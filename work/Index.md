@@ -25,6 +25,7 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
   - [[TAT-409 Backend Open Items]] — backend bugs/gaps blocking the FE, found in the TAT-410→435 ticket sweep (endpoint-level handoff)
   - [[TAT-409 Instructor TOR View - API Spec]] — field spec for `GET /tors/:id` so instructors can open their own TOR
 - [[TAT Portal Onboarding]] — getting productive on [[tat-portal]] (the [[TAT Platform]] storefront)
+- [[Online-Course Exam Timeout - Backend Bug]] — [[tat-portal]] exam-timer fix shipped (`f858fb8`); backend handoff to score saved answers on timeout instead of forfeiting
 - [[TAT-434 Email Verification]] — done, committed `533bf70`, Passed Code Review
 - [[TAT-428 Edit Issued Certificates]] — tat-ws: catalog edit + trainee-row cert view/edit; rich-text HTML editing per BA re-scope, committed `d5a6d25`. Pending staging verification
 - [[TAT Certificates - Open Items]] — all remaining gaps/bugs from the certificate work (frontend, backend, product)
