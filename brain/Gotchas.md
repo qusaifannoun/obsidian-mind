@@ -16,6 +16,10 @@ When one element morphs into a full-screen background (a thumbnail "opening" int
 - Animate `borderRadius` in **px** (`28 → 0`), not `'50%' → '0%'` — percent interpolation on a growing box looks wrong mid-tween.
 - A portrait **rounded-rectangle** thumbnail is `width≠height` + a fixed px radius. `rounded-full` on a non-square box is an **ellipse/oval**, not the rounded-rect you usually want.
 
+## `router.refresh()` does NOT invalidate the React Query cache (tat-portal)
+
+Next's `router.refresh()` only re-runs RSC / server-component data — it leaves the **client React Query cache untouched**. Bit [[tat-portal]]'s refund flow (2026-06-23): the refund modal's `onSuccess` called `router.refresh()`, which updated the server-rendered orders list but left the client-cached `myCourses` / `cart` queries stale, so a refunded course kept showing in My Courses until a hard refresh. Fix: mutations that change React-Query-held data must call `queryClient.invalidateQueries` explicitly (via the centralized helpers — see [[Patterns#Centralized cache-invalidation map for React Query mutations (tat-portal)]]). More broadly, the staleness came from mutations not invalidating the *other* queries they affect (e.g. submit-exam left `myCourses`/`myCourseDetail`/`myCertificates` stale), compounded by a global `staleTime: 5min` + `refetchOnWindowFocus: false`. Rule: `router.refresh()` and React Query are two separate caches — refreshing one never refreshes the other.
+
 ## App-shell layout: pin to the viewport, scroll only `<main>`
 
 A dashboard shell must be `h-screen overflow-hidden` on the outer flex container so the sidebar + topbar stay fixed and **only the content area scrolls**. Using `min-h-screen` lets the container grow past the viewport, so the whole page (body) scrolls and the sidebar scrolls away with it — a basic but easy-to-miss bug (hit it in [[tat-prereq]]'s first dashboard layout). Correct shape: `flex h-screen overflow-hidden` → `Sidebar` (h-full) + a `flex-1 flex-col overflow-hidden` column → `Topbar` (shrink-0) + `main flex-1 overflow-y-auto`.

@@ -54,6 +54,19 @@ Hard rule (Qusai, 2026-06-04): **never expose row actions as bare icons/buttons*
 - **Table header row:** a step darker than the card — `bg-gray-50 dark:bg-gray-900/50`. **Row hover:** `hover:bg-gray-50 dark:hover:bg-white/[0.04]`. **Dividers/borders inside a `gray-800` card:** `gray-700` (not `gray-800`, which vanishes).
 - The bug this fixes: transparent inputs/tables (`bg-transparent`) inherit the page bg and disappear. Always give them a surface.
 
+## Centralized cache-invalidation map for React Query mutations (tat-portal)
+
+[[tat-portal]] had recurring "I had to refresh to see it" bugs: mutations changed one entity but never invalidated the *other* queries holding that data (e.g. submitting an exam updated `examDetails` but left `myCourses` / `myCourseDetail` / `myCertificates` stale; refund used `router.refresh()` which doesn't touch the React Query cache at all). Compounded by a global `staleTime: 5min` + `refetchOnWindowFocus: false`, so stale data persisted.
+
+Fix (2026-06-23): one module — `src/api/cacheInvalidation.ts` — encodes **which caches each domain action affects**, and every mutation's `onSuccess` calls the matching helper instead of sprinkling ad-hoc `invalidateQueries` (which is how it drifted in the first place).
+
+- Helpers are **action-named, not key-named**: `invalidateAfterExamSubmit(qc, id)`, `invalidateAfterFinishCourse`, `invalidateAfterRefund`, `invalidateAfterCheckout`, plus primitives (`invalidateEnrollment(id?)`, `invalidateCart`, `invalidateCertificates`, `invalidateProfile`). The cross-entity ripple lives in the helper, so adding a mutation = pick the right helper, not re-derive the fan-out.
+- **Over-invalidation is safe**: React Query only refetches *mounted* queries; the rest are marked stale and refetched lazily. So invalidating a superset is fine for correctness.
+- Detail keys take an optional id: `[MyCourseDetail, id]` when known, else `[MyCourseDetail]` (prefix match) when one action can touch any of them (e.g. refund from the orders page).
+- Gotcha baked in: Next's `router.refresh()` only re-runs RSC/server data — it does **not** invalidate the client React Query cache. Mutations that change RQ-held lists must call the invalidation helper explicitly.
+
+General rule: **mutation cache invalidation is a cross-entity concern — centralize the "what affects what" map in one place; never scatter `invalidateQueries` per call site.**
+
 ## Radial layouts = data array + polar math, not hand-tuned offsets (tat-website)
 
 [[tat-website]]'s home-page client "orbit" originally placed ~20 logos with individual `top/left/right/bottom` pixel offsets and inconsistent box sizes — logos drifted off the orbit lines and every addition meant guessing another offset. Fixed (2026-06-10, see [[TAT-440 Client Logos & Safran]]) by driving each ring from a `{ src, alt }[]` array and an `orbitStyle(radius, index, count)` helper: `angle = 360/count × index − 90`, translate to `(r·cosθ, r·sinθ)` from center. Logos land exactly on a fixed radius, evenly spaced, in a uniform `object-contain` box (consistent size, aspect preserved). Adding one logo = one array entry; spacing rebalances automatically. General rule: **any "elements arranged on a circle/arc" UI should be array-driven with trig, never enumerated offsets.**
