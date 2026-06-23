@@ -1,4 +1,5 @@
 ---
+date: 2026-06-02
 description: "Index of quarterly brag notes — impact, competency evidence, technical growth, feedback per quarter"
 tags:
   - perf
@@ -13,7 +14,7 @@ A running log of impact, wins, and growth. Each quarter is its own note — open
 
 | Quarter | Highlights | Review |
 |---------|-----------|--------|
-|         |           |        |
+| [[Q2 2026]] | TAT onboarding; TAT-434 email-verify fix; TAT-428 certificates; tat-ws hydration/lint/bug cleanup | — |
 
 ## How This Works
 

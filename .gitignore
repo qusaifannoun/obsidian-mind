@@ -14,6 +14,11 @@
 # QMD index (local, regenerated)
 .qmd/
 
+# Secrets / local env (API keys — never commit). .env.example is tracked.
+.env
+.env.local
+.env.*.local
+
 # Session logs (local transcripts)
 thinking/session-logs/
 

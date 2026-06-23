@@ -133,6 +133,23 @@ SessionStart hook runs `qmd --index <name> update` automatically, reading the in
 5. **`/om-capture-1on1`** — capture the review 1:1 with your manager
 6. **`/om-vault-audit`** — tidy up after all the new data
 
+## Jira (Atlassian Cloud)
+
+Reusable Jira helper at `.claude/scripts/jira.mjs`. Reads credentials from the gitignored vault-root `.env` (`ATLASSIAN_API_KEY`, `ATLASSIAN_EMAIL`, `ATLASSIAN_SITE_URL`, `JIRA_PROJECT_KEY`). Site: `cryptonic-art.atlassian.net`, project `TAT` ("Total Aviation Training"). Used for the [[TAT Platform]] ticket workflow — read tickets, find contradictions, transition issues.
+
+```bash
+node .claude/scripts/jira.mjs myself                        # auth check
+node .claude/scripts/jira.mjs search "project=TAT AND assignee=currentUser() AND statusCategory!=Done"
+node .claude/scripts/jira.mjs get TAT-434                   # full detail + description
+node .claude/scripts/jira.mjs transitions TAT-434           # available status moves
+node .claude/scripts/jira.mjs transition TAT-434 "In Progress"   # write — confirm first
+node .claude/scripts/jira.mjs comment TAT-434 "text"             # write — confirm first
+```
+
+- **Read** commands (`search`/`get`/`transitions`) are safe to run freely.
+- **Write** commands (`transition`/`comment`) are outward-facing (the team sees them) — confirm with the user before each unless told to proceed.
+- TAT workflow states: Business Analysis → Ready for UI Design → In UI Design → Ready for UI Review → PASSED UI REVIEW → Ready for Dev → In Progress → Code Review → Passed Code Review → READY FOR QA → IN QA → Passed QA → Fully Approved → Done (plus Parked, Needs Fixes, FAILED CODE REVIEW, Ignored/Cancelled).
+
 ## Workflow: Project Ramp-Up
 
 1. **`/om-slack-scan`** — scan project channels for history and decisions
