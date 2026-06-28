@@ -14,7 +14,7 @@ A running log of impact, wins, and growth. Each quarter is its own note — open
 
 | Quarter | Highlights | Review |
 |---------|-----------|--------|
-| [[Q2 2026]] | TAT onboarding; TAT-434 email-verify fix; TAT-428 certificates; tat-ws hydration/lint/bug cleanup | — |
+| [[Q2 2026]] | TAT onboarding; TAT-409 History Form wired + verified (6 tickets, TAT Form 031 layout, 2 contract bugs); TAT-434 email-verify fix; TAT-428 certificates; tat-ws hydration/lint/bug cleanup | — |
 
 ## How This Works
 

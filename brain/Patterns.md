@@ -17,6 +17,17 @@ Qusai is the **sole developer** on the TAT repos ([[tat-prereq]] et al.), so the
 
 As of 2026-06-18, the [[TAT-409 Staff Management Subsystem|TAT-409]] FE dummies have been **replaced with the real backend** (staging Swagger): staff-management-login, TOR matrix/details/pending, tor-documents, Form 285, Form 32 (rebuilt schema-driven), profiles catalog + `profiles/me`, qualifications, assessments, deactivate. Read paths verified vs staging; write paths wired but largely unexercised. The "FE-first dummy-data layer" pattern below is now historical for this subsystem (History + Assessment *forms* remain dummy — no backend). Instructor self-service is wired but **backend-blocked**: the instructor role 403s on `profiles/me` / `tor-documents` / `qualifications` until granted those actions server-side. Rule going forward: **FE follows the backend contract; align the FE to a ticket once its backend is approved.**
 
+## History Form is now real + rendered as TAT Form 031 (2026-06-28)
+
+The History Form is no longer dummy (updates the note above). The whole TAT-417/418/419/421 + [[TAT-429]] backend shipped and the FE was wired + verified against staging across roles:
+
+- **One `HistoryFormView` (`/staff/[id]/history-form`) = the whole TAT Form 031 document.** Restructured from stacked cards into a single bordered document with centered `SectionBar`s, in the form's order: identity → Years of Experience → Part 66 → Type Training Course → Relevant Training History → Updated Training & Validity → Sit-ins & Successfully Assessed As → Special Notes → Certified by. Sections with **no backend** (License/Valid Until, Part 66, aircraft-qual editing, Certified-by) render as **disabled placeholders with a "pending backend" note** so the document is visually complete.
+- **Wired sub-resources** (all `/staff-management/profiles/:userId/history-form/*` + `/sit-ins/*`): basic info (TM approve / field-reject), mandatory training (record → submit → approve / field-reject the 3 fields accomplishedDate/durationHours/evidence), training history (add → approve / reject-with-reason, with a Due Date column), sit-in (evaluator submit → TM final assessment). Hooks/fetchers in `src/api/Forms/*`; query keys per entity.
+- **Gating is per-action, approximated by role** (the FE only has role codes, no action list): mandatory training is **instructor-only** (`!isReviewer`; SA lacks `SM_SAVE_MANDATORY_TRAINING`); training history allows SA too (`isSuperAdmin || !isReviewer`); reviewer approve/reject shows for `isReviewer` on Pending items; the sit-in evaluator form shows only to the assigned `evaluatorUserId`.
+- **404 = not-started**: the GET 404s until the form exists, so fetchers return an empty Draft / null on 404 (see [[Gotchas#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]).
+
+Reusable shape going forward: **a multi-section form that maps 1:1 to a paper form = one document component + a `SectionBar` primitive + per-section sub-components**, each wired to its own endpoint and gated by the actor who fills it.
+
 ## FE-first dummy-data layer (tat-prereq)
 
 Building [[tat-prereq]] FE pages ahead of the backend ([[TAT-409 Staff Management Subsystem|TAT-409]] is FE-only for now). To keep the swap-to-real trivial, dummy data is wired **through the real DI-fetcher + React Query pattern**, not faked in the component:
@@ -44,6 +55,27 @@ Plain Tailwind tables styled with the shared theme tokens (no MUI X DataGrid / T
 ## Table row actions = kebab menu only
 
 Hard rule (Qusai, 2026-06-04): **never expose row actions as bare icons/buttons**. Every table row's actions live in a **kebab (⋮) button → dropdown menu**, each item rendered as **icon + text**. Reusable component: `src/components/ui/RowActionsMenu.tsx` (Radix dropdown; takes `actions: { label, icon, onClick, destructive?, disabled? }[]`; trigger/menu items `stopPropagation` so a clickable row doesn't fire). The actions column header is empty (`sr-only "Actions"`). Used by the Manage Staff table (Edit; Deactivate etc. will be added as menu items, not new buttons).
+
+## tat-ws: always use the shared `Table` component
+
+Standing rule (Qusai, 2026-06-28): in [[tat-ws]], **every table uses the shared `components/Table/Table.tsx`**. New tables are built with it; any existing hand-rolled `<table>` we touch gets **migrated** to it. Don't hand-roll `<table>`/`<thead>`/`<tbody>` markup in tat-ws anymore.
+
+Why: the component bakes in the things hand-rolled tables keep getting wrong — `overflow-x-auto` (no columns clipped off-screen on narrow viewports — the bug that triggered this rule), built-in `TablePagination`, loading/empty states, consistent surface styling, and a portaled kebab (⋮) `TableActionDropdown` for row actions (which satisfies the kebab-only row-actions rule below).
+
+API (import from `@tat-ws/components/Table`): `<Table<T> data columns pagination onPageChange onRowsPerPageChange isLoading emptyState showActionsColumn actions />`. Columns are `ColumnDefinition<T>[]`, each with a `render(value, item, index)` for custom cells (badges, buttons, nested components all fine). Row actions = `TableAction[]` or `(item) => TableAction[]`, each `{ id, label, onClick, variant?: 'default' | 'danger', disabled? }`. For server pagination feed `pagination={{ current_page, last_page, per_page, total }}` and wire `onPageChange`/`onRowsPerPageChange` (first migration: Manage Trainees, 2026-06-28 — see [[TAT Certificates - Open Items]]).
+
+Scope: this is the **tat-ws** component. [[tat-prereq]] keeps its own separate table convention (plain Tailwind + `RowActionsMenu` — see "## Tables" and "## Table row actions = kebab menu only" above). Don't cross-apply; each repo uses its own table primitive.
+
+## File uploads: always pass a `FileUploadCategory` (tat-ws)
+
+Standing rule (Qusai, 2026-06-28): every file upload (`POST /file/upload-file` via `usePostFile` or the RHF file inputs) **must send a `category`** from `FileUploadCategory`, chosen to match the content — the backend routes the file to the matching S3 prefix by category. Never upload without a category or with a mismatched one.
+
+Category map (the ones that matter so far):
+- **Online-course learning materials** — Manage Learning Materials for an online course (`manage-courses/online-courses/[id]/materials` → `ManageMaterials` → `LearningMaterialsStep` → `MaterialFileUpload`) → **`ONLINE_COURSE_CONTENT`** (`"online-course-content"`). Already wired correctly (verified 2026-06-28).
+- **General Learning Materials Management** (`learning-materials-management/[id]/[tab]` → `AddNewMaterialModal`) → `LEARNING_MATERIALS` — a *separate* feature from online-course materials; don't confuse the two.
+- Company documents → `COMPANY_DOCUMENTS`; signatures/stamps → `SIGNATURE`/`STAMP`; certificates → `CERTIFICATE_DOCUMENTS` / `ONLINE_COURSE_CERTIFICATES`; TOR docs/forms → `TOR_DOCUMENTS` / `TOR_FORM_285` / `TOR_FORM_32`.
+
+⚠️ **The FE enum has drifted from the backend.** Authoritative source is the backend `FileUploadCategory` (`tat-app-ws/libs/app-data/src/lib/enums.ts`, 15 values). The FE copy (`tat-ws/apps/tat-ws/src/types/fileUpload.ts`) is **missing** `APPS`, `ONLINE_COURSE_PARTS`, `ONLINE_COURSE_CERTIFICATES`, `TOR_DOCUMENTS`, `TOR_FORM_285`, `TOR_FORM_32`, and has **extras** `SIGNATURE`/`STAMP` the backend enum doesn't list (used in `DynamicUserFields.tsx` — confirm the backend actually accepts them, else those uploads may be rejected). Rule: keep the FE enum mirrored to the backend; when an upload needs a category the FE lacks, add it from the backend list — don't invent strings. Related: the upload response is `{ Location, Key }` (capitalized), see [[Gotchas#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)]].
 
 ## Surfaces vs page background (TailAdmin reference)
 

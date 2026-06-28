@@ -20,7 +20,7 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
 
 ## Active Projects
 
-- [[TAT-409 Staff Management Subsystem]] — **new** internal subsystem (instructors + TORs) on an SSO subdomain; 21-ticket epic. Domain: [[Staff Management Subsystem & TOR Model]]
+- [[TAT-409 Staff Management Subsystem]] — **new** internal subsystem (instructors + TORs) on an SSO subdomain; 21-ticket epic. Domain: [[Staff Management Subsystem & TOR Model]]. **History Form slice (417/418/419/420/421/429) wired to the real backend + verified across roles, rendered as the single-document TAT Form 031 (2026-06-28).**
   - [[TAT-432 Staff Profile]] — profile view done; Add/Edit forms next
   - [[TAT-409 Backend Open Items]] — backend bugs/gaps blocking the FE, found in the TAT-410→435 ticket sweep (endpoint-level handoff)
   - [[TAT-409 Instructor TOR View - API Spec]] — field spec for `GET /tors/:id` so instructors can open their own TOR
