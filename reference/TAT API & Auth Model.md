@@ -61,6 +61,18 @@ TAT has **two separate certificate models/collections** (the "two cert types" �
 
 They're **independent** — `OnlineCourseCertificate` doesn't reference `Certificate`. So "edit a certificate" only applies to the general system; online-course certs are view-only PDFs. The `PATCH /online-courses/{id}/certificates/{type}` endpoint edits a course's certificate **template HTML**, not an issued cert. Verified building [[TAT-428 Edit Issued Certificates]].
 
+### Certificate template preview (two endpoints, by domain)
+
+The shared `CertificateEditor` has a Preview button that renders the in-progress template HTML with **dummy data**. There are **two** preview endpoints — they differ by which placeholder token syntax the backend substitutes:
+
+| | Aircraft / general | Online course |
+|---|---|---|
+| Endpoint | `POST /certificate-templates/preview` | `POST /online-courses/certificate-templates/preview` |
+| Token syntax | single-brace `{ token }` | double-brace `{{ token }}` |
+| Request / response | `{ content }` → `{ previewContent }` (identical shape) | same: `{ content }` → `{ previewContent }` |
+
+The editor routes by its `courseType` prop (`'online'` → online endpoint). Using the wrong one is silent — the aircraft endpoint won't touch `{{ }}` tokens, so an online preview comes back with placeholders unfilled. See [[Gotchas#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]. Wired 2026-06-26 ([[TAT Certificates - Open Items]]).
+
 ## Media (protected content)
 
 - Learning media served via **S3 signed URLs**; backend ideally tags explicit `IMAGE`/`AUDIO` types.
