@@ -1,0 +1,641 @@
+<title>TAT-409 Bug & Gap List</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --surface: #ffffff;
+    --surface-2: #eef1f6;
+    --ink: #16202e;
+    --ink-2: #56616f;
+    --ink-3: #808b99;
+    --line: #dde3ea;
+    --line-2: #e8ecf1;
+    --accent: #1663d6;
+    --accent-soft: #e7effc;
+
+    --crit: #cf2e22;      --crit-line: #cf2e22;  --crit-bg: #fcebe9;
+    --high: #c9640a;      --high-line: #d97313;  --high-bg: #fbf0e3;
+    --med:  #9a6a11;      --med-line:  #c1902a;  --med-bg:  #f8f1dd;
+    --low:  #2c7d3a;      --low-line:  #35933f;  --low-bg:  #e8f5eb;
+
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Cascadia Mono", "Roboto Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --shadow: 0 1px 2px rgba(16,32,46,.04), 0 4px 16px rgba(16,32,46,.05);
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1117;
+      --surface: #141c26;
+      --surface-2: #1b2531;
+      --ink: #e7edf4;
+      --ink-2: #9aa7b6;
+      --ink-3: #6f7d8d;
+      --line: #26313f;
+      --line-2: #202a36;
+      --accent: #5195ff;
+      --accent-soft: #16263e;
+
+      --crit: #ff6f62;   --crit-line: #e8493c;  --crit-bg: rgba(207,46,34,.16);
+      --high: #ff9f45;   --high-line: #d97313;  --high-bg: rgba(201,100,10,.17);
+      --med:  #e6bb4e;   --med-line:  #c1902a;  --med-bg:  rgba(154,106,17,.20);
+      --low:  #59c56b;   --low-line:  #35933f;  --low-bg:  rgba(44,125,58,.18);
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f7fa; --surface: #ffffff; --surface-2: #eef1f6; --ink: #16202e; --ink-2: #56616f; --ink-3: #808b99;
+    --line: #dde3ea; --line-2: #e8ecf1; --accent: #1663d6; --accent-soft: #e7effc;
+    --crit: #cf2e22; --crit-line: #cf2e22; --crit-bg: #fcebe9; --high: #c9640a; --high-line: #d97313; --high-bg: #fbf0e3;
+    --med: #9a6a11; --med-line: #c1902a; --med-bg: #f8f1dd; --low: #2c7d3a; --low-line: #35933f; --low-bg: #e8f5eb;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c1117; --surface: #141c26; --surface-2: #1b2531; --ink: #e7edf4; --ink-2: #9aa7b6; --ink-3: #6f7d8d;
+    --line: #26313f; --line-2: #202a36; --accent: #5195ff; --accent-soft: #16263e;
+    --crit: #ff6f62; --crit-line: #e8493c; --crit-bg: rgba(207,46,34,.16); --high: #ff9f45; --high-line: #d97313; --high-bg: rgba(201,100,10,.17);
+    --med: #e6bb4e; --med-line: #c1902a; --med-bg: rgba(154,106,17,.20); --low: #59c56b; --low-line: #35933f; --low-bg: rgba(44,125,58,.18);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 24px 80px; }
+
+  /* ---- Header ---- */
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 10px;
+  }
+  h1 {
+    font-size: clamp(28px, 4.4vw, 40px); line-height: 1.08; margin: 0 0 12px;
+    letter-spacing: -.02em; text-wrap: balance; font-weight: 700;
+  }
+  .lede { font-size: 16px; color: var(--ink-2); max-width: 62ch; margin: 0 0 4px; }
+  .meta { font-size: 13px; color: var(--ink-3); margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .meta code { font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+
+  /* ---- Keystone banner ---- */
+  .keystone {
+    margin: 28px 0 8px; padding: 18px 20px; border-radius: var(--radius);
+    background: var(--crit-bg); border: 1px solid color-mix(in srgb, var(--crit-line) 34%, transparent);
+    border-left: 4px solid var(--crit-line);
+    display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start;
+  }
+  .keystone .kicon { font-family: var(--mono); font-weight: 700; color: var(--crit); font-size: 13px; letter-spacing: .04em; padding-top: 2px; white-space: nowrap; }
+  .keystone h2 { margin: 0 0 4px; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+  .keystone p { margin: 0; font-size: 14px; color: var(--ink-2); }
+  .keystone strong { color: var(--ink); }
+
+  /* ---- Stat tiles ---- */
+  .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 28px 0 14px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 16px 14px; position: relative; overflow: hidden;
+  }
+  .tile .num { font-size: 30px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1; }
+  .tile .lbl { font-size: 12px; color: var(--ink-2); margin-top: 6px; font-weight: 500; }
+  .tile.sev { border-left: 3px solid var(--tile-c); }
+  .tile .num.c { color: var(--tile-c); }
+
+  .bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; margin: 6px 0 30px; background: var(--surface-2); }
+  .bar span { display: block; height: 100%; }
+
+  /* ---- Toolbar ---- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 20; margin: 0 -24px 22px; padding: 14px 24px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-2);
+    display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center;
+  }
+  .fgroup { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .fgroup .glabel { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-3); font-weight: 600; margin-right: 2px; }
+  .chip {
+    font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer;
+    background: var(--surface); color: var(--ink-2); border: 1px solid var(--line);
+    padding: 5px 11px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;
+    transition: background .12s, color .12s, border-color .12s;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--ink-3); color: var(--ink); }
+  .chip .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--chip-c, var(--ink-3)); flex: none; }
+  .chip .cnt { font-variant-numeric: tabular-nums; color: var(--ink-3); font-size: 11.5px; }
+  .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--ink); }
+  .chip.sevchip[aria-pressed="true"][data-sev="crit"] { --chip-c: var(--crit-line); background: var(--crit-bg); border-color: color-mix(in srgb, var(--crit-line) 40%, transparent); }
+  .chip.sevchip[aria-pressed="true"][data-sev="high"] { --chip-c: var(--high-line); background: var(--high-bg); border-color: color-mix(in srgb, var(--high-line) 40%, transparent); }
+  .chip.sevchip[aria-pressed="true"][data-sev="med"]  { --chip-c: var(--med-line);  background: var(--med-bg);  border-color: color-mix(in srgb, var(--med-line) 40%, transparent); }
+  .chip.sevchip[aria-pressed="true"][data-sev="low"]  { --chip-c: var(--low-line);  background: var(--low-bg);  border-color: color-mix(in srgb, var(--low-line) 40%, transparent); }
+  .chip[aria-pressed="false"] { opacity: .62; }
+
+  .search {
+    font: inherit; font-size: 13px; color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; min-width: 190px;
+  }
+  .search::placeholder { color: var(--ink-3); }
+  .search:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .count { margin-left: auto; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .count b { color: var(--ink); }
+
+  /* ---- Tier + rows ---- */
+  .tier { margin: 26px 0 12px; display: flex; align-items: baseline; gap: 10px; }
+  .tier h3 { margin: 0; font-size: 13px; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; }
+  .tier .tc { color: var(--tier-c); }
+  .tier .desc { font-size: 12.5px; color: var(--ink-3); }
+  .tier .line { flex: 1; height: 1px; background: var(--line-2); }
+
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .row {
+    background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--row-c);
+    border-radius: var(--radius); padding: 16px 20px 17px; box-shadow: var(--shadow);
+  }
+  .row .rowhead { display: flex; align-items: baseline; gap: 10px; }
+  .row .id {
+    font-family: var(--mono); font-weight: 700; font-size: 11.5px; letter-spacing: .03em;
+    color: var(--row-c); background: color-mix(in srgb, var(--row-c) 13%, transparent);
+    border-radius: 5px; padding: 2px 7px; flex: none; align-self: flex-start; position: relative; top: 1px;
+  }
+  .row .title { font-size: 15.5px; font-weight: 650; letter-spacing: -.01em; margin: 0; line-height: 1.34; text-wrap: balance; }
+  .row .ac {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; align-items: center;
+  }
+  .row .ac code {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 5px; padding: 1px 6px;
+    white-space: nowrap;
+  }
+  .jira {
+    font-family: var(--mono); font-size: 11.5px; font-weight: 600; text-decoration: none;
+    color: var(--accent); background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    border-radius: 5px; padding: 1px 5px 1px 7px; display: inline-flex; align-items: center; gap: 4px;
+    white-space: nowrap; transition: background .12s, border-color .12s;
+  }
+  .jira:hover { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  .jira svg { width: 9px; height: 9px; opacity: .8; }
+  .row .desc { font-size: 13.5px; color: var(--ink-2); margin: 12px 0 0; line-height: 1.58; max-width: 92ch; }
+  .row .path { font-family: var(--mono); font-size: 12px; color: var(--ink); word-break: break-word; }
+  .row .fix {
+    margin-top: 10px; display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start;
+    font-size: 13px; color: var(--ink-2); line-height: 1.48;
+    background: var(--surface-2); border: 1px solid var(--line-2);
+    border-left: 2px solid var(--accent); border-radius: 8px; padding: 9px 12px;
+  }
+  .row .fix .flabel {
+    font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--accent); padding-top: 2px; white-space: nowrap;
+  }
+  .row .fix b { color: var(--ink); font-weight: 600; }
+  .row .fix .path { font-size: 11.5px; }
+  .row .plats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .plat {
+    font-size: 11px; font-weight: 600; letter-spacing: .01em; padding: 2px 8px; border-radius: 5px;
+    font-family: var(--mono);
+    background: var(--p-bg); color: var(--p-fg); border: 1px solid var(--p-bd);
+  }
+  .plat[data-p="tat-app-ws"] { --p-bg: color-mix(in srgb, #1663d6 12%, var(--surface)); --p-fg: #1663d6; --p-bd: color-mix(in srgb, #1663d6 30%, transparent); }
+  .plat[data-p="tat-prereq"] { --p-bg: color-mix(in srgb, #7c4dd6 13%, var(--surface)); --p-fg: #7c4dd6; --p-bd: color-mix(in srgb, #7c4dd6 30%, transparent); }
+  .plat[data-p="tat-ws"]     { --p-bg: color-mix(in srgb, #0d8f86 13%, var(--surface)); --p-fg: #0d8f86; --p-bd: color-mix(in srgb, #0d8f86 30%, transparent); }
+  .plat[data-p="tat-portal"] { --p-bg: color-mix(in srgb, #c23f70 13%, var(--surface)); --p-fg: #c23f70; --p-bd: color-mix(in srgb, #c23f70 30%, transparent); }
+  @media (prefers-color-scheme: dark) {
+    .plat[data-p="tat-app-ws"] { --p-fg: #6ba6ff; }
+    .plat[data-p="tat-prereq"] { --p-fg: #b394f5; }
+    .plat[data-p="tat-ws"]     { --p-fg: #35c3b8; }
+    .plat[data-p="tat-portal"] { --p-fg: #ef7aa6; }
+  }
+  :root[data-theme="dark"] .plat[data-p="tat-app-ws"] { --p-fg: #6ba6ff; }
+  :root[data-theme="dark"] .plat[data-p="tat-prereq"] { --p-fg: #b394f5; }
+  :root[data-theme="dark"] .plat[data-p="tat-ws"]     { --p-fg: #35c3b8; }
+  :root[data-theme="dark"] .plat[data-p="tat-portal"] { --p-fg: #ef7aa6; }
+
+  .row[hidden], .tier[hidden] { display: none; }
+  .empty { text-align: center; color: var(--ink-3); font-size: 14px; padding: 40px 0; display: none; }
+
+  /* ---- Solid footer ---- */
+  .solid { margin-top: 44px; padding: 22px 22px 20px; background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--radius); }
+  .solid h3 { margin: 0 0 4px; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  .solid h3 .ok { color: var(--low); }
+  .solid p { margin: 0 0 14px; font-size: 13px; color: var(--ink-3); }
+  .solid ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
+  .solid li { font-size: 13.5px; color: var(--ink-2); padding-left: 20px; position: relative; }
+  .solid li::before { content: "✓"; position: absolute; left: 0; color: var(--low); font-weight: 700; }
+  .solid li b { color: var(--ink); font-weight: 600; }
+
+  footer { margin-top: 34px; font-size: 12px; color: var(--ink-3); text-align: center; }
+
+  @media (max-width: 720px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .tile.total { grid-column: 1 / -1; }
+    .solid ul { grid-template-columns: 1fr; }
+    .keystone { grid-template-columns: 1fr; gap: 8px; }
+    .count { width: 100%; margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Staff Management Epic · Functionality Inspection</p>
+    <h1>TAT-409 — Bug &amp; Gap List</h1>
+    <p class="lede">Every gap found in the group-by-group inspection of all 22 tickets — backend and both frontends checked against the real Jira acceptance criteria. Each item names the missing AC and the platform responsible.</p>
+    <div class="meta">
+      <span>Inspected 2026-07-05</span>
+      <span>22 tickets · 11 groups</span>
+      <span>37 gaps</span>
+      <span>Backend <code>tat-app-ws</code> · FE <code>tat-prereq</code> / <code>tat-ws</code> / <code>tat-portal</code></span>
+    </div>
+  </header>
+
+  <div class="keystone">
+    <div class="kicon">FIX&nbsp;FIRST</div>
+    <div>
+      <h2>One field breaks three flows — <code>tor.aircraftTypeIds</code> is never populated</h2>
+      <p>Nothing writes it (created <strong>[]</strong>, no code path adds to it). That cascades into <strong>aircraft-qual creation</strong> (422 self-blocks), <strong>assignment eligibility</strong> (pickers render empty when an aircraft type is required), and <strong>qual validation</strong> (short-circuits to true). With the sibling missing <strong>“requested role”</strong> concept it also breaks Form 32 role-scoping and role-type eligibility. Resolve ownership (410 link-at-creation vs 422 derive-from-approved-quals) before anything else.</p>
+    </div>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="tile total"><div class="num" id="n-total">37</div><div class="lbl">Total gaps</div></div>
+    <div class="tile sev" style="--tile-c:var(--crit-line)"><div class="num c" style="--tile-c:var(--crit)" id="n-crit">5</div><div class="lbl">Critical</div></div>
+    <div class="tile sev" style="--tile-c:var(--high-line)"><div class="num c" style="--tile-c:var(--high)" id="n-high">8</div><div class="lbl">High</div></div>
+    <div class="tile sev" style="--tile-c:var(--med-line)"><div class="num c" style="--tile-c:var(--med)" id="n-med">12</div><div class="lbl">Medium</div></div>
+    <div class="tile sev" style="--tile-c:var(--low-line)"><div class="num c" style="--tile-c:var(--low)" id="n-low">12</div><div class="lbl">Low</div></div>
+  </div>
+  <div class="bar" aria-hidden="true">
+    <span style="background:var(--crit-line);width:13.5%"></span>
+    <span style="background:var(--high-line);width:21.6%"></span>
+    <span style="background:var(--med-line);width:32.4%"></span>
+    <span style="background:var(--low-line);width:32.4%"></span>
+  </div>
+
+  <div class="toolbar">
+    <div class="fgroup" id="sevfilter">
+      <span class="glabel">Severity</span>
+      <button class="chip sevchip" data-sev="crit" aria-pressed="true"><span class="dot" style="--chip-c:var(--crit-line)"></span>Critical <span class="cnt">5</span></button>
+      <button class="chip sevchip" data-sev="high" aria-pressed="true"><span class="dot" style="--chip-c:var(--high-line)"></span>High <span class="cnt">8</span></button>
+      <button class="chip sevchip" data-sev="med" aria-pressed="true"><span class="dot" style="--chip-c:var(--med-line)"></span>Medium <span class="cnt">12</span></button>
+      <button class="chip sevchip" data-sev="low" aria-pressed="true"><span class="dot" style="--chip-c:var(--low-line)"></span>Low <span class="cnt">12</span></button>
+    </div>
+    <div class="fgroup" id="platfilter">
+      <span class="glabel">Platform</span>
+      <button class="chip platchip" data-plat="tat-app-ws" aria-pressed="true"><span class="dot" style="--chip-c:#1663d6"></span>tat-app-ws</button>
+      <button class="chip platchip" data-plat="tat-prereq" aria-pressed="true"><span class="dot" style="--chip-c:#7c4dd6"></span>tat-prereq</button>
+      <button class="chip platchip" data-plat="tat-ws" aria-pressed="true"><span class="dot" style="--chip-c:#0d8f86"></span>tat-ws</button>
+      <button class="chip platchip" data-plat="tat-portal" aria-pressed="true"><span class="dot" style="--chip-c:#c23f70"></span>tat-portal</button>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Search gaps, ACs, files…" aria-label="Search gaps">
+    <div class="count"><b id="shown">37</b> of 37 shown</div>
+  </div>
+
+  <main id="list">
+    <section class="tiergroup" data-tier="crit">
+      <div class="tier" style="--tier-c:var(--crit-line)"><h3><span class="tc">Critical</span></h3><span class="desc">blocks a core flow end-to-end</span><span class="line"></span></div>
+      <div class="rows">
+      <article class="row" data-sev="crit" data-plats="tat-app-ws" data-text="c1 tor.aircrafttypeids is never populated (keystone) 410 ac-02 422 ac-01 424 ac-10/12 tat-410 tat-422 tat-424 nothing writes the field — it's created [] in staff-tor.service.ts and no endpoint ever adds to it. yet assertaircraftontor, the assignment-eligibility filter, and the refresher lookups all read it. decide the owner and populate it: link aircraft types at tor creation (tat-410 ac-02) or push the approved aircrafttypeid onto tor.aircrafttypeids when a tat-422 qualification is approved. then backfill existing tors. blocks c3/c4 until resolved. tat-app-ws" style="--row-c:var(--crit-line)">
+        <div class="rowhead"><span class="id">C1</span><h4 class="title">tor.aircraftTypeIds is never populated (keystone)</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-410" target="_blank" rel="noopener noreferrer">TAT-410<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-424" target="_blank" rel="noopener noreferrer">TAT-424<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>410 AC-02</code><code>422 AC-01</code><code>424 AC-10/12</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Nothing writes the field — it's created <span class='path'>[]</span> in <span class='path'>staff-tor.service.ts</span> and no endpoint ever adds to it. Yet assertAircraftOnTor, the assignment-eligibility filter, and the refresher lookups all read it.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Decide the owner and populate it: link aircraft types at TOR creation (TAT-410 AC-02) <b>or</b> push the approved aircraftTypeId onto <span class='path'>tor.aircraftTypeIds</span> when a TAT-422 qualification is approved. Then backfill existing TORs. Blocks C3/C4 until resolved.</div></div>
+      </article>
+      <article class="row" data-sev="crit" data-plats="tat-app-ws" data-text="c2 nullable-enum crash blocks all aircraft-qual creates 422 ac-01 tat-422 staffqualification.refresherupdatesource is enum + default:null; null isn't in the enum, so mongoose validates the default and throws on every create (staff-qualification.schema.ts:123-128). change to enum:[...object.values(enum), null] (purely additive). same latent pattern on stafftorform.workflowstage. fix was applied then reverted — re-apply on the backend. tat-app-ws" style="--row-c:var(--crit-line)">
+        <div class="rowhead"><span class="id">C2</span><h4 class="title">Nullable-enum crash blocks all aircraft-qual creates</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>422 AC-01</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">StaffQualification.refresherUpdateSource is <span class='path'>enum + default:null</span>; null isn't in the enum, so Mongoose validates the default and throws on every create (<span class='path'>staff-qualification.schema.ts:123-128</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Change to <span class='path'>enum:[...Object.values(Enum), null]</span> (purely additive). Same latent pattern on <span class='path'>StaffTorForm.workflowStage</span>. Fix was applied then reverted — <b>re-apply on the backend</b>.</div></div>
+      </article>
+      <article class="row" data-sev="crit" data-plats="tat-app-ws" data-text="c3 assertaircraftontor self-blocks aircraft-qual create 422 ac-01 tat-422 create() calls assertaircraftontor, which requires the aircraft type to already be in tor.aircrafttypeids — but tat-422 is the mechanism that adds an aircraft to a tor, so the guard demands what it creates (staff-aircraft-qualification.service.ts:107,1066). drop/relax the guard in create(), and add the approved aircrafttypeid to tor.aircrafttypeids on approval (ties to c1). tat-app-ws" style="--row-c:var(--crit-line)">
+        <div class="rowhead"><span class="id">C3</span><h4 class="title">assertAircraftOnTor self-blocks aircraft-qual create</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>422 AC-01</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">create() calls assertAircraftOnTor, which requires the aircraft type to already be in tor.aircraftTypeIds — but TAT-422 <b>is</b> the mechanism that adds an aircraft to a TOR, so the guard demands what it creates (<span class='path'>staff-aircraft-qualification.service.ts:107,1066</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Drop/relax the guard in create(), and add the approved aircraftTypeId to tor.aircraftTypeIds on approval (ties to C1).</div></div>
+      </article>
+      <article class="row" data-sev="crit" data-plats="tat-app-ws" data-text="c4 eligibility pickers render empty when a course needs an aircraft type 424 ac-10/12 tat-424 when a course/chapter has an aircrafttype, buildstafftoreligibilityfilter adds aircrafttypeids:<id>; over the always-empty field, distinct() returns [] and every instructor/examiner is filtered out. isallaircraftqualificationsvalidfortor also short-circuits to true (staff-tor-assignment-eligibility.util.ts:60-62). resolved by c1 (populate aircrafttypeids). until then, assignment for aircraft-typed courses is non-functional — track with the c1 keystone fix. tat-app-ws" style="--row-c:var(--crit-line)">
+        <div class="rowhead"><span class="id">C4</span><h4 class="title">Eligibility pickers render EMPTY when a course needs an aircraft type</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-424" target="_blank" rel="noopener noreferrer">TAT-424<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>424 AC-10/12</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">When a course/chapter has an aircraftType, buildStaffTorEligibilityFilter adds <span class='path'>aircraftTypeIds:&lt;id&gt;</span>; over the always-empty field, distinct() returns [] and every instructor/examiner is filtered out. isAllAircraftQualificationsValidForTor also short-circuits to true (<span class='path'>staff-tor-assignment-eligibility.util.ts:60-62</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Resolved by C1 (populate aircraftTypeIds). Until then, assignment for aircraft-typed courses is non-functional — track with the C1 keystone fix.</div></div>
+      </article>
+      <article class="row" data-sev="crit" data-plats="tat-portal tat-ws tat-prereq" data-text="c5 sso is not real end-to-end 430 ac-01 430 ac-09 tat-430 tat-prereq has a working /sso receiver (posts /auth/exchange-sso-token) and a standalone login, but no dashboard app issues the bridge token, and session cookies have no domain= attr so they're subdomain-local. today only the standalone login works. add a “staff management” entry + bridge-token issuer in tat-portal/tat-ws that redirects to the subsystem with a short-lived token; set cookies on the shared parent domain (domain=.tat147.com) and propagate logout across apps. tat-portal tat-ws tat-prereq" style="--row-c:var(--crit-line)">
+        <div class="rowhead"><span class="id">C5</span><h4 class="title">SSO is not real end-to-end</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-430" target="_blank" rel="noopener noreferrer">TAT-430<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>430 AC-01</code><code>430 AC-09</code></div>
+        <div class="plats"><span class="plat" data-p="tat-portal">tat-portal</span><span class="plat" data-p="tat-ws">tat-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">tat-prereq has a working /sso receiver (posts /auth/exchange-sso-token) and a standalone login, but no dashboard app issues the bridge token, and session cookies have no <span class='path'>domain=</span> attr so they're subdomain-local. Today only the standalone login works.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add a “Staff Management” entry + bridge-token issuer in tat-portal/tat-ws that redirects to the subsystem with a short-lived token; set cookies on the shared parent domain (<span class='path'>domain=.tat147.com</span>) and propagate logout across apps.</div></div>
+      </article>
+      </div>
+    </section>
+    <section class="tiergroup" data-tier="high">
+      <div class="tier" style="--tier-c:var(--high-line)"><h3><span class="tc">High</span></h3><span class="desc">AC violated, feature partially broken</span><span class="line"></span></div>
+      <div class="rows">
+      <article class="row" data-sev="high" data-plats="tat-app-ws tat-prereq" data-text="h1 no “requested role” concept anywhere 415 ac-02/03 424 ac-11 tat-415 tat-424 tat-410 stafftorformtemplate has no role field, so all four form 32 a/b/c/d forms show for every instructor; and the eligibility context carries only licenseids + aircrafttypeid, so role-type qualification matching (424 ac-11) is unenforced. introduce a requested-role/qualification on the tor (a per-tor multi-select). backend: scope form 32 templates and eligibility by it. the fe role gate added this session is cosmetic only and doesn't enforce. tat-app-ws tat-prereq" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H1</span><h4 class="title">No “requested role” concept anywhere</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-415" target="_blank" rel="noopener noreferrer">TAT-415<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-424" target="_blank" rel="noopener noreferrer">TAT-424<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-410" target="_blank" rel="noopener noreferrer">TAT-410<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>415 AC-02/03</code><code>424 AC-11</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">StaffTorFormTemplate has no role field, so all four Form 32 A/B/C/D forms show for every instructor; and the eligibility context carries only licenseIds + aircraftTypeId, so role-type qualification matching (424 AC-11) is unenforced.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Introduce a requested-role/qualification on the TOR (a per-TOR multi-select). Backend: scope Form 32 templates and eligibility by it. The FE role gate added this session is cosmetic only and doesn't enforce.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws tat-prereq" data-text="h2 form 32 privileged-editor auto-approve is unimplemented 415 ac-12 tat-415 tat-416 isprivilegedform32editor / form_32_auto_approve_roles is defined but never called; the reviewer savedraft branch only merges the assessment block; ad isn't in form_32_reviewer_roles so all ad edits/approves 403 — yet the fe pic_roles includes ad and renders save/approve/reject buttons. implement the privileged path: let sa/ad/qm/tm edit any field with per-field auto-approve (evidence still required). align fe pic_roles with the backend so ad doesn't get dead buttons. tat-app-ws tat-prereq" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H2</span><h4 class="title">Form 32 privileged-editor auto-approve is unimplemented</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-415" target="_blank" rel="noopener noreferrer">TAT-415<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-416" target="_blank" rel="noopener noreferrer">TAT-416<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>415 AC-12</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">isPrivilegedForm32Editor / FORM_32_AUTO_APPROVE_ROLES is defined but never called; the reviewer saveDraft branch only merges the assessment block; AD isn't in FORM_32_REVIEWER_ROLES so all AD edits/approves 403 — yet the FE PIC_ROLES includes AD and renders Save/Approve/Reject buttons.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Implement the privileged path: let SA/AD/QM/TM edit any field with per-field auto-approve (evidence still required). Align FE PIC_ROLES with the backend so AD doesn't get dead buttons.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws tat-prereq" data-text="h3 aircraft quals inside the history form have no write path 417 ac-08/09/35 tat-417 the embedded aircraftqualifications array is only read as a count (staff-history-form.service.ts:473); no service writes it, no endpoint targets it, and the history_form_aircraft_qualification_created audit event is never emitted. the fe shows a count-only placeholder. add add/replace/list endpoints for the shared, no-approval history-form aircraft-qual record (type + category), wire the fe add form, and emit the audit event. distinct from the tor-scoped staffqualification collection (tat-422). tat-app-ws tat-prereq" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H3</span><h4 class="title">Aircraft quals inside the History Form have no write path</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>417 AC-08/09/35</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">The embedded aircraftQualifications array is only read as a count (<span class='path'>staff-history-form.service.ts:473</span>); no service writes it, no endpoint targets it, and the HISTORY_FORM_AIRCRAFT_QUALIFICATION_CREATED audit event is never emitted. The FE shows a count-only placeholder.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add add/replace/list endpoints for the shared, no-approval History-Form aircraft-qual record (Type + Category), wire the FE add form, and emit the audit event. Distinct from the TOR-scoped StaffQualification collection (TAT-422).</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws" data-text="h4 sit-in evaluator is arbitrary, not the teaching instructor 421 ac-01/02 tat-421 tat-429 pickevaluatoruserid(traineeuserid) takes no courseid and returns the first active instructor-role user ≠ the trainee (staff-sit-in.service.ts:343-364), so the assigned evaluator is effectively random and unrelated to the course. pass courseid into the picker and select the instructor actually assigned to teach that course (from the schedule/course-instructor subsystem). add a manual re-assign endpoint for the null-fallback case. tat-app-ws" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H4</span><h4 class="title">Sit-in evaluator is arbitrary, not the teaching instructor</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-421" target="_blank" rel="noopener noreferrer">TAT-421<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-429" target="_blank" rel="noopener noreferrer">TAT-429<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>421 AC-01/02</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">pickEvaluatorUserId(traineeUserId) takes no courseId and returns the first active INSTRUCTOR-role user ≠ the trainee (<span class='path'>staff-sit-in.service.ts:343-364</span>), so the assigned evaluator is effectively random and unrelated to the course.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Pass courseId into the picker and select the instructor actually assigned to teach that course (from the schedule/course-instructor subsystem). Add a manual re-assign endpoint for the null-fallback case.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws" data-text="h5 “suspend qualification tracking” is a no-op 432 ac-08 tat-432 deactivate persists qualificationtrackingmode (staff-management.service.ts:515), but no refresher/expiry cron reads it — so choosing “suspend” deactivates the account without actually stopping tracking. have the aircraft + mandatory refresher/expiry crons skip users whose qualificationtrackingmode = suspended, and resume on reactivation. tat-app-ws" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H5</span><h4 class="title">“Suspend Qualification Tracking” is a no-op</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-432" target="_blank" rel="noopener noreferrer">TAT-432<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>432 AC-08</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Deactivate persists qualificationTrackingMode (<span class='path'>staff-management.service.ts:515</span>), but no refresher/expiry cron reads it — so choosing “suspend” deactivates the account without actually stopping tracking.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Have the aircraft + mandatory refresher/expiry crons skip users whose qualificationTrackingMode = SUSPENDED, and resume on reactivation.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws" data-text="h6 deactivated staff may still be assignment-eligible 432 ac-09 tat-432 tat-424 no staffstatus:inactive filter was found in the eligibility / enrollment / selection paths, so a deactivated instructor may still surface in assignment lists. add staffstatus === active to the eligibility filter and the eligible-instructor/examiner queries; confirm assessment selection excludes inactive users. tat-app-ws" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H6</span><h4 class="title">Deactivated staff may still be assignment-eligible</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-432" target="_blank" rel="noopener noreferrer">TAT-432<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-424" target="_blank" rel="noopener noreferrer">TAT-424<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>432 AC-09</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">No staffStatus:INACTIVE filter was found in the eligibility / enrollment / selection paths, so a deactivated instructor may still surface in assignment lists.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add staffStatus === ACTIVE to the eligibility filter and the eligible-instructor/examiner queries; confirm assessment selection excludes inactive users.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-app-ws" data-text="h7 geteligiblecourseinstructors bypasses tor 424 ac-01/07 tat-424 tat-429 the eligible-instructor list filters by role + history-form presence + sit-in only (enrollment.service.ts:1213-1284) — no tor eligibility filter — so tor-ineligible instructors appear and are only rejected at addcourseinstructor save. apply buildstafftoreligibilityfilter to the eligible-instructor query so ineligible instructors are hidden entirely (ac-07), not just blocked at save. tat-app-ws" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H7</span><h4 class="title">getEligibleCourseInstructors bypasses TOR</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-424" target="_blank" rel="noopener noreferrer">TAT-424<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-429" target="_blank" rel="noopener noreferrer">TAT-429<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>424 AC-01/07</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">The eligible-instructor list filters by role + history-form presence + sit-in only (<span class='path'>enrollment.service.ts:1213-1284</span>) — no TOR eligibility filter — so TOR-ineligible instructors appear and are only rejected at addCourseInstructor save.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Apply buildStaffTorEligibilityFilter to the eligible-instructor query so ineligible instructors are hidden entirely (AC-07), not just blocked at save.</div></div>
+      </article>
+      <article class="row" data-sev="high" data-plats="tat-prereq" data-text="h8 fe total training duration not windowed to 2 years 418 ac-07/08 tat-418 historyformview.totalhours sums every dated training item regardless of age (historyformview.tsx:259-261); the backend correctly windows to the last 2 years, so the fe total can overcount vs what eligibility uses. window the fe total to accomplisheddate ≥ now−2y to match the backend, or display the backend-computed total instead of recomputing client-side. tat-prereq" style="--row-c:var(--high-line)">
+        <div class="rowhead"><span class="id">H8</span><h4 class="title">FE total training duration not windowed to 2 years</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-418" target="_blank" rel="noopener noreferrer">TAT-418<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>418 AC-07/08</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">HistoryFormView.totalHours sums every dated training item regardless of age (<span class='path'>HistoryFormView.tsx:259-261</span>); the backend correctly windows to the last 2 years, so the FE total can overcount vs what eligibility uses.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Window the FE total to accomplishedDate ≥ now−2y to match the backend, or display the backend-computed total instead of recomputing client-side.</div></div>
+      </article>
+      </div>
+    </section>
+    <section class="tiergroup" data-tier="med">
+      <div class="tier" style="--tier-c:var(--med-line)"><h3><span class="tc">Medium</span></h3><span class="desc">noticeable gap / spec divergence</span><span class="line"></span></div>
+      <div class="rows">
+      <article class="row" data-sev="med" data-plats="tat-app-ws tat-prereq" data-text="m1 training-history records require approval (contradicts ac) 417 ac-17 tat-417 tat-418 addtraininghistory creates non-privileged records as pending_approval, with approve/reject endpoints and a required certificate (staff-history-training-record.service.ts:104-120); ac-17 says they must not require approval. one entity conflates 417's list with 418's external course. either split 417's no-approval “relevant training history” from 418's approvable external course, or confirm with the ba that the merged approval model supersedes ac-17. tat-app-ws tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M1</span><h4 class="title">Training-history records require approval (contradicts AC)</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-418" target="_blank" rel="noopener noreferrer">TAT-418<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>417 AC-17</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">addTrainingHistory creates non-privileged records as PENDING_APPROVAL, with approve/reject endpoints and a required certificate (<span class='path'>staff-history-training-record.service.ts:104-120</span>); AC-17 says they must NOT require approval. One entity conflates 417's list with 418's external course.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Either split 417's no-approval “Relevant Training History” from 418's approvable external course, or confirm with the BA that the merged approval model supersedes AC-17.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-app-ws tat-prereq" data-text="m2 no instructor selection on assessment 423 ac-03 tat-423 the assessment is hard-bound to tor.userid (staff-assessment.service.ts:104); assignstaffassessmentdto has no instructorid and the fe has no instructor picker. if a tor maps to exactly one instructor this is acceptable — confirm with the ba. otherwise add instructorid to the assign dto + an fe picker. tat-app-ws tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M2</span><h4 class="title">No instructor selection on assessment</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-423" target="_blank" rel="noopener noreferrer">TAT-423<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>423 AC-03</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">The assessment is hard-bound to tor.userId (<span class='path'>staff-assessment.service.ts:104</span>); AssignStaffAssessmentDTO has no instructorId and the FE has no instructor picker.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>If a TOR maps to exactly one instructor this is acceptable — confirm with the BA. Otherwise add instructorId to the assign DTO + an FE picker.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-app-ws tat-prereq" data-text="m3 assessment type chosen by the assigner, not the instructor 423 ac-21 tat-423 initial/continuation/extension is picked by the assigner (sa/tm) at assign time, not by the instructor during fill (assessmentformview.tsx:128). move the assessment-type selection into the instructor's fill step, or reconcile the ac with the assign-time model. tat-app-ws tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M3</span><h4 class="title">Assessment type chosen by the assigner, not the instructor</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-423" target="_blank" rel="noopener noreferrer">TAT-423<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>423 AC-21</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">Initial/Continuation/Extension is picked by the assigner (SA/TM) at assign time, not by the instructor during fill (<span class='path'>AssessmentFormView.tsx:128</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Move the assessment-type selection into the instructor's fill step, or reconcile the AC with the assign-time model.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-app-ws" data-text="m4 no list/get endpoint for external-teaching activities 422 ac-19 tat-422 external teaching has post submit + patch approve/reject by id, but no get/list — the pic can act on an activity only if they already know its id, with no way to discover pending ones (ac-19 review). add get /tors/:torid/external-teaching (or nested under the qualification) returning pending/approved/rejected activities; wire the fe review list. tat-app-ws" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M4</span><h4 class="title">No list/GET endpoint for external-teaching activities</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>422 AC-19</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">External teaching has POST submit + PATCH approve/reject by id, but no GET/list — the PIC can act on an activity only if they already know its id, with no way to discover pending ones (AC-19 review).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add GET /tors/:torId/external-teaching (or nested under the qualification) returning pending/approved/rejected activities; wire the FE review list.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m5 reviewer can't preview/download certificates 419 (review) tat-419 evidence/signature keys are write-only; the adapters never surface evidencefilekey into the view types and there's no history-form evidence download endpoint, so a reviewer approves/rejects blind (fetchers.ts). return evidence keys in the read dtos and add a signed-url download endpoint for history-form evidence; render a preview/download link in the reviewer ui. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M5</span><h4 class="title">Reviewer can't preview/download certificates</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-419" target="_blank" rel="noopener noreferrer">TAT-419<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>419 (review)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">Evidence/signature keys are write-only; the adapters never surface evidenceFileKey into the view types and there's no history-form evidence download endpoint, so a reviewer approves/rejects blind (<span class='path'>fetchers.ts</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Return evidence keys in the read DTOs and add a signed-URL download endpoint for history-form evidence; render a preview/download link in the reviewer UI.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m6 no fe surface for “request course online” 418 ac-25/26 tat-418 tat-419 the instructor “request course online” action (418 ac-25) and the tm online-course-request review (419 ac-10) have no fe surface — the backend is fully built (requests + tm review). add the instructor “request online” button (post training-course-request) and the tm request-review list (approve/reject) in tat-prereq. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M6</span><h4 class="title">No FE surface for “request course online”</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-418" target="_blank" rel="noopener noreferrer">TAT-418<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-419" target="_blank" rel="noopener noreferrer">TAT-419<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>418 AC-25/26</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">The instructor “request course online” action (418 AC-25) and the TM online-course-request review (419 AC-10) have no FE surface — the backend is fully built (requests + TM review).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add the instructor “Request online” button (POST training-course-request) and the TM request-review list (approve/reject) in tat-prereq.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-app-ws" data-text="m7 eligible-instructor list under-checks “already assigned” 429 ac-03 tat-429 the list only excludes existing instructor enrollment rows (enrollment.service.ts:1264-1274), not the schedule instructor-assignment subsystem; and instructors with no history form are silently dropped. cross-check the schedule/course-instructor assignments when excluding “already assigned”; decide whether no-history-form instructors should appear (and surface them if so). tat-app-ws" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M7</span><h4 class="title">Eligible-instructor list under-checks “already assigned”</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-429" target="_blank" rel="noopener noreferrer">TAT-429<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>429 AC-03</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">The list only excludes existing INSTRUCTOR enrollment rows (<span class='path'>enrollment.service.ts:1264-1274</span>), not the schedule instructor-assignment subsystem; and instructors with no history form are silently dropped.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Cross-check the schedule/course-instructor assignments when excluding “already assigned”; decide whether no-history-form instructors should appear (and surface them if so).</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m8 no pagination on manage staff 431 (manage staff) tat-431 the fetcher hardcodes limit:1000, skip:0 with no ui pager (fetchers.ts:63) — it downloads the whole roster and won't scale. wire server pagination (skip/limit) through the shared table + a pager; first confirm the backend paginates at the db, not just slices in memory. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M8</span><h4 class="title">No pagination on Manage Staff</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-431" target="_blank" rel="noopener noreferrer">TAT-431<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>431 (Manage Staff)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">The fetcher hardcodes limit:1000, skip:0 with no UI pager (<span class='path'>fetchers.ts:63</span>) — it downloads the whole roster and won't scale.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Wire server pagination (skip/limit) through the shared Table + a pager; first confirm the backend paginates at the DB, not just slices in memory.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m9 role enforcement is client-side only 430 ac-07/08 tat-430 proxy.ts gates protected routes on token presence, not role (proxy.ts:25); route_access guards run in react, so a direct route/fetch bypasses them and relies entirely on backend authz. add server-side role gating in proxy.ts (decode the token's role → 403/redirect), keeping the react guards for ux. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M9</span><h4 class="title">Role enforcement is client-side only</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-430" target="_blank" rel="noopener noreferrer">TAT-430<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>430 AC-07/08</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">proxy.ts gates protected routes on token presence, not role (<span class='path'>proxy.ts:25</span>); ROUTE_ACCESS guards run in React, so a direct route/fetch bypasses them and relies entirely on backend authz.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add server-side role gating in proxy.ts (decode the token's role → 403/redirect), keeping the React guards for UX.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-app-ws" data-text="m10 sit-in signature not validated as an evidence file 421 ac-09 tat-421 assessorsignaturekey is stored as a plain @isstring with only a non-empty check (staff-sit-in.service.ts:256-267), unlike form 32 which calls assertvalidevidencefilekey — so any string passes. validate assessorsignaturekey as an uploaded evidence file (bucket/ prefix + allowed extension), matching the form 32 signature handling. tat-app-ws" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M10</span><h4 class="title">Sit-in signature not validated as an evidence file</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-421" target="_blank" rel="noopener noreferrer">TAT-421<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>421 AC-09</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">assessorSignatureKey is stored as a plain @IsString with only a non-empty check (<span class='path'>staff-sit-in.service.ts:256-267</span>), unlike Form 32 which calls assertValidEvidenceFileKey — so any string passes.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Validate assessorSignatureKey as an uploaded evidence file (bucket/ prefix + allowed extension), matching the Form 32 signature handling.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m11 staff-history uploads reuse tor file categories 412/413 uploads tat-417 tat-418 evidence/signature uploads reuse fileuploadcategory.tordocuments / torassessment (useforms.ts:172,227,303), so staff-history files land in tor s3 folders; no history-form category exists. add historyformevidence / mandatorytraining / signature fileuploadcategory values and pass the right one at each call site. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M11</span><h4 class="title">Staff-history uploads reuse TOR file categories</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-418" target="_blank" rel="noopener noreferrer">TAT-418<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>412/413 uploads</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">Evidence/signature uploads reuse FileUploadCategory.TorDocuments / TorAssessment (<span class='path'>useForms.ts:172,227,303</span>), so staff-history files land in TOR S3 folders; no history-form category exists.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add HistoryFormEvidence / MandatoryTraining / Signature FileUploadCategory values and pass the right one at each call site.</div></div>
+      </article>
+      <article class="row" data-sev="med" data-plats="tat-prereq" data-text="m12 ad mis-bucketed in the history form fe 415 ac-12 (fe) tat-417 tat-419 ad isn't in the fe reviewer set, so an admin falls into the instructor branch and gets the submit-for-approval ui instead of a privileged auto-approve path (historyformview.tsx). add ad to the fe privileged-editor set for the history form and branch it to the auto-approve path, mirroring the backend privileged roles. tat-prereq" style="--row-c:var(--med-line)">
+        <div class="rowhead"><span class="id">M12</span><h4 class="title">AD mis-bucketed in the History Form FE</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-419" target="_blank" rel="noopener noreferrer">TAT-419<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>415 AC-12 (FE)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">AD isn't in the FE reviewer set, so an Admin falls into the instructor branch and gets the submit-for-approval UI instead of a privileged auto-approve path (<span class='path'>HistoryFormView.tsx</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add AD to the FE privileged-editor set for the History Form and branch it to the auto-approve path, mirroring the backend privileged roles.</div></div>
+      </article>
+      </div>
+    </section>
+    <section class="tiergroup" data-tier="low">
+      <div class="tier" style="--tier-c:var(--low-line)"><h3><span class="tc">Low</span></h3><span class="desc">polish / doc / config</span><span class="line"></span></div>
+      <div class="rows">
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l1 online-request approval notification omits approval date/time 419 ac-13 tat-419 notifytrainingcourserequestapproved passes userid + coursetitle only (notifications.service.ts:3871-3874); ac-13 requires course name and approval date/time. add reviewedat to the templatevalues and the notification template. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L1</span><h4 class="title">Online-request approval notification omits Approval Date/Time</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-419" target="_blank" rel="noopener noreferrer">TAT-419<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>419 AC-13</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">notifyTrainingCourseRequestApproved passes userId + courseTitle only (<span class='path'>notifications.service.ts:3871-3874</span>); AC-13 requires Course Name AND Approval Date/Time.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add reviewedAt to the templateValues and the notification template.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l2 “auto-remove expired” is read-time exclusion only 418 ac-16 tat-418 expired external/online durations are excluded only by the 2-year read-time window (mandatory-training.util.ts:71-79); nothing deletes them and the expiry cron re-syncs tor for mandatory duedate only, not external rollover. functionally the total is correct — either accept read-time exclusion, or add a cron pass that re-syncs tor eligibility when an external duration ages out. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L2</span><h4 class="title">“Auto-remove expired” is read-time exclusion only</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-418" target="_blank" rel="noopener noreferrer">TAT-418<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>418 AC-16</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Expired external/online durations are excluded only by the 2-year read-time window (<span class='path'>mandatory-training.util.ts:71-79</span>); nothing deletes them and the expiry cron re-syncs TOR for mandatory dueDate only, not external rollover.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Functionally the total is correct — either accept read-time exclusion, or add a cron pass that re-syncs TOR eligibility when an external duration ages out.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l3 protected refresher courses have placeholder content 420 (content) tat-420 the 7 protected courses seed as real onlinecourse docs but with placeholder body text and hasexam:false (mandatory-refresher-online-course.service.ts:66-84); seeding also skips on a fresh db with zero users. author real content + exams for the 7 courses (they're editable — only deletion is blocked). ensure a seed user exists at boot. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L3</span><h4 class="title">Protected refresher courses have placeholder content</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-420" target="_blank" rel="noopener noreferrer">TAT-420<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>420 (content)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">The 7 protected courses seed as real OnlineCourse docs but with placeholder body text and hasExam:false (<span class='path'>mandatory-refresher-online-course.service.ts:66-84</span>); seeding also skips on a fresh DB with zero users.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Author real content + exams for the 7 courses (they're editable — only deletion is blocked). Ensure a seed user exists at boot.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-prereq" data-text="l4 tor matrix auto-update is refetch-only 433 ac-11 tat-433 counts only refresh on react-query remount/refocus (usetor.ts:17-21) — no realtime/event-driven invalidation on status/form/expiry/assessment changes. if live updates are required, add websocket/polling invalidation on the relevant mutations; otherwise confirm periodic refetch satisfies the ac. tat-prereq" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L4</span><h4 class="title">TOR Matrix auto-update is refetch-only</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-433" target="_blank" rel="noopener noreferrer">TAT-433<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>433 AC-11</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">Counts only refresh on react-query remount/refocus (<span class='path'>useTor.ts:17-21</span>) — no realtime/event-driven invalidation on status/form/expiry/assessment changes.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>If live updates are required, add websocket/polling invalidation on the relevant mutations; otherwise confirm periodic refetch satisfies the AC.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-prereq" data-text="l5 matrix cards show blank email/phone 433 ac-04 tat-433 adaptmatrixcard hardcodes email:''/phone:'' because the matrix card dto omits them (adapters.ts:66-67); server-side search still matches those fields. add email/phone to the tor-matrix card dto (backend) and render them on the card. tat-prereq" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L5</span><h4 class="title">Matrix cards show blank email/phone</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-433" target="_blank" rel="noopener noreferrer">TAT-433<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>433 AC-04</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">adaptMatrixCard hardcodes email:''/phone:'' because the matrix card DTO omits them (<span class='path'>adapters.ts:66-67</span>); server-side search still matches those fields.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add email/phone to the tor-matrix card DTO (backend) and render them on the card.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l6 assessment submit → pending_tm_review (unnamed status) 423 ac-11 tat-423 submit transitions to pending_tm_review, a state the acs don't define (they name only draft/approved). naming reconciliation only — map pending_tm_review to the ac vocabulary in docs/ui, or update the ac. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L6</span><h4 class="title">Assessment submit → PENDING_TM_REVIEW (unnamed status)</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-423" target="_blank" rel="noopener noreferrer">TAT-423<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>423 AC-11</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Submit transitions to PENDING_TM_REVIEW, a state the ACs don't define (they name only Draft/Approved).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Naming reconciliation only — map PENDING_TM_REVIEW to the AC vocabulary in docs/UI, or update the AC.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l7 audit coverage gaps 421 ac-14 423 ac-20 tat-421 tat-423 notification dispatch, tor-recalculation, and the history-form approved transition aren't all persisted as audit-log entries (only state-change events are). add audit entries for notifications sent, tor/eligibility recalcs, and the approved status change. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L7</span><h4 class="title">Audit coverage gaps</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-421" target="_blank" rel="noopener noreferrer">TAT-421<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-423" target="_blank" rel="noopener noreferrer">TAT-423<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>421 AC-14</code><code>423 AC-20</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Notification dispatch, TOR-recalculation, and the History-Form APPROVED transition aren't all persisted as audit-log entries (only state-change events are).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add audit entries for notifications sent, TOR/eligibility recalcs, and the APPROVED status change.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l8 sit-in notification carries no direct link 421 ac-04 429 tat-421 tat-429 sit-in notifications carry only trainee name + course title; no deep link to the sit-in form (notifications.service.ts:3986-3990). include the sitinid + a direct link in the templatevalues and the notification template. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L8</span><h4 class="title">Sit-in notification carries no direct link</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-421" target="_blank" rel="noopener noreferrer">TAT-421<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-429" target="_blank" rel="noopener noreferrer">TAT-429<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>421 AC-04</code><code>429</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Sit-in notifications carry only trainee name + course title; no deep link to the sit-in form (<span class='path'>notifications.service.ts:3986-3990</span>).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Include the sitInId + a direct link in the templateValues and the notification template.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l9 no manual qm suspend/revoke of a tor 411 ac-03 tat-411 tor status is auto-computed only; there's no manual qm suspend/revoke action (411 ac-03). add a qm-only manual suspend/revoke endpoint + ui that overrides the computed status. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L9</span><h4 class="title">No manual QM suspend/revoke of a TOR</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-411" target="_blank" rel="noopener noreferrer">TAT-411<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>411 AC-03</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">TOR status is auto-computed only; there's no manual QM suspend/revoke action (411 AC-03).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add a QM-only manual suspend/revoke endpoint + UI that overrides the computed status.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l10 form 32 has no whole-form versioning 415 ac-10 tat-415 evidence filehistory is archived, but there's no record-level versioning for “replaced form 32 records” (ac-10). add record-level archival if whole-form replacement is required; otherwise confirm evidence-level history suffices with the ba. tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L10</span><h4 class="title">Form 32 has no whole-form versioning</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-415" target="_blank" rel="noopener noreferrer">TAT-415<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>415 AC-10</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Evidence fileHistory is archived, but there's no record-level versioning for “replaced Form 32 records” (AC-10).</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Add record-level archival if whole-form replacement is required; otherwise confirm evidence-level history suffices with the BA.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-prereq" data-text="l11 stale “dummy” comments on real-wired pages (docs) tat-433 tat-435 assessment, tor-matrix, pending-tors, tor-detail, and history-form pages carry “fe-only/dummy” comments but hit live backend endpoints — misleading for reviewers. delete the stale comments so reviewers don't assume the pages are unwired. tat-prereq" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L11</span><h4 class="title">Stale “dummy” comments on real-wired pages</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-433" target="_blank" rel="noopener noreferrer">TAT-433<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-435" target="_blank" rel="noopener noreferrer">TAT-435<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>(docs)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-prereq">tat-prereq</span></div>
+        <p class="desc">Assessment, tor-matrix, pending-tors, tor-detail, and history-form pages carry “FE-only/dummy” comments but hit live backend endpoints — misleading for reviewers.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Delete the stale comments so reviewers don't assume the pages are unwired.</div></div>
+      </article>
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l12 notification recipients are db-config-driven (config) tat-422 tat-417 recipients come from notificationsetting.destination role codes; the mechanism is wired, but exact sets (e.g. em for 422 ac-06) depend on seed data. verify the notification-setting seeds per environment include the ac-required roles (e.g. em in “aircraft qualification pending pic review”). tat-app-ws" style="--row-c:var(--low-line)">
+        <div class="rowhead"><span class="id">L12</span><h4 class="title">Notification recipients are DB-config-driven</h4></div>
+        <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>(config)</code></div>
+        <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
+        <p class="desc">Recipients come from NotificationSetting.destination role codes; the mechanism is wired, but exact sets (e.g. EM for 422 AC-06) depend on seed data.</p>
+        <div class="fix"><span class="flabel">Fix</span><div>Verify the notification-setting seeds per environment include the AC-required roles (e.g. EM in “Aircraft Qualification Pending PIC Review”).</div></div>
+      </article>
+      </div>
+    </section>
+  </main>
+  <p class="empty" id="empty">No gaps match the current filters.</p>
+
+  <section class="solid">
+    <h3><span class="ok">✓</span> What's actually solid — not gaps</h3>
+    <p>The epic is far from broken. These were verified working during the inspection.</p>
+    <ul>
+      <li><b>Notifications are wired</b> platform-wide via a NotificationInterceptor (recipients config-driven)</li>
+      <li><b>Privileged auto-approve</b> genuinely implemented for quals (422) and sit-in/assessment (421/423)</li>
+      <li><b>Online-refresher auto-completion is real</b> (418) — not a stub; only content is placeholder</li>
+      <li><b>Protected courses (420)</b> properly seeded &amp; undeletable, wired to 418 + 422</li>
+      <li><b>Manage Staff / Profile / Matrix / Pending (431–435)</b> all real-endpoint wired</li>
+      <li><b>Cert visibility (436)</b> complete; TOR core (410/411) &amp; documents (412/413) strong</li>
+    </ul>
+  </section>
+
+  <footer>Source: TAT-409 Ticket Groups &amp; Inspection Map · generated from the full backend + frontend code inspection.</footer>
+</div>
+
+<script>
+  const list = document.getElementById("list");
+
+  // ---- filtering ----
+  const state = {
+    sev: new Set(["crit","high","med","low"]),
+    plat: new Set(["tat-app-ws","tat-prereq","tat-ws","tat-portal"]),
+    q: "",
+  };
+  const shown = document.getElementById("shown");
+  const empty = document.getElementById("empty");
+
+  function apply() {
+    let n = 0;
+    for (const section of list.children) {
+      let visible = 0;
+      for (const row of section.querySelector(".rows").children) {
+        const okSev = state.sev.has(row.dataset.sev);
+        const okPlat = row.dataset.plats.split(" ").some(p => state.plat.has(p));
+        const okQ = !state.q || row.dataset.text.includes(state.q);
+        const show = okSev && okPlat && okQ;
+        row.hidden = !show;
+        if (show) { visible++; n++; }
+      }
+      section.hidden = visible === 0;
+    }
+    shown.textContent = n;
+    empty.style.display = n === 0 ? "block" : "none";
+  }
+
+  document.getElementById("sevfilter").addEventListener("click", e => {
+    const b = e.target.closest(".sevchip"); if (!b) return;
+    const on = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", String(!on));
+    on ? state.sev.delete(b.dataset.sev) : state.sev.add(b.dataset.sev);
+    apply();
+  });
+  document.getElementById("platfilter").addEventListener("click", e => {
+    const b = e.target.closest(".platchip"); if (!b) return;
+    const on = b.getAttribute("aria-pressed") === "true";
+    b.setAttribute("aria-pressed", String(!on));
+    on ? state.plat.delete(b.dataset.plat) : state.plat.add(b.dataset.plat);
+    apply();
+  });
+  document.getElementById("search").addEventListener("input", e => {
+    state.q = e.target.value.trim().toLowerCase();
+    apply();
+  });
+
+  apply();
+</script>

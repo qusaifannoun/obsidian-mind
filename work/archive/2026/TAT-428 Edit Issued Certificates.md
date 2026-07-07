@@ -2,7 +2,7 @@
 date: 2026-06-02
 description: "Scope for TAT-428 Edit Issued Certificates — a tat-ws (admin) feature, not tat-portal; backend PATCH already exists, work is frontend wiring + Super Admin gating"
 project: TAT
-status: active
+status: completed
 quarter: Q2-2026
 ticket: TAT-428
 tags:
@@ -135,15 +135,23 @@ Verified: `tsc --noEmit -p apps/tat-ws/tsconfig.json` **0 errors**; eslint clean
 - Verified: `tsc --noEmit` clean (only pre-existing `specs/index.spec.tsx` `@testing-library/react` error, confirmed present on baseline too); eslint clean on my changes (the 2 issues in `ManageTrainees/index.tsx` are the known pre-existing ones, now at lines 240/408).
 - **Untested against staging** — needs a real issued cert: confirm the GET actually returns `templateHtmlSnapshot`, edit → save → PDF regenerates from edited HTML.
 
+## ✅ DONE (2026-07-05)
+
+Marked complete. All three cert-edit paths shipped, and the online-course rich-text path is **contract-verified against backend source** (`tat-app-ws` `dev`):
+- **Field-name mismatch is real and the FE handles it right** — schema stores `templateHtmlSnapshot` (`online-course-certificate.schema.ts:51`); `UpdateOnlineCourseCertificateDTO` accepts `templateHtml` (`online-course.dto.ts:618`); `updateCertificate()` reads `dto.templateHtml` → writes `cert.templateHtmlSnapshot` (`:665`). FE reads the snapshot into the editor, PATCHes `{ templateHtml }` — exact match.
+- **Metadata fields intentionally stripped** — DTO has *only* `templateHtml`; the abandoned `cece4e1` structured form would've been rejected. `d5a6d25` correctly deleted it.
+- **PDF regenerates from the edited HTML** — `updateCertificate()` sets the snapshot, flips `pdfGenerationStatus`, `enqueueCertificateRegeneration()` (`:665–672`); worker renders `generatePdfFromHtml(cert.templateHtmlSnapshot)` (`:125`). Async via queue.
+- Live click-through (SA → Manage Trainees → edit → save → PDF re-render) left as a lightweight manual follow-up; the contract that gates it is proven.
+
 ## Status summary
 - ✅ Editable certs (general): catalog edit + permission gate (Step 1–3)
 - ✅ Online-course certs (trainee row): view PDF (Step 4)
-- ✅ Editing online-course certs (rich-text HTML, per BA): **FE built 2026-06-11, committed `d5a6d25`** (tat-ws `dev`) — reuses the general `CertificateEditModal`/quill editor bound to `templateHtmlSnapshot`, PATCHes `{ templateHtml }`; also fixed the modal's oversized Close button (IconButton → Button). Replaces the `cece4e1` structured form. **Pending: staging verification.**
+- ✅ Editing online-course certs (rich-text HTML, per BA): **FE built 2026-06-11, committed `d5a6d25`** (tat-ws `dev`) — reuses the general `CertificateEditModal`/quill editor bound to `templateHtmlSnapshot`, PATCHes `{ templateHtml }`; also fixed the modal's oversized Close button (IconButton → Button). Replaces the `cece4e1` structured form. **Contract-verified from source 2026-07-05; live E2E is a manual follow-up.**
 
 ## Remaining / notes
 - [x] If product wants online-course certs editable too → backend must add editable content + `PATCH` (separate, backend team). **Backend notified 2026-06-04 → shipped 2026-06-07.**
 - [x] Build the online-course cert edit FE path (checklist above). **Done 2026-06-11, committed `d5a6d25`.**
-- [ ] Verify against staging (needs an issued cert): GET returns `templateHtmlSnapshot`; edit → save → PDF regenerates from the edited HTML.
+- [x] Verify against staging (needs an issued cert): GET returns `templateHtmlSnapshot`; edit → save → PDF regenerates from the edited HTML. **Contract-verified from backend source 2026-07-05** (schema + DTO + `updateCertificate` regen path all confirmed); live click-through deferred as a manual follow-up.
 - [ ] Backend (later, not us): tighten general `UPDATE_CERTIFICATE` to SA-only (and confirm the SA/AD/TM scope on the new endpoint vs ticket's SA-only); add the dedicated `OC_UPDATE_CERTIFICATE` action (still absent from `actionsEnums.ts` as of 2026-06-11), then switch the FE gate from `UCE`.
 
 ## Related

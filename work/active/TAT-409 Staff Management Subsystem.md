@@ -69,7 +69,7 @@ The kickoff framing was "a new frontend subsystem." That's the centerpiece (**TA
 
 ### 6 · Cross-cutting / adjacent (touch existing surfaces)
 - [x] **TAT-429** Add Instructor To Course Enrollment List — "Add Instructor" on Course Enrollment; eligibility-filtered; feeds Sit-In. *Highest.* **WIRED 2026-06-28 (`tat-ws` `1f38541`).** "Add Instructor" button → modal (searchable eligible list + per-row Add) on the [[tat-ws]] Course Enrollment Management page; `GET /enrollment/instructors/eligible/:courseId` + `POST /enrollment/instructors/add/:courseId` (creates an INSTRUCTOR enrollment + a sit-in). GET verified (200, search param) on staging; **POST deferred** — eligibility needs an instructor with a `PENDING_SIT_IN` mandatory slot, none on staging yet.
-- [ ] **TAT-436** Control Certificate Visibility for Refresher Courses — refresher certs hidden until SA publishes; "Unpublished" indicator + Publish button on Manage Trainees. *Highest.* (Extends the [[TAT-428 Edit Issued Certificates|certificate]] work directly.)
+- [~] **TAT-436** Control Certificate Visibility for Refresher Courses — refresher certs hidden until SA publishes; "Unpublished" indicator + Publish button on Manage Trainees. *Highest.* (Extends the [[TAT-428 Edit Issued Certificates|certificate]] work directly.) **Backend shipped (`cb267288`); FE wired 2026-07-05 — see [[TAT-436 Refresher Certificate Publish]]. Pending staging verification.**
 
 ## Suggested sequencing
 

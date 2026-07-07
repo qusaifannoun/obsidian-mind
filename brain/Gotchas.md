@@ -101,3 +101,66 @@ tat-ws's "Exam Answers" preview was wired to `GET /online-courses/{id}/trainees/
 > The crash had hidden the whole codebase's violations (unused vars, `no-explicit-any`, non-null assertions, `no-unsafe-optional-chaining` errors). CI `nx lint` will now fail on these real issues until they're cleaned — a separate effort. `tsc --noEmit -p apps/tat-ws/tsconfig.json` is the clean type gate meanwhile.
 
 Alternative fix (not taken): bump `@nx/eslint-plugin` to a version where the autofix bug is gone. Context: [[TAT-428 Edit Issued Certificates]], [[TAT Certificates - Open Items]].
+
+## Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05)
+
+> [!danger] `enum: SomeEnum` + `default: null` where the enum has no null → validation error on every create
+> Mongoose runs enum validation on the **explicit `null` default**, and since `null` isn't in `Object.values(enum)` it throws `"… is not a valid enum value for path …"` — even though nothing set the field. This **blocked all aircraft-qualification creates** (`StaffQualification.refresherUpdateSource`). Same latent pattern on `StaffTorForm.workflowStage`.
+>
+> Fix: `enum: [...Object.values(SomeEnum), null]` (purely additive — can't break valid values). A local fix was applied to `tat-app-ws` `staff-qualification.schema.ts` + `staff-tor-form.schema.ts` then **reverted** — so the bug is **still OPEN** for the backend team (Hamza). Surfaced via [[TAT-409 Ticket Groups & Inspection Map|TAT-422 testing]].
+
+## tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)
+
+> [!warning] Missing `category` → files land in `bucket/undefined/`, and the backend does NOT error
+> The S3 key is built as `bucket/<category>/<...>`; the shared `src/api/uploadFileKey.ts` only appended `file`, not `category`, so every tat-prereq upload (Form 32/285, History evidence, signatures, qualifications) went to `bucket/undefined/`. Form 32's validator only checks the `bucket/` prefix + extension, so it silently misfiles instead of failing. Fix: `uploadFileKey(client, file, category)` now required; each call site passes the right `FileUploadCategory` (`tor-form-32`, `tor-aircraft-qualification`, `tor-documents`, `tor-assessment`, `tor-external-teaching`, `tor-form-285`). Same class as the [[Gotchas#tat-ws uploads|tat-ws upload]] gotcha — third time this bit.
+
+## MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)
+
+> [!warning] `sx` targeting `.MuiOutlinedInput-*` silently does nothing on MUI X v7 date pickers
+> v7 renders a segmented field with `.MuiPickersOutlinedInput-root`, `.MuiPickersOutlinedInput-notchedOutline`, `.MuiPickersSectionList-root` — NOT the legacy `.MuiOutlinedInput-*`. The app's `DatePickerField` `sx` targeted the old names, so styling never applied and it fell back to MUI defaults (Roboto 16px, wrong border/height). Fix: target the `.MuiPickers*` classes. Applies to `ControlledDatePicker` + `DatePickerField` in tat-prereq. Verify the actual class names in the DOM before writing MUI `sx`.
+
+## Form 32 assessment Signature is a FILE key, not text (2026-07-05)
+
+> [!danger] Backend validates `assessment.signatureKey` as an evidence file (`bucket/…` + allowed ext)
+> The FE rendered Signature as a free-text input; typing anything → save 400s with `"Invalid file type. Supported: PDF, DOC, DOCX, JPG, JPEG, PNG."` (`assertValidEvidenceFileKey`). Fixed: the FE now uploads a signature file (category `tor-form-32`) and stores the returned key. If a backend field is named `*Key`, assume it's an uploaded file, not text.
+
+## Form 32 forms are license-scoped, not role-scoped — shows all 4 A/B/C/D (2026-07-05)
+
+> [!warning] Every TOR shows Form 32 A/B/C/D regardless of the person's role → violates TAT-415 AC-02
+> `createFormInstances` attaches a form for **every template matching the `licenseId`**; the Form 32 A/B/C/D templates are seeded per authority (CARC/EASA/GCAA) with **no role field**. So an Instructor's TOR shows Examiner (C) + Assessor (D) forms. AC-415-02 says the form type is "selected based on the role (multi-select)." The "requested role" concept doesn't exist in the impl. See [[TAT-409 Ticket Groups & Inspection Map]].
+
+## IDE TS-server flags "implicit any" where batch `tsc` passes — annotate React-Query callbacks (2026-07-06)
+
+> [!warning] The editor shows TS errors that `tsc --noEmit` (the source of truth) does not
+> On [[tat-prereq]]'s `HistoryFormView.tsx`, VS Code's TS language server flagged `implicit any` on `.map`/`.filter`/`.reduce` callbacks and a `{} | null` on a `Map.get()` — but `tsc --noEmit` (fresh, strict, cache cleared) reported **0 errors**. Cause: the LS falls back to `any` on **React-Query-derived values** (`useX().data`, destructured `data`/`records`) when deep/generic inference times out in the editor; batch `tsc` has no such limit and resolves them. Don't chase phantom errors by re-reading `tsc` output — confirm with `mcp__ide__getDiagnostics` (the live editor view) vs a clean `npx tsc --noEmit`. **Fix:** give the flagged callbacks/vars **explicit type annotations** (`(it: MandatoryTrainingItem) =>`, `const requestByCourse: Map<string, TrainingCourseRequest> = …`) so the editor doesn't need to infer the container type. Bonus: doing so caught a real bug (`useSitIn().data` is `SitIn | null | undefined`, not just `| undefined`). Zsh caveat: `${PIPESTATUS[0]}` is empty in zsh (it's `$pipestatus`), so a piped `tsc | head` can hide the real exit code — capture to a file + `grep -c "error TS"`.
+
+## Sharing an HTML deliverable in Teams: JS is stripped + UTF-8 mojibakes → prefer a `.docx` (2026-07-05)
+
+> [!warning] A JS-rendered HTML page shows blank in Teams' preview, and its em-dashes/quotes render as `â€"`
+> When sharing the [[TAT-409 Bug & Gap List]] dashboard: (1) Microsoft Teams (and most chat/file previewers) **sandbox the preview and strip `<script>`** — so any content built by JS at load renders as an empty page. Fix: **pre-render the content as static HTML** and use JS only for progressive enhancement (filters). Verify the `<article>` rows exist in the file source, not just after `appendChild`. (2) Teams decoded the file as Latin-1, so UTF-8 `—`/`"`/`→` showed as mojibake (`â€"`, `â€œ`). A **`.docx` stores Unicode natively** and renders cleanly everywhere — build one with `python-docx` (installable via `pip install --user python-docx`; hyperlinks need a small `add_hyperlink` OOXML helper). Rule of thumb: **browser/artifact → interactive HTML; Teams/email → `.docx`.** Keep the `.md` as the canonical source and generate the others from it.
+
+## History Form: eligibility needs THREE approvals + the sit-in evaluator is arbitrary (2026-07-05)
+
+> [!warning] A TOR isn't eligible on basic-info approval alone; and the sit-in evaluator is not the course's teaching instructor
+> The [[TAT-409 Staff Management Subsystem|History Form]] flips to `APPROVED` (the state `isHistoryFormApprovedForUser` / TOR eligibility gates on) only when **all three** hold: basic-info `BASIC_INFO_APPROVED` **+** mandatory training valid **+** the sit-in final assessment completes (`assertHistoryFormReadyForApproval`, `staff-sit-in.service.ts`). Approving basic info alone leaves the form at `BASIC_INFO_APPROVED` — not eligible. The **sit-in final assessment is the capstone** that sets `APPROVED` (fused into `completeFinalAssessment`, no separate approve step). So "approve the History Form" is not one action — testing eligibility requires driving all three.
+> Two real bugs found in the sit-in (TAT-421): **(1) the auto-assigned evaluator is arbitrary, not the teaching instructor** — `pickEvaluatorUserId(traineeUserId)` takes no `courseId` and just `findOne`s the first active `INSTRUCTOR`-role user ≠ trainee (violates AC-01/02); **(2) `assessorSignatureKey` is stored as a plain string, never validated as an evidence file** (contrast Form 32's `assertValidEvidenceFileKey` — see [[Gotchas#Form 32 assessment Signature is a FILE key, not text]]). Privileged auto-approve here IS live (unlike Form 32's dead helper). See [[TAT-409 Ticket Groups & Inspection Map]].
+
+## History Form spec-vs-impl divergences: training-history approval + FE 2-year window (2026-07-05)
+
+> [!warning] Two mismatches between AC and code in the History Form training area
+> - **Training-history records require approval, but TAT-417 AC-17 says they must NOT.** `addTrainingHistory` creates non-privileged records as `PENDING_APPROVAL` with approve/reject endpoints and a required evidence file (`staff-history-training-record.service.ts`). They don't block *form* approval (AC-18 holds), but the workflow itself contradicts AC-17. The FE mirrors this (reviewer approve/reject built), so both sides diverge from the spec together.
+> - **The backend windows total training duration to the last 2 years; the FE sums everything.** `calculateTotalTrainingDurationHours` (`mandatory-training.util.ts`) filters `accomplishedDate >= now-2y`; the tat-prereq `HistoryFormView` `totalHours` sums all dated items regardless of age. So the FE "total" can overcount vs what the backend uses for eligibility. Also FE-only: **aircraft-quals in the History Form are count-only (no write API — triple-confirmed)**, there's **no "request course online" surface** and **no reviewer cert preview**, uploads reuse **TOR** `FileUploadCategory` (wrong folder — no history-form category), and **AD falls into the instructor branch** (no FE privileged auto-approve path). See [[TAT-409 Ticket Groups & Inspection Map]].
+
+## Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)
+
+> [!warning] The "PIC can fill/update any field, auto-approved" promise is dead code; and AD is a FE reviewer but not a backend one
+> AC-415-12 says SA/AD/QM/TM must be able to fill/update **any** Form 32 field with auto-approve. Reality in `staff-tor-form-32.service.ts`:
+> - `isPrivilegedForm32Editor`/`FORM_32_AUTO_APPROVE_ROLES` (= SA/AD/QM/TM) is **defined but never called** — dead code.
+> - `saveDraft`'s reviewer branch is gated on `isForm32Reviewer` (`FORM_32_REVIEWER_ROLES` = **TM/QM/SA only, no AD**) *and* only merges `dto.assessment` — a reviewer's edits to instructor **section** fields (`dto.sections`/name/date) are **silently dropped**. No per-field auto-approve exists.
+> - **AD mismatch:** `AD` has RBAC `SM_SAVE_FORM_32` (bootstrap `smForm32PrivilegedEditorActions`) and the FE `Form32Editor` `PIC_ROLES=['SA','AD','QM','TM']` renders AD the Save/Approve/Reject buttons — but backend `assertCan*InstructorSaReview` reject AD → **every AD action 403s**. FE affordance ≠ backend contract.
+> Same "verify write flows as the *actual* role" lesson as the [[Gotchas#History Form writes|History Form privileged-path]] gotcha. Contrast: Form 32's **notifications ARE wired** (submit→TM/QM/SA, reject→instructor via `notifications.service.ts`) — don't assume the whole subsystem's notification layer is unsent. See [[TAT-409 Ticket Groups & Inspection Map]].
+
+## `tor.aircraftTypeIds` is never populated — the keystone gap (2026-07-05)
+
+> [!danger] Nothing writes `tor.aircraftTypeIds`; it's created `[]` and `assertAircraftOnTor` (TAT-422) self-blocks
+> The only write is `[]` at TOR creation (`staff-tor.service.ts`). No endpoint/logic ever adds an aircraft type. TAT-422's `create` calls `assertAircraftOnTor` (reads `aircraftTypeIds`) → always fails on app-created TORs (only seed TORs work). TAT-422 IS the "add aircraft to TOR" mechanism (AC-01/03 "add a certificate"), so `assertAircraftOnTor` is the bug — it requires what it's meant to create. Fix: drop/relax `assertAircraftOnTor` + populate/derive `aircraftTypeIds` from approved quals. Awaiting BA confirmation of TAT-410 AC-02 ownership. See [[TAT-409 Ticket Groups & Inspection Map]].
