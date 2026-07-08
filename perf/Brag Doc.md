@@ -14,6 +14,7 @@ A running log of impact, wins, and growth. Each quarter is its own note — open
 
 | Quarter | Highlights | Review |
 |---------|-----------|--------|
+| [[Q3 2026]] | tat-prereq notification system (bell + real-time Socket.IO dot + detail page) & cross-repo deep-link routing fix (21 settings repointed to the staff host); staff-creation-blocking enum bug root-caused + fixed | — |
 | [[Q2 2026]] | TAT onboarding; TAT-409 History Form wired + verified (6 tickets, TAT Form 031 layout, 2 contract bugs); TAT-434 email-verify fix; TAT-428 certificates; tat-ws hydration/lint/bug cleanup | — |
 
 ## How This Works

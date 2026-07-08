@@ -9,6 +9,31 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## tat-prereq staff self-profile — stale mapper, dead per-user record endpoints, and an unmapped-enum crash (2026-07-08)
+
+Three distinct traps from the [[Staff Self-Service Polish - Nationality, Password, Profile Data]] batch on [[tat-prereq]], all only visible with a **real staging login** (offline fetchers return dummy data):
+
+- **A FE mapper written against a "thin" endpoint silently drops fields once the backend expands it.** `getMyStaffProfile` (`GET /staff-management/profiles/me`) was mapped when the endpoint returned identity + role only ("no personal fields yet"), so it hard-omitted nationality, national ID, DOB, gender, place of birth, and office location. Staging now returns the **full** record, but the stale mapper kept dropping them → every field rendered `—` on My Profile. The endpoint's *view* looked broken; the bug was the mapper. Lesson: a mapper is a contract snapshot — re-diff it against the live response whenever "the page shows blanks but the API has data." Same class as the [[Gotchas#FE hook built against a speculative endpoint the backend never shipped|speculative-endpoint]] gotcha, inverted (endpoint grew, mapper didn't).
+- **`/staff-management/qualifications` & `/assessments` (per-user, `?userId=`) do NOT exist — 404.** The profile panels were built against these speculative routes. The real data is **per-TOR** (`tors/:torId/aircraft-qualifications`, `tors/:torId/assessments`); there is **no per-user list route**. To show them on a profile you must **aggregate across the member's TORs** (`useStaffTors` → fan-out per TOR via `useQueries` → flatten; reuse the TOR-detail query keys so nothing double-fetches). Compounding it: the global React Query `retry: 1` **doubles** every 404 (a 4xx never recovers on retry), and dev StrictMode doubles again — so a dead endpoint shows up as a burst of 2–4 identical failing requests, not one. Set `retry: false` on known-missing/4xx-only queries, or aggregate the real endpoints.
+- **`STATUS[value].cls` crashes when the backend sends an enum value the local style map doesn't have.** A `Record<Enum, {label,cls}>` lookup returns `undefined` for any unmapped status/type, and `.cls` then throws (`Cannot read properties of undefined`) — it took down the whole Qualifications panel. Always go through a fallback (`STATUS[v] ?? { label: v, cls: NEUTRAL }`) so an unmapped backend enum degrades to a neutral badge instead of white-screening. The TS union gives false confidence — the backend enum can hold values the FE union doesn't.
+
+## `Object.assign(merged, mergeFn(current, …))` clobbers freshly-merged data with stale `current` (Form 32 PIC save, 2026-07-08)
+
+The [[TAT-409 Staff Management Subsystem|Form 32]] privileged (PIC) save did `Object.assign(merged, this.mergeAssessment(current, dto.assessment))` — but `mergeAssessment` returns `{ ...current, assessment }`, so the `Object.assign` **spread the entire stale `current` record over `merged`**, resetting the just-merged `name`/`date`/`sections` back to their pre-save (empty) values. It only bit a **first-time** PIC save (blank `current`) that also sent a **truthy** `assessment` — and the FE *always* sends `assessment: {}` (truthy), so every first PIC save failed. The backend then failed completeness validation with a **misleading** message: *"All Form 32 sections require a selected option and supporting evidence"* — pointing at sections when the real victim was the clobbered header/sections. Fix: assign only the merged piece — `merged.assessment = this.mergeAssessment(current, dto.assessment).assessment`.
+
+- **Two traps compounded it:** (1) a merge helper that returns the *whole* object (`{...current, x}`) is a landmine when the caller `Object.assign`s it onto an already-built object; return just the sub-object, or have the caller pick `.x`. (2) The same `form32SectionsIncomplete` error is thrown from **four** places (header validation, per-section validation, category, aircraft-type) — a shared error message hides *which* check failed.
+- **Debugging method that cracked it (staging, real token):** craft **discriminating** payloads to bisect which validation fires. Sending an evidence `fileKey` that passes the empty-check but fails the file-type check (`badkey.xyz`) returned `InvalidFileType` **only if** sections were received — proving `dto.sections` *was* delivered and the failure was upstream (header clobber), not a dropped DTO field. Also ruled out a class-validator `whitelist:true` strip by **reproducing the transform locally** with the repo's own `class-validator`/`class-transformer` — `@IsOptional()`-only does **not** strip a property (my first hypothesis was wrong; verify, don't assume).
+- Sibling fix same session: **PIC couldn't *create* a Form 32 (401)** — the `@Action(SM_CREATE_FORM_32)` controller guard rejects before any service code, and `SM_CREATE_FORM_32` was only in the **instructor** role→action seed bucket, not the PIC (`smForm32PrivilegedEditorActions`) bucket. Guarded-endpoint permission lives in the **seed**, not a service-level role check — and needs a re-seed to apply (see the "Booting [[tat-app-ws Backend]] against a shared DB re-runs ALL seeders" gotcha above for the re-seed caveat).
+
+## Booting [[tat-app-ws Backend]] against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)
+
+`BootstrapService.onModuleInit()` runs the full seeder chain on **every** app start (`nx serve api`, or any deploy). It is **not** a safe way to trigger one seeder against a shared DB. `seedRoleActions` calls **`editRoleActions`, which REPLACES a role's entire action set** with the hard-coded local `roleActionsMap` — so booting a **local branch** against the **shared dev cluster** overwrites every role's permissions with the local definitions. If local ≠ deployed, this **regresses permissions for everyone on that dev DB** (observed: instructor `/details` went 200→403 after a local `nx serve` pointed at dev).
+
+- **Confirmed 2026-07-07** while running a one-off `instanceKey` backfill via the app (see [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] neighbourhood / Form 285 work). The backfill itself worked (`/form-285` 404→403), but the collateral role-action overwrite did not.
+- **Self-healing:** redeploy/restart staging (or run the *deployed* branch) → bootstrap re-seeds role-actions to the deployed truth.
+- **Rule:** never boot the app against shared dev/prod to run a single data fix. Use a **standalone script** with the DB driver (needs the current `MONGO_URI` — the local `.env` dev URI is stale/NXDOMAIN; grab the live one from AWS ECS task def / Bitbucket vars / Atlas). Or gate the fix so only it runs.
+- Related: the local `.env` `MONGO_URI` (`tat-dev.cqtcwb3…`) is **dead**; the live dev cluster is `tat-development.oemqsva…`. `.env` values also have stray **trailing commas** (`redis,`, `tat147-dev,`) that break Redis/host lookups. See [[Patterns#Propose before implementing — don't jump to code (Qusai, 2026-07-07)]].
+
 ## History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)
 
 The [[TAT-409 Staff Management Subsystem|History Form]] (TAT-417/418/419) backend branches on `isPrivileged` (SA/AD/QM/TM), and the difference is invisible until you test as a **real instructor** — the SA path masks every one of these:
@@ -102,12 +127,20 @@ tat-ws's "Exam Answers" preview was wired to `GET /online-courses/{id}/trainees/
 
 Alternative fix (not taken): bump `@nx/eslint-plugin` to a version where the autofix bug is gone. Context: [[TAT-428 Edit Issued Certificates]], [[TAT Certificates - Open Items]].
 
-## Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05)
+## Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)
 
 > [!danger] `enum: SomeEnum` + `default: null` where the enum has no null → validation error on every create
-> Mongoose runs enum validation on the **explicit `null` default**, and since `null` isn't in `Object.values(enum)` it throws `"… is not a valid enum value for path …"` — even though nothing set the field. This **blocked all aircraft-qualification creates** (`StaffQualification.refresherUpdateSource`). Same latent pattern on `StaffTorForm.workflowStage`.
+> Mongoose runs enum validation on the **explicit `null` default**, and since `null` isn't in `Object.values(enum)` it throws `"… is not a valid enum value for path …"` — even though nothing set the field. **A recurring anti-pattern in `tat-app-ws` schemas — 4 instances found so far.**
 >
-> Fix: `enum: [...Object.values(SomeEnum), null]` (purely additive — can't break valid values). A local fix was applied to `tat-app-ws` `staff-qualification.schema.ts` + `staff-tor-form.schema.ts` then **reverted** — so the bug is **still OPEN** for the backend team (Hamza). Surfaced via [[TAT-409 Ticket Groups & Inspection Map|TAT-422 testing]].
+> **Two fixes, both valid:** (a) additive — `enum: [...Object.values(SomeEnum), null]` (keeps a null value legal); (b) **remove `default: null`** — the path stays `undefined` on create and enum validation skips undefined (cleaner when the field should be unset until later). Pick remove-default when nothing should ever set the field at create time; additive when a stored `null` is meaningful.
+>
+> **Instance log:**
+> - `StaffQualification.refresherUpdateSource` — blocked all aircraft-qualification creates. Surfaced via [[TAT-409 Ticket Groups & Inspection Map|TAT-422 testing]] (2026-07-05). **Fixed** (additive) — `staff-qualification.schema.ts:125`.
+> - `StaffTorForm.workflowStage` — same latent pattern. **Fixed** (additive) — `staff-tor-form.schema.ts:77`. *(Both were fixed-then-reverted on 2026-07-05; the additive fix is back in the current `dev`.)*
+> - `User.qualificationTrackingMode` — **top-level field → blocked ALL staff creation** (every role, both [[tat-prereq]] and the backoffice). **Fixed** (remove-default) — `user.schema.ts`, commit `dc8f3a4f`, pushed to `dev` 2026-07-07. See [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]].
+> - `Auditor.type` — latent twin (dormant until an auditor sub-doc is created). **Fixed** (remove-default) in the same commit.
+>
+> A lint rule / schema sweep for `enum:` + `default: null` would catch the next one before it ships.
 
 ## tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)
 

@@ -21,9 +21,13 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
 ## Active Projects
 
 - [[TAT-409 Staff Management Subsystem]] — **new** internal subsystem (instructors + TORs) on an SSO subdomain; 21-ticket epic. Domain: [[Staff Management Subsystem & TOR Model]]. **History Form slice (417/418/419/420/421/429) wired to the real backend + verified across roles, rendered as the single-document TAT Form 031 (2026-06-28).**
-  - [[TAT-432 Staff Profile]] — profile view done; Add/Edit forms next
+  - [[TAT-432 Staff Profile]] — profile view + Add/Edit forms done
+  - [[Staff Self-Service Polish - Nationality, Password, Profile Data]] — QA batch: nationality dropdown, national-ID validation, self-service change-password, `profiles/me` full-mapping fix, per-TOR quals/assessments aggregation, DOB format, Form 285 title dropdown, Manage Staff eye icon; shipped `dev` (`c267616`/`4a17423`/`af17500`, 2026-07-08)
+  - [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] — backend `enum + default:null` on `User.qualificationTrackingMode` blocked ALL staff creation on staging; fixed + pushed (`dc8f3a4f`), awaiting deploy re-verify (2026-07-07)
+  - [[Form 32 PIC Bugs & Cross-Frontend Auth Fixes]] — Form 32 PIC save clobber (`0969d044`) + create-401 seed gap, signature-draw reuse, and a cross-repo auth bundle (reset endpoint, login min, `x-client-app` routing); all pushed to `dev` (2026-07-08)
   - [[TAT-409 Backend Open Items]] — backend bugs/gaps blocking the FE, found in the TAT-410→435 ticket sweep (endpoint-level handoff)
   - [[TAT-409 Instructor TOR View - API Spec]] — field spec for `GET /tors/:id` so instructors can open their own TOR
+  - [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]] — tat-prereq navbar bell + real-time flashing dot (Socket.IO) + notification detail page; backend repoints prereq notifications to the staff-management host (`STAFF_MANAGEMENT_URL`) + non-destructive migration (2026-07-08)
 - [[TAT Portal Onboarding]] — getting productive on [[tat-portal]] (the [[TAT Platform]] storefront)
 - [[Online-Course Exam Timeout - Backend Bug]] — [[tat-portal]] exam-timer fix shipped (`f858fb8`); backend handoff to score saved answers on timeout instead of forfeiting
 - [[TAT-436 Refresher Certificate Publish]] — tat-ws: SA-only publish for refresher/TOR certs (hidden from trainee until published). Backend shipped (`cb267288`); FE wired — Unpublished indicator + Publish button on Manage Trainees. Pending staging verification

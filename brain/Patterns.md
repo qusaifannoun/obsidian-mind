@@ -9,6 +9,24 @@ tags:
 
 Recurring patterns discovered across work.
 
+## No comments or ticket numbers in code (all TAT repos)
+
+Hard rule (Qusai, 2026-07-07): **do not leave comments in any code file I write or touch — and never write ticket/task numbers (e.g. `// TAT-409`) into the code.** Qusai's feedback: it leaves too many comments and task numbers behind, which makes the code look bad. Write self-explanatory code (clear names) instead of explanatory comments.
+
+- Applies to every repo: [[tat-app-ws Backend]], [[tat-ws]], [[tat-prereq]], [[tat-portal]], [[tat-website]].
+- Covers new code **and** files I edit — don't add comments while I'm in there. (Don't strip *pre-existing* comments unless asked; the rule is about what *I* add.)
+- Ticket numbers live in commit messages / the vault work notes, **not** in source.
+- Only exception: Qusai explicitly asks for a comment in a specific spot.
+- **Re-emphasized 2026-07-08** (raised again, firmly) after I shipped the notification-system code full of explanatory comments. Default to **zero comments** from the first line — don't write them and then strip later. Self-documenting code only.
+
+## Propose before implementing — don't jump to code (Qusai, 2026-07-07)
+
+When Qusai asks *"what can we do"*, *"what is the fix"*, *"can we…"*, or otherwise asks about **options/approach**, that is a **discussion**, not a go-ahead. **Do not edit files until he explicitly says to implement.** He'll say "fix it", "do it", "go ahead", or similar. Present the options, recommend one, and **wait**.
+
+- Bitten twice on 2026-07-07: implemented the Form 285 comment cleanup and later started editing `bootstrap.service.ts` for the `instanceKey` backfill before being asked — both times he interrupted.
+- Applies across repos ([[tat-app-ws Backend]], [[tat-prereq]], et al.). Investigating/reading is fine; **writing** needs a green light.
+- Pairs with [[Patterns#No comments or ticket numbers in code (all TAT repos)]] — both are about respecting his control over what lands in the code.
+
 ## Git workflow — commit straight to `main` (TAT repos)
 
 Qusai is the **sole developer** on the TAT repos ([[tat-prereq]] et al.), so the workflow is **commit directly to `main`** — no feature branches, no PRs (confirmed 2026-06-18). When work is done on a throwaway branch, fast-forward `main` to it and delete the branch. Don't push unless asked; he pushes on his own cadence. Still end commit messages with the `Co-Authored-By` trailer.
@@ -66,6 +84,14 @@ API (import from `@tat-ws/components/Table`): `<Table<T> data columns pagination
 
 Scope: this is the **tat-ws** component. [[tat-prereq]] keeps its own separate table convention (plain Tailwind + `RowActionsMenu` — see "## Tables" and "## Table row actions = kebab menu only" above). Don't cross-apply; each repo uses its own table primitive.
 
+## tat-portal: paginate via the shared URL-driven `CoursePagination`
+
+Standing pattern in [[tat-portal]]: list/grid pages paginate through the shared **`CoursePagination`** component (`src/components/courses/CoursePagination.tsx`) plus the constants in `src/components/courses/pagination.ts` (`DEFAULT_PAGE_SIZE = 9`, `PAGE_SIZE_OPTIONS = [9, 18, 27, …90]`). Don't hand-roll page controls — reuse these across pages.
+
+How it works: pagination state lives in the **URL** (`?page=` / `?pageSize=`), so it survives refresh and back/forward. The component owns the nav + a "per page" `<select>` and writes the params via `router.push`; the page reads them back and drives a **server-side** fetch (`skip = (page-1)*pageSize`, `limit = pageSize`) against an endpoint that returns `{ data, total }`. Feed `<CoursePagination total={total} page={page} pageSize={pageSize} />` below the grid. Changing page size resets to page 1 automatically (handled inside the component).
+
+Two consumers so far: the public catalog `/courses` (server component — reads `searchParams` prop) and `/my-courses` (client component — reads `useSearchParams()`, so its content must sit inside a `<Suspense>` boundary; uses React Query with `placeholderData: keepPreviousData` so paging doesn't flash skeletons). Both share the same component + constants. Note the out-of-range guard is intentionally absent — a `?page=` past the last page shows an empty grid rather than clamping, matching both pages. Distinct from the [[tat-ws]] `Table`/`TablePagination` convention above — each repo has its own pagination primitive; don't cross-apply.
+
 ## File uploads: always pass a `FileUploadCategory` (tat-ws)
 
 Standing rule (Qusai, 2026-06-28): every file upload (`POST /file/upload-file` via `usePostFile` or the RHF file inputs) **must send a `category`** from `FileUploadCategory`, chosen to match the content — the backend routes the file to the matching S3 prefix by category. Never upload without a category or with a mismatched one.
@@ -102,3 +128,16 @@ General rule: **mutation cache invalidation is a cross-entity concern — centra
 ## Radial layouts = data array + polar math, not hand-tuned offsets (tat-website)
 
 [[tat-website]]'s home-page client "orbit" originally placed ~20 logos with individual `top/left/right/bottom` pixel offsets and inconsistent box sizes — logos drifted off the orbit lines and every addition meant guessing another offset. Fixed (2026-06-10, see [[TAT-440 Client Logos & Safran]]) by driving each ring from a `{ src, alt }[]` array and an `orbitStyle(radius, index, count)` helper: `angle = 360/count × index − 90`, translate to `(r·cosθ, r·sinθ)` from center. Logos land exactly on a fixed radius, evenly spaced, in a uniform `object-contain` box (consistent size, aspect preserved). Adding one logo = one array entry; spacing rebalances automatically. General rule: **any "elements arranged on a circle/arc" UI should be array-driven with trig, never enumerated offsets.**
+
+## Notifications: one action → target the right frontend by env-driven base URL (tat-app-ws)
+
+The TAT backend serves several frontends (admin **dashboard** [[tat-ws]], **online-courses** [[tat-portal]], **staff-management** [[tat-prereq]]). Notification deep-links are stored as relative paths in `seed_data/notification-settings.json` and the base host is resolved by `CommonService.resolveClientBaseUrl(context)` — so the *same* notification pipeline can point links at different apps. Pattern (2026-07-08, see [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]]):
+
+- **Add a client = add an env URL + a `resolveClientBaseUrl` branch.** New `staffManagementUrl` from `STAFF_MANAGEMENT_URL` (staging `staging.staff.tat147.com`, prod `staff.tat147.com`); the branch keys off `FrontendUrlContext.clientApp === 'staff-management'`. Env value carries the staging↔prod switch, exactly like `DASHBOARD_URL`. **Dashboard is the default** — untagged notifications don't move.
+- **Mark only the settings you want to move.** Each seed parameter can carry `client: "staff-management"`; `bootstrap.service.ts` threads it into `generateNotificationUrl` so the base is **baked into the stored URL at seed time** (not at send time). So changing a link's target = seed edit, not code.
+- **Deep-linking needs the id in `templateValues`.** A link like `.../tor/{{torId}}/form-285` only resolves if the notify function forwards `torId`. The form responses already carried `torId`/`userId` via `toDTO`, so it was just adding them to `templateValues` — check the response shape before assuming a placeholder is populated.
+- **Re-seed is destructive + skips existing settings** (see [[Gotchas]]) — so URL changes to already-seeded envs need a **non-destructive migration** (`$set parameters` by setting `name`), not a reboot. Keep the seed JSON the single source of truth and have the migration bake from it.
+
+Frontend side: the backend pushes new notifications over **Socket.IO** (`emit("notification", ...)`, room = user `_id`, auth via `handshake.auth.Authorization` Bearer). Consume by connecting to the API **origin** (strip the `/api` REST prefix), then invalidate the inbox query + flash the bell on each event.
+
+**Same mechanism drives auth links (reset-password / verify-email), but the per-client branch list is DUPLICATED per resolver (2026-07-08).** The client is detected from the **`x-client-app` request header** — every FE sets it (`tat-prereq` → `staff-management`, `tat-portal` → `online-courses`; `tat-ws`/website send nothing → default dashboard). But `CommonService` has a **separate resolver per link type** — `resolveClientBaseUrl`, `resolveResetPasswordUrl`, `resolveVerifyEmailUrl`, `resolveLoginUrl` — each with its **own** branch list. `resolveClientBaseUrl` handled `staff-management`, but `resolveResetPasswordUrl` only branched on `online-courses`, so staff forgot-password links fell through to the **dashboard** URL. Fix = add the `clientApp === 'staff-management'` branch to `resolveResetPasswordUrl` too (derives `${staffManagementUrl}/reset-password`). **Rule: adding/fixing a client means auditing ALL the resolvers, not just `resolveClientBaseUrl`.** Related auth fixes same day: reset-password FE calls **`PATCH /auth/reset-password/:token`** with `{ password }` (not `POST /auth/reset-password` → "Cannot POST"); the reset page's Email field was dead UI (token identifies the user); and **login forms must not enforce password strength/length** (`min(1)`, not `min(8)`) — that belongs on creation/reset, else admin-issued/legacy short passwords can't sign in.
