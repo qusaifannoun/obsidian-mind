@@ -9,6 +9,22 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## `autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)
+
+> [!danger] `E11000 duplicate key ... index: enrollmentId_1 dup key: { enrollmentId: null }` — on a field that no longer exists in the schema
+> [[tat-app-ws Backend]] connects with `autoIndex: true` (`database.module.ts:232`). Mongoose **creates** every index the schema declares and **never drops** ones it no longer declares. So when `cd30796b` (TAT-429, 2026-06-26) renamed `StaffSitIn.enrollmentId` → `periodEnrollmentId`, the old `enrollmentId_1` index — **`unique: true` with no `sparse`** — stayed alive in `staffsitins`.
+>
+> **Why it detonates on the *second* insert, not the first.** A non-sparse index still indexes documents where the field is *missing*, storing them under `null`. No code writes `enrollmentId` anymore, so doc #1 indexed as `null` fine; doc #2 collided with it. Any smoke test that created a single sit-in passed. Every `sitInModel.create()` on staging had been broken for two weeks before anyone hit it.
+>
+> **Rules:**
+> - Renaming or removing an **indexed** field needs a **migration that drops the old index**. `autoIndex` will not do it, and a redeploy will not do it.
+> - A `unique` index without `sparse` on an optional field is a bug waiting for the second document. If the new field is `default: null`, it **must** be `sparse` (the rename got this right — the leftover was the problem).
+> - Suspect a stale index whenever E11000 names a field that isn't in the current schema. Check with `db.<coll>.getIndexes()`, not the schema file.
+>
+> **Second-order damage: self-concealing orphans.** `addCourseInstructor` created the `Enrollment`, *then* the sit-in, with no transaction or rollback. Each failed attempt left an orphan enrollment behind. `getEligibleCourseInstructors` filters out anyone already enrolled — so the affected instructor silently **vanished from the eligible-instructors dropdown**, and a retry returned a misleading `400 "Instructor is not eligible"` instead of the real error. A half-completed write that makes its own victim invisible generates no bug report. **When two writes must both land, either transact them or compensate on failure — Atlas is a replica set, so transactions are available.**
+>
+> Fix: `scripts/migrations/2026-07-10-drop-stale-sitin-indexes.js` (drops stale indexes, soft-deletes orphans) + rollback & check-reorder in `enrollment.service.ts`. Context: [[Stale Sit-In Index & Orphaned Instructor Enrollments]].
+
 ## Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)
 
 > [!danger] Setting `STAFF_MANAGEMENT_URL` after the first seed never took effect — staff-management notification links kept pointing at the dashboard host
@@ -55,7 +71,8 @@ The [[TAT-409 Staff Management Subsystem|Form 32]] privileged (PIC) save did `Ob
 - **Confirmed 2026-07-07** while running a one-off `instanceKey` backfill via the app (see [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] neighbourhood / Form 285 work). The backfill itself worked (`/form-285` 404→403), but the collateral role-action overwrite did not.
 - **Self-healing:** redeploy/restart staging (or run the *deployed* branch) → bootstrap re-seeds role-actions to the deployed truth.
 - **Rule:** never boot the app against shared dev/prod to run a single data fix. Use a **standalone script** with the DB driver (needs the current `MONGO_URI` — the local `.env` dev URI is stale/NXDOMAIN; grab the live one from AWS ECS task def / Bitbucket vars / Atlas). Or gate the fix so only it runs.
-- Related: the local `.env` `MONGO_URI` (`tat-dev.cqtcwb3…`) is **dead**; the live dev cluster is `tat-development.oemqsva…`. `.env` values also have stray **trailing commas** (`redis,`, `tat147-dev,`) that break Redis/host lookups. See [[Patterns#Propose before implementing — don't jump to code (Qusai, 2026-07-07)]].
+- Related: `.env` values have stray **trailing commas** (`redis,`, `tat147-dev,`) that break Redis/host lookups. See [[Patterns#Propose before implementing — don't jump to code (Qusai, 2026-07-07)]].
+- **Updated 2026-07-10:** the local `.env` `MONGO_URI` now points at the live cluster (`…oemqsva…`, db `tat-dev`), not the dead `cqtcwb3` host — that part of this gotcha is stale. It still won't connect from a laptop: **Atlas IP allowlist** rejects un-whitelisted IPs (`MongooseServerSelectionError: ReplicaSetNoPrimary`). Whitelist your IP or run migrations from a host that's already allowed.
 
 ## History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)
 
