@@ -80,7 +80,7 @@ Consolidated output of the full [[TAT-409 Ticket Groups & Inspection Map|group-b
 | L3 | 420 (content) | The 7 protected refresher courses are seeded + undeletable but **content is placeholder** (`hasExam:false`); seeding **skips on a fresh DB with zero users**. | `tat-app-ws` | `mandatory-refresher-online-course.service.ts:66-84,32-39`. Content-population task. |
 | L4 | 433 AC-11 | Matrix auto-update is **refetch-only** (react-query remount/refocus) — no realtime/event-driven invalidation. | `tat-prereq` | `useTor.ts:17-21`. |
 | L5 | 433 AC-04 | Matrix cards show **blank email/phone** (card DTO omits them); search works server-side. | `tat-prereq` (+ backend DTO) | `adapters.ts:66-67`. |
-| L6 | 423 AC-11 | Assessment submit → `PENDING_TM_REVIEW`, a status the ACs don't name (they only define Draft/Approved). | `tat-app-ws` | Naming divergence only. |
+| L6 | 423 AC-11 | Assessment submit → `PENDING_TM_REVIEW`, a status the ACs don't name (they only define Draft/Approved). | `tat-app-ws` | ✅ **Resolved 2026-07-08 — BA confirmed** the implemented flow (submission → review status) is intended; AC-11's "Draft" wording is loose spec language. No change needed. |
 | L7 | 421 AC-14 · 423 AC-20 | **Audit coverage gaps** — notification dispatch + TOR-recalc + the History-Form APPROVED transition aren't all persisted as audit entries. | `tat-app-ws` | `staff-sit-in.service.ts`, `staff-assessment.service.ts`. |
 | L8 | 421 AC-04 · 429 | Sit-in notification carries **no direct link** to the sit-in form (only trainee name + course title). | `tat-app-ws` | `notifications.service.ts:3986-3990`. |
 | L9 | 411 AC-03 | No manual QM **suspend/revoke** of a TOR (status is auto-computed only). | `tat-app-ws` | From group-1 inspection. |
