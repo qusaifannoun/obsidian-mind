@@ -9,6 +9,27 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## `StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)
+
+> [!danger] `completeFinalAssessment` sets `status = APPROVED` **and** `active = false` together. Any read that filters `active: true` loses the record the instant the cycle succeeds.
+> Three separate read paths made this mistake. **I wrote one of them myself, hours after diagnosing the other two.**
+>
+> - `getSitInForTrainee` queried `{ userId, active: true }` → threw `sitInNotFound`. The FE treats 404 as "no sit-in yet", so the History Form rendered an **empty section** right after a successful approval — signature, assessments, assessor name all intact in the DB, just unreachable. (Fixed `0bab2340`.)
+> - `getCourseInstructors` (the new Instructors tab) joined sit-ins on `active: true` → a completed instructor rendered as **"No sit-in" / "Unassigned"**. (Fixed `0c1f1cbb`.)
+>
+> **The correct predicate for a read is `active OR status === APPROVED`** — that also excludes a *moved-away* sit-in (`active: false`, non-approved), which should stay hidden. `active: true` alone is correct **only** where "in progress" is genuinely the question: the eligible-instructor list (which separately queries completed ones), the move pre-check, the evaluator worklist, and the `otherActiveSitIns` guard.
+>
+> **The general trap: a boolean that flips as a side effect of success.** Every reader reaches for it as an existence check, and the bug only appears on the happy path — so it survives every test that stops short of completion. Prefer deriving "in progress" from `status` over a denormalised flag; failing that, never let a read filter on it.
+>
+> Meta-lesson: I fixed this in one service and then reproduced it in a new endpoint I wrote the same day, because I'd written that endpoint *before* understanding the field. **After learning a field's semantics, grep every existing use — including your own uncommitted code.** See [[TAT-429 Sit-In Eligibility & Move Semantics]].
+
+## Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)
+
+> [!warning] Fixing a deadlock doesn't reveal one bug — it reveals every bug downstream of it, all at once
+> The sit-in cycle had **never once run end to end** (the [[Gotchas#Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)|circular TOR dependency]] made it impossible). Within an hour of unblocking it, driving the flow for real surfaced: the completed sit-in 404'ing, the instructors list showing "No sit-in", `SIT_IN_CREATED` recording the **instructor** as the actor instead of the SA/TM who clicked Add Instructor (an audit trail that lies is worse than one that's missing), and `sit_in_moved` rendering as a raw enum string.
+>
+> None were regressions — all were **pre-existing and unreachable**, sitting behind the deadlock since TAT-421 shipped. Same shape as the [[Gotchas#`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)|stale sit-in index]]: code that has never been exercised is not "working", it's **untested**, and it will fail in a cluster the moment someone reaches it. **When you unblock a dead path, budget for the bugs behind it rather than treating the unblock as done.**
+
 ## `autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)
 
 > [!danger] `E11000 duplicate key ... index: enrollmentId_1 dup key: { enrollmentId: null }` — on a field that no longer exists in the schema
