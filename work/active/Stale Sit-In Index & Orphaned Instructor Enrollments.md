@@ -41,10 +41,11 @@ Chose a compensating rollback over a real transaction: `createForPeriodCourseEnr
 ## Status
 
 - [x] Migration script written
-- [x] Service rollback + check reorder — `nx run api:build` and `tsc --noEmit` clean
-- [ ] **Run migration against staging** — blocked: Atlas IP allowlist rejects this laptop (`ReplicaSetNoPrimary`). Needs a whitelisted IP or a bastion/ECS host.
-- [ ] Re-verify the original curl (instructor `6a4d245e…`, course `6a50caf9…`) returns 200
-- [ ] **Check production for the same stale index** before it bites there
+- [x] Service rollback + check reorder — `nx run api:build` and `tsc --noEmit` clean. Committed `dev` `30610307`
+- [x] **Migration run against staging (2026-07-11)** — dropped `enrollmentId_1` + `userId_1_courseCode_1_active_1`; soft-deleted **2 orphan enrollments** ("Tor Instructor Dev → Test Course", "Qusai Fannoun → Test Course 2"). Post-apply dry run confirms 0 stale indexes / 0 orphans. (The earlier Atlas `ReplicaSetNoPrimary` was an IP-allowlist rejection surfacing as a TLS `internal error` alert, not a connectivity or cert problem — resolved once the egress IP `188.123.164.132` was whitelisted.)
+- [x] Handoff explainer written + **sent to team by email** (2026-07-11); the repo README copy was removed
+- [ ] Re-verify the original request (instructor `6a4d245e…`, course `6a50caf9…`) returns 200. Note: neither cleaned-up orphan was that exact instructor/course pair, so if it still 400s it's a *genuine* eligibility reason (no history form / TOR ineligibility / active schedule), not this bug
+- [ ] **Check production for the same stale index** before it bites there — same rename, same `autoIndex` behavior, so prod will fail identically on its second sit-in insert
 - [ ] Consider deleting the now-always-`false` `alreadyInstructorEnrolled` DTO field (`enrollment.service.ts:1312`) — enrolled instructors are filtered out entirely, so it can never be true
 
 ## Related
