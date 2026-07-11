@@ -70,6 +70,35 @@ Uploaded **once**, **synced across all three TORs** for the instructor. Required
 
 **TOR is the single source of truth for instructor assignment eligibility.** Existing license/role/document/course/aircraft checks become *inputs into* TOR status, not separate rules. An instructor is assignable only with a **matching-license TOR in `Active`** plus a valid requested qualification matching the required **aircraft type and/or role**. Draft/Paused instructors are **hidden entirely** from assignment lists — **no override** for any role. Applies to course/examiner/assessor/assessment/aircraft assignment, single and bulk. Related: [[TAT-429]] adds instructors to the course enrollment list (feeds the History Form Sit-In flow in [[TAT-421]]).
 
+> [!important] TAT-424 governs **qualification**, not **pre-qualification** — the sit-in path is exempt
+> Applying the Active-TOR rule to [[TAT-429]]'s Add Instructor list is **circular** and was fixed on 2026-07-12 (see [[TAT-429 Sit-In Eligibility & Move Semantics]]). "Can this person *teach*?" is a TAT-424 question. "Can this person *sit in to learn*, so they can one day teach?" is not — the candidate has no TOR yet by definition. **Gate the qualification flows on TOR; never gate the bootstrap flow on it.**
+
+## The sit-in — how a new instructor is onboarded `TAT-429` → `TAT-421`
+
+The **sit-in is the entry point of the whole subsystem**, and it's easy to misread as an assignment. It isn't.
+
+A sit-in enrolls a new instructor into a live course **as a student**, sitting with the trainees, to learn from the instructor actually teaching it. That teaching instructor is the **evaluator** (`pickEvaluatorUserId` picks from the course's schedule instructors). They confirm attendance; the TM does the final assessment.
+
+The bootstrap chain, in order:
+
+```
+Add Instructor (TAT-429)  →  INSTRUCTOR enrollment + StaffSitIn created
+   ↓
+Evaluator submits (the course's teaching instructor)   → PENDING_TM_REVIEW
+   ↓
+TM final assessment (TAT-421)                          → sit-in APPROVED
+   ↓
+History Form → APPROVED   (capstone; also needs basic-info approved + mandatory training valid)
+   ↓
+TOR → ACTIVE  (staff-tor-sync.processor)
+   ↓
+NOW eligible to teach / examine — TAT-424 applies from here on
+```
+
+`addCourseInstructor` is the **only** code path in the repo that creates a `StaffSitIn`. Everything downstream — History Form approval, TOR activation, teaching eligibility — is gated behind it.
+
+**Who appears in the Add Instructor list** (`getEligibleCourseInstructors`, post-fix): role `INSTRUCTOR` + `staffStatus: ACTIVE`, has a History Form (it's auto-created with the TOR, so this means "is in the staff pipeline"), is not already enrolled on or scheduled for the course, and either has an active sit-in or has never completed one. **No TOR condition.** Adding someone who already has an active sit-in **moves** them off their old course.
+
 ## The pages (frontend) `TAT-431`–`TAT-435`
 
 | Page | Who | Purpose |
