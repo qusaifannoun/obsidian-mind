@@ -83,9 +83,46 @@ Built by two parallel platform agents against the contract above, then FE-integr
 - **Clear-vs-unset on partial save** — FE omits empty `task`/`reference`/`assessorComments` rather than sending `""`, so blanking a previously-saved value isn't persisted. Follow-up if explicit clears are needed.
 - **Live E2E pending** — needs the backend deployed to `dev` + a real session to drive assign → fill rubric → submit (completeness) → approve.
 
-## Open question (flagged to BA)
+## The assessor lands — both open questions answered (2026-07-12)
 
-On the paper form the **Assessor** (a distinct person) fills the rubric + first signature, evaluating the instructor. Our model calls that block `instructorSection` and AC-06/07 has the instructor self-filling. Confirm who authoritatively fills the rubric/first signature before finalizing the schema's naming. Schema is role-agnostic (rubric is just data on the assessment), so this does not block the build — only naming/labels.
+The two questions this note flagged to the BA on 2026-07-09 came back, and the answers reshaped the model. Grilled out via `/grill-me`; shipped across `f336c3f1`→`4f541a86` ([[tat-app-ws Backend]]) and `cd829f2`→`85ebc1c` ([[tat-prereq]]).
+
+> [!danger] The instructor could grade and sign their own assessment
+> `assertCanEditReport` permitted the **TOR owner** — the person *being assessed* — to edit `report`: their own scores, rating, and comments. The paper form has **no signature box for the assessed instructor**; its two signers are the **Assessor** and the **Training Manager**. There was no assessor concept in the code at all. **Answer: `instructorSection` means the *assigned* instructor — and the assessor IS the assigned instructor.** No rename needed; the field was never populated by the right person.
+
+**Assessor assignment.** `assessorUserId`, **optional** at creation. Optional is load-bearing, not laziness: an eligible assessor needs an **ACTIVE TOR**, but a TOR only activates once its assessments are approved — so the *first* assessor for any aircraft cannot exist. Privileged users fill it in instead. **Same circular-dependency shape as [[TAT-429 Sit-In Eligibility & Move Semantics|the sit-in deadlock]] — caught in design this time, not in production.**
+
+**Eligible assessors** (`GET tors/:torId/assessments/eligible-assessors?aircraftTypeId=`): an active TOR on the **same licence** + an **APPROVED `StaffQualification`** for that aircraft type, **B1/B2 category ignored**, assessee excluded. Reads `StaffQualification` directly rather than `buildStaffTorEligibilityFilter`. Privileged users always appear, so the list is never empty.
+
+**Permissions — filling ≠ approving.** My first pass read "SA/AD/TM/QM can fill the form completely" as including approval and widened the approve roles to all four, which let **QM and AD self-approve**. Corrected:
+
+| Actor | Fill every section | Submit | Approve |
+|---|---|---|---|
+| Assessed instructor | ✗ (video only) | ✗ | ✗ |
+| Assigned assessor | ✓ | → TM review | ✗ |
+| **QM / AD** | ✓ | **→ TM review** | ✗ |
+| **SA / TM** | ✓ | **auto-approved** | ✓ |
+
+`STAFF_ASSESSMENT_TM_ROLES` → **`STAFF_ASSESSMENT_APPROVER_ROLES` = [SA, TM]** — renamed because the set now contains SA, and a constant called `TM_ROLES` holding a non-TM is [[Gotchas#`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)|the name-that-lies trap]] again. Auto-approve keys off `isApprover`, not `isPrivilegedEditor` — **that was the actual bug**. The guard against auto-approving an assessment you were *assigned to carry out* is kept, so a TM acting as assessor submits then approves as a separate audited act.
+
+**RBAC didn't match the intent either**: `SM_ASSIGN_ASSESSMENT` was SA+TM only, **AD and QM had no assessment actions at all**, and even SA lacked approve. Now: all four assign; only SA + TM approve.
+
+## Three bugs found by building it
+
+1. **The TAT ID was the Mongo ObjectId.** This note predicted it ("backend emits `String(userId)` as a placeholder") — and the FE rendered it **read-only**: `<ReadOnly label="TAT ID" value={assessment.tatId ?? assessment.userId} />`. **Answer: it's typed per-form, not derived.** Name / TAT ID / Date are now real inputs; the form had no header row at all. Assessment type became a dropdown.
+2. **Video upload was broken for every file, always** (`f336c3f1`). The FE sends `file.type` — a **MIME type** (`video/mp4`) — and the backend compared it against bare **extensions** (`mp4`). Nothing could ever match; every upload 400'd `staffAssessmentInvalidVideoType`. Now validates the uploaded **fileKey's extension** (the backend rewrites extensions on upload — [[Gotchas]]'s own rule), across a broad set incl. `mkv`/`avi`/`3gp`. Both the assessee and the assessor may upload.
+3. **Assessment create 500'd on every attempt** (`c59680b7`) — `enum + default: null` on `report.overallRating`. See [[Gotchas#Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)]].
+
+**Also:** `assessorComments` deleted — on the paper form "COMMENTS BY THE ASSESSOR" **is** the rating scale (Excellent/Good/Average/Needs Development), not a free-text box. The enum values already matched 1–4; only the label was wrong. And signatures now use the shared **`SignatureInput`** (draw *or* upload), the same component Form 285 and Form 32 use — the assessment form had its own upload-only duplicate.
+
+**`/my-assessments`** — the assessor's queue, mirroring `/sit-ins`. An assigned assessor previously had no way to find their work.
+
+## Open
+
+- [ ] **None of this has been exercised.** Every feature touched this week had latent bugs the moment it was first actually driven ([[Gotchas#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]). Expect the same.
+- [ ] The **destructive role-action seeder** re-seeds AD/QM on deploy (their action sets changed). Correct here — but do not run this branch locally against the shared dev DB.
+- [ ] Confirm the assessor-assigned notification actually seeds (all three edits were made: settings, template, **and** the bootstrap mapping).
+- [ ] Clear-vs-unset on partial save (carried over, still open).
 
 ## Related
 - [[TAT-409 Staff Management Subsystem]] — parent epic

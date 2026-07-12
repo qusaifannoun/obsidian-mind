@@ -86,7 +86,7 @@ The status column is the real value: the onboarding progression was previously *
 ## What is NOT fixed (deliberately out of scope)
 
 - **Teaching/examining assignment keeps the TAT-424 rule.** `course.service.ts`, `schedule.service.ts`, and the instructor pickers are untouched — 424 is correct where it belongs. Only the *pre-qualification* sit-in path is exempt.
-- **`tor.aircraftTypeIds` is still never populated**, so aircraft-type courses still return **zero** eligible instructors for real teaching assignment. This fix only routes around it.
+- ~~**`tor.aircraftTypeIds` is still never populated**, so aircraft-type courses return zero eligible instructors for teaching assignment.~~ **WRONG — corrected 2026-07-12.** It *is* populated (`$addToSet` on aircraft-qualification approval), and the vault already said so. See [[Gotchas#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)]]. An instructor with no approved aircraft qualification is *correctly* excluded from an aircraft-type course — that's the rule working, not a bug.
 - **TAT-424 AC-09 has no TOR gate at all on assessor/assessment assignment** — `staff-assessment.service.ts` doesn't even import the eligibility service.
 
 ## Open
@@ -98,7 +98,7 @@ The status column is the real value: the onboarding progression was previously *
 - [ ] Verify the "Sit-In Moved To Another Course" notification setting actually seeds on deploy — `sendNotification` silently no-ops if the setting is missing (see [[Gotchas#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]])
 - [ ] Comment on TAT-424 / TAT-429 recording the exemption, so the TOR filter isn't reinstated
 - [ ] **Remove-instructor endpoint** — nothing in the codebase can un-enroll an instructor from a course. Deferred deliberately; can largely reuse `deactivateForMove`
-- [ ] Separate ticket for the `aircraftTypeIds` keystone gap
+- [x] ~~Separate ticket for the `aircraftTypeIds` keystone gap~~ — **not a gap; it was already fixed. My claim was wrong.**
 
 ## Related
 

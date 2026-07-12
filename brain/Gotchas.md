@@ -9,6 +9,27 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)
+
+> [!danger] Mongoose's enum validator whitelists `undefined` but **rejects `null`** — so `default: null` on an enum fails its own validation on every document that instantiates the field
+> `StaffAssessmentReport.overallRating` was `enum: AssessmentOverallRating, default: null`. The parent auto-creates the report subdoc (`default: () => ({})`), so **every assessment create 500'd**: `report.overallRating: `null` is not a valid enum value`. Latent since TAT-423 shipped.
+>
+> **The fix is to permit null in the values** — the pattern three other nullable enums in this codebase already use correctly (`staff-tor-form`, `staff-qualification`, `exam-submission`), which is exactly *why* those work and this one didn't:
+> ```ts
+> enum: [...Object.values(MyEnum), null],
+> default: null,
+> ```
+>
+> **This was the 5th instance.** The [[Gotchas#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)|2026-07-05 note]] already said it deserved *"a lint/schema-review rather than a one-off patch"* — that call was right, and it took three more instances to act on. Now enforced: **`npm run check:schemas`** (`scripts/check-nullable-enums.mjs`, `.github/workflows/checks.yml`). Three more latent copies were found and fixed in `user.schema` (`qualificationCategory` ×3 — unexploded only because those subdocs are `default: null` on `User`, so they're never instantiated on a plain user create).
+>
+> **The check itself nearly shipped useless.** My first version regexed the `@Prop({…})` body for `enum:` + `default: null` — and was wrong **in both directions**: it false-positived on `course-schedule` (an unrelated nested `default: null` in the same `@Prop`) and **false-negatived on the very bug it was written for** (a single-line prop let the enum-value capture run past the comma and swallow `default: null`, so it saw "null" in the enum and passed). **A check that misses the bug it was written for is worse than no check — it certifies the code as clean.** The working version resolves each `enum:` field's *enclosing object* and reads that object's own top-level `default:`. Verified both ways: clean on the fixed tree, catches all 4 real violations when the fixes are reverted.
+
+## A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)
+
+> [!warning] The FE sends `file.type` (`video/mp4`); the backend compared it to bare extensions (`mp4`). Nothing could ever match, so **every** upload 400'd.
+> `assertValidVideo` normalised `fileType` and checked it against `STAFF_ASSESSMENT_VIDEO_EXTENSIONS = ["mp4","webm","mov",…]`. The browser's `File.type` is a **MIME type**, so `"video/mp4" !== "mp4"` — the whitelist was unreachable and the feature had never once worked. Widening the whitelist would have fixed nothing.
+> **Validate the uploaded `fileKey`'s extension, not the browser's MIME.** The backend already rewrites extensions on upload (see [[Gotchas#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]), so the key is the authoritative source. The browser's MIME is *also* unreliable — it's frequently an empty string for `.mkv`/`.avi`.
+
 ## An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)
 
 > [!danger] Four times in one week, a "missing feature" was a **fully-working backend endpoint with no frontend affordance**
@@ -289,12 +310,18 @@ Alternative fix (not taken): bump `@nx/eslint-plugin` to a version where the aut
 > Symptom: mandatory-training History (N) showed only `Submitted → Approved` — a reviewer reject + instructor resubmit cycle lost its `Rejected`/`Resubmitted` events. Root cause in `saveMandatoryTraining` (`staff-history-mandatory-training.service.ts`): it rebuilt the slot as `const nextSlot = { ...(existingSlot ?? {}), … reviewHistory: [...existingSlot.reviewHistory] }` then `form.mandatoryTraining = slots; form.save()`. **Spreading a live Mongoose subdocument yields internal `_doc`/`$__` keys, and the nested `reviewHistory` entries are subdocuments bound to the *old* parent** — when the whole array is reassigned and re-cast on save, that nested array gets dropped. The later resubmit then sees an empty history and writes a fresh `Submitted` (not `Resubmitted`), leaving exactly `[Submitted, Approved]`.
 > **In-place mutation is safe** (`submit`/`approve`/`reject` do `slot.reviewHistory = [...]; form.save()` on the *live* subdoc — those events persisted fine). **Rebuild-via-spread is not.** Fix: convert to a plain object first — `existingSlot.toObject()` — before spreading, and `form.markModified("mandatoryTraining")` before save (also covers the **Mixed** `fieldReviews` field, which needs `markModified` regardless). Same family as [[Gotchas#Shallow spread shares nested refs — a before/after diff of a mutated object is always empty|the Form 32 shallow-spread diff bug]]. Rule: **never `{...doc}` a Mongoose document/subdoc — use `.toObject()`; and `markModified` any Mixed path or reassigned nested array.** (Fix committed; needs a live reject→resubmit→approve re-test to confirm.)
 
-## `tor.aircraftTypeIds` is never populated — the keystone gap (2026-07-05)
+## ~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)
 
-> [!danger] Nothing writes `tor.aircraftTypeIds`; it's created `[]` and `assertAircraftOnTor` (TAT-422) self-blocks
-> The only write is `[]` at TOR creation (`staff-tor.service.ts`). No endpoint/logic ever adds an aircraft type. TAT-422's `create` calls `assertAircraftOnTor` (reads `aircraftTypeIds`) → always fails on app-created TORs (only seed TORs work). TAT-422 IS the "add aircraft to TOR" mechanism (AC-01/03 "add a certificate"), so `assertAircraftOnTor` is the bug — it requires what it's meant to create. Fix: drop/relax `assertAircraftOnTor` + populate/derive `aircraftTypeIds` from approved quals. Awaiting BA confirmation of TAT-410 AC-02 ownership. See [[TAT-409 Ticket Groups & Inspection Map]].
+> [!success] `tor.aircraftTypeIds` **IS** populated. Do not act on the original claim below.
+> `addAircraftTypeToTor()` `$addToSet`s the aircraft type whenever an aircraft qualification reaches **`APPROVED`** (three call sites in `staff-aircraft-qualification.service.ts`), and `resolveTorAircraftTypeIds(…, { backfill: true })` lazily derives + writes it from approved qualifications for any TOR that predates that.
 >
-> **Re-confirmed still live 2026-07-12.** Second consequence: `buildStaffTorEligibilityFilter` matches the course's `aircraftType` against `tor.aircraftTypeIds` (TAT-424 AC-10). Since that array is always `[]`, **every aircraft-type course returns ZERO eligible instructors** for teaching/examining assignment — `course.service.ts`, `schedule.service.ts`, and the instructor pickers all silently return empty rather than erroring. [[TAT-429 Sit-In Eligibility & Move Semantics]] routes around it for the sit-in path only; the teach path is still dead. **An always-empty list is not obviously a bug to whoever's looking at it** — same self-concealing shape as the orphan enrollments.
+> **How I got it wrong — and the vault already had the answer.** The 2026-07-05 inspection recorded it as never-written; the backend fixed it in the 2026-07-06 drop, and **the vault says so in two places**: [[TAT-409 Bug & Gap List]] (*"The keystone C1 is now populated on qual approval"*) and [[TAT-409 Ticket Groups & Inspection Map]] (*"the keystone is resolved — populated via idempotent `$addToSet` when an aircraft qual is approved"*). On **2026-07-12 I "re-confirmed" it as still live anyway** and told Qusai every aircraft-type course returns zero eligible instructors.
+>
+> **Two failures stacked:**
+> 1. **A grep that couldn't find the truth.** I searched for `aircraftTypeIds` and a write-keyword (`$addToSet|push|updateOne|save`) **on the same line** — and both writers are multi-line `$addToSet` blocks. A grep requiring two tokens on one line silently misses any multi-line construct, and multi-line is the *norm* for Mongo update operators. **A negative grep is not proof of absence.** Same failure that made the first nullable-enum CI check worthless (it matched per-`@Prop` instead of per-field, and both false-positived *and* false-negatived on the very bug it was written for).
+> 2. **I trusted a stale Gotcha over newer notes in the same vault.** The Gotchas entry was the *oldest* record and the one I reached for. **When a Gotcha and a work note disagree, the work note is usually newer — and either way, the code decides.** This is the second time in a week a stale vault note nearly produced a wrong fix (the other: [[Patterns]] claiming SA lacks `SM_SAVE_MANDATORY_TRAINING`, when SA has it). **Gotchas rot. Re-verify against source before repeating one, and correct it in place when it's wrong.**
+>
+> Original (now stale) claim, kept for the record: *"The only write is `[]` at TOR creation. No endpoint/logic ever adds an aircraft type. TAT-422's `create` calls `assertAircraftOnTor` → always fails on app-created TORs."* The `assertAircraftOnTor` half may still warrant a look, but the never-populated premise it rested on is false.
 
 ## Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)
 
