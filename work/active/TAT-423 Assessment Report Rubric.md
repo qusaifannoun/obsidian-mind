@@ -139,8 +139,11 @@ Submission notifies **TM *and every SA*** ("Assessment Pending TM Review" destin
 
 - [ ] **None of this has been exercised.** Every feature touched this week had latent bugs the moment it was first actually driven ([[Gotchas#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]). Expect the same.
 - [ ] The **destructive role-action seeder** re-seeds AD/QM on deploy (their action sets changed). Correct here — but do not run this branch locally against the shared dev DB.
-- [ ] Confirm the assessor-assigned notification actually seeds (all three edits were made: settings, template, **and** the bootstrap mapping).
+- [x] ~~Confirm the assessor-assigned notification actually seeds (all three edits were made)~~ — **it did NOT seed. The "three edits" rule was wrong.** `NotificationTemplate.code` is `enum: SystemActions`, so `ASNAR` (and `SIMV`) were rejected by Mongoose at boot and the settings were never created — both notifications were **dead for 9 days**. Added `ASSESSMENT_ASSESSOR_ASSIGNED = "ASNAR"` + `SIT_IN_MOVED = "SIMV"` to `SystemActions`; verified both now seed and exist in the DB. See [[Gotchas#The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)]].
+- [x] **TM comments removed from the assessment form** (2026-07-12, Qusai's call) — it was already optional in every layer, so "not required" meant *remove it*. Dropped the textarea, `ApproveStaffAssessmentDTO.comments`, the `approve()` write, and `comments` from `StaffAssessmentSignature` (shared by all three signature sections). Mirrors `9f80c4a3` (`assessorComments`). Old values still sit inert in Mongo — no cleanup written.
+- [ ] **TM-review notification never reaches Super Admins** — the seed file says `["TM","SA"]`, the DB row says `["TM"]`, and the seeder never re-syncs `destination`. See [[Gotchas#The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)]]. Needs a product call.
 - [ ] Clear-vs-unset on partial save (carried over, still open).
+- [ ] **Refactor to Zod + RHF** — this component is one of the two that break the repo's form convention. [[tat-prereq Forms Refactor - Zod + RHF]].
 
 ## Related
 - [[TAT-409 Staff Management Subsystem]] — parent epic

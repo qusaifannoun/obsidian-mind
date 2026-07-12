@@ -30,6 +30,37 @@ Things that have bitten before and will bite again.
 >
 > **Rule: if a number is a business rule, the backend owns it and the FE renders it.** A duplicated rule doesn't just drift — it can be computing something else entirely while looking perfectly plausible. Two of the worst bugs this week were duplicated-rule bugs ([[Gotchas#The 35h/2yr badge summed the wrong collection (2026-07-12)|the collection mismatch]] and this one).
 
+## The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)
+
+> [!danger] The TOR details page showed **Active with no creation/expiry date**. Not a display bug — the TOR was never activated, and the badge was lying.
+> Two implementations of the same rule, drifted:
+> - **`staff-tor-sync.processor`** (persists `status`, stamps `activatedAt` + 2-year `expiresAt`) required **six** gates: forms, required docs, history form, mandatory training, aircraft qualifications, assessments.
+> - **`evaluateTorCompletion`** (`staff-management.service`, behind `GET /tors/:id/details`) checked only **three**: forms, history form, mandatory training. It never looked at documents, qualifications, or assessments.
+>
+> So a TOR sitting between the two bars reads `ACTIVE` on the details page while the processor correctly keeps it `DRAFT` — and because the dates are only stamped by the processor, `activatedAt`/`expiresAt` stay `null` **forever**. The same weak rule fed `incomplete`, so the Pending-TORs worklist under-reported too. Meanwhile the *list* endpoint returns the **persisted** status, so list and details could contradict each other on the same TOR.
+>
+> **Diagnosis trick that settled it in one query:** 46 `tor_sync_completed` audit rows (worker alive and running) + **every TOR still persisted as `draft`** ⇒ the writer never agreed the TOR was active, so the reader was the liar. Fixed by extracting `staff-tor-activation.util.ts` (`resolveTorStatusFromGates`) and having both callers use it (`57bb7a1c`).
+>
+> **This is the THIRD duplicated-rule bug this week** ([[Gotchas#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|the 35h badge]], [[Gotchas#The 35h/2yr badge summed the wrong collection (2026-07-12)|the collection mismatch]], and this). See [[Patterns#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]].
+
+## An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)
+
+> [!warning] When a status field and its timestamp disagree, the status is derived-at-read and the timestamp is persisted. The persisted one is the truth.
+> Qusai reported "creation date and expiry date don't show on the TOR once it's active". Instinct says *rendering bug* → check the FE. Wrong. The FE was reading the right fields (`activatedAt → creationDate`, `expiresAt → expiryDate`); they were simply `null` in Mongo.
+>
+> **A status that comes from a live derivation and a timestamp that comes from a persisted column can disagree.** Whenever a record looks like it's in state X but the timestamp for entering X is empty, the transition into X never actually happened — go read whatever is supposed to *write* it. Don't debug the renderer.
+>
+> Also worth knowing: the two "active" TORs in the dev DB are **June-6 seed fixtures** inserted straight into Mongo with `status: active`, zero audit rows, and a dead `effectiveFrom`/`effectiveTo` schema. They are not evidence of a working activation path — **no TOR has ever legitimately activated**.
+
+## The Assessment Report is NOT a TOR form — one hardcoded "missing" row hid two outstanding assessments (2026-07-12)
+
+> [!warning] Activation requires an approved assessment **per aircraft type**, but the TOR details page showed a single `Assessment Report — missing` row
+> Assessments live in `staffassessments`, not in `stafftorforms`. So the details page — which builds the Forms section by matching templates to `StaffTorForm` instances — always found no instance for `assessment_report` and rendered `status: "missing"`, **even when an assessment existed and was approved**.
+>
+> On Qusai's CARC TOR: 3 aircraft types, 3 approved qualifications, **1** approved assessment. Two assessments outstanding — and nothing on the screen said so. He reasonably believed "all records are approved and successfully completed". The UI gave him no way to know otherwise.
+>
+> Fixed by expanding the template into one row per aircraft type (`mapTorDetailsAssessmentForms`), each with its real status (`approved → active`, `pending_tm_review → pending_approval`, else `missing`). **Note `assessment_report` must stay `mandatory: false`** — making it mandatory would make `deriveTorStatusFromForms` look for a `StaffTorForm` instance that never exists, and no TOR would ever activate. The assessment gate enforces it instead.
+
 ## `refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)
 
 > [!warning] The aircraft-qualification card labelled `refresherDate` as "Refresher" — it read `Refresher: 10 Jul 2026 / Expires: 09 Jul 2028`, two years apart
@@ -366,4 +397,22 @@ Alternative fix (not taken): bump `@nx/eslint-plugin` to a version where the aut
 > [!warning] Add a setting to `notification-settings.json` without a `notificationSettingMappings` entry and it is never created — no error, and the notification then never fires
 > `seedNotificationSettings` (`bootstrap.service.ts:1218`) looks up `notificationSettingMappings[setting.name]` for the action + template code. On a miss it `console.warn`s and `continue`s — the setting is **never inserted**. Downstream, `sendNotification` no-ops when `notificationSettingModel.findOne({name})` misses. So a new notification fails **silently at both ends**: nothing throws, nothing logs at runtime, the recipient just never hears anything.
 >
-> **Adding a notification needs THREE edits, not two:** (1) `seed_data/notification-settings.json`, (2) `seed_data/notification-template.json` (with a unique `code`), and (3) the `notificationSettingMappings` object in `bootstrap.service.ts` keyed by the exact setting `name`. Caught on the `SIT_IN_MOVED` work — the first two were done and it would have shipped mute. The seeder itself is **upsert-style and non-destructive** (it updates existing settings' parameters, never deletes), unlike the role-action seeder above.
+> **Adding a notification needs FOUR edits, not two** (I originally wrote THREE here — that was wrong, see the next gotcha): (1) `seed_data/notification-settings.json`, (2) `seed_data/notification-template.json` (with a unique `code`), (3) the `notificationSettingMappings` object in `bootstrap.service.ts` keyed by the exact setting `name`, and (4) **the `code` must also be a member of the `SystemActions` enum**. Caught on the `SIT_IN_MOVED` work — the first two were done and it would have shipped mute. The seeder itself is **upsert-style and non-destructive** (it updates existing settings' parameters, never deletes), unlike the role-action seeder above.
+
+## The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)
+
+> [!danger] `SIT_IN_MOVED` and `Assessment Assessor Assigned` shipped mute for 9 days. The three-edit rule above was **incomplete** — and I only found out by reading a startup log Qusai pasted.
+> `notification-template.schema.ts:8` is `@Prop({ unique: true, enum: SystemActions })`. The template `code` is therefore not a free string — it must **also exist as a `SystemActions` enum member**. `SIMV` and `ASNAR` never were, so Mongoose rejected the template on create:
+> ```
+> NotificationTemplate validation failed: code: `SIMV` is not a valid enum value for path `code`.
+> ```
+> No template → `seedNotificationSettings` can't create the setting → `sendNotification` no-ops on the missing setting. **Dead at three layers, and the only trace is a `console.error` at boot** that nobody reads. Fixed by adding `SIT_IN_MOVED = "SIMV"` and `ASSESSMENT_ASSESSOR_ASSIGNED = "ASNAR"` to `SystemActions` (`enums.ts`); both then seeded on the next boot.
+>
+> **How to check a notification is actually live** (don't assume): query `notificationsettings` + `notificationtemplates` for the name/code, and grep the boot log for `not a valid enum value` / `No mapping found` / `Action not found`. All three failure modes are silent at runtime.
+
+## The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)
+
+> [!warning] Editing `destination` in `notification-settings.json` for an already-seeded setting is a **silent no-op, forever**
+> `seedNotificationSettings` takes an early `continue` on any existing setting after syncing **only `parameters`** — it never updates `destination`, `action`, or `notificationTemplate`. The seed file says "Assessment Pending TM Review" goes to `["TM", "SA"]`; the DB row still says `["TM"]` from its first seed, so **Super Admins never receive it** no matter what the JSON claims. 67 settings are "synced" on every boot, parameters only — so any of them can be drifted the same way.
+>
+> Fixing it properly means making the seeder sync `destination` too, which would overwrite destinations deliberately customized in the DB. **Unresolved — needs a product call.**

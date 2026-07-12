@@ -45,6 +45,41 @@ If a number or date encodes a **rule** — a compliance total, a validity window
 
 **Why this is a rule and not a preference:** a duplicated business rule doesn't merely drift — it can be computing something else entirely while looking completely plausible. Both of the worst bugs of the week were duplicated-rule bugs (see [[Gotchas#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]). A number that comes off the API can be wrong once; a number the FE derives can be wrong *differently* from the one eligibility actually uses, and nothing will ever reconcile them.
 
+## One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)
+
+The pattern above is the FE-vs-BE case. The **general** rule is stronger, because the third instance this week was entirely inside the backend:
+
+> **TOR activation** was implemented twice in the same codebase — six gates in `staff-tor-sync.processor` (the writer), three gates in `evaluateTorCompletion` (the reader). The reader said `ACTIVE`; the writer said `DRAFT`. See [[Gotchas#The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)]].
+
+Three duplicated-rule bugs in one week, all with the same shape: **each copy is individually plausible, so nothing looks broken — and the mismatch surfaces as a downstream symptom that points somewhere else entirely** (a blank date, a 0/35h badge, a wrong compliance number). Nobody ever gets an error.
+
+**Rule:** if two places need the same decision, extract it — a shared util (`staff-tor-activation.util.ts` → `resolveTorStatusFromGates`), and both call it. Not "keep them in sync"; there is no in-sync, only not-yet-drifted.
+
+**Smell to grep for:** the same set of boolean gates `&&`-ed together in more than one file. And when a read path and a write path both decide the same thing, the **writer is the source of truth** — reads should report the persisted value, not recompute it.
+
+## All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)
+
+[[tat-prereq]] has the infrastructure and most forms follow it. **My TAT-423/Form-32 code did not**, and Qusai caught it.
+
+The rule is stated in the repo, in the docstring of `src/hooks/use-zod-form.ts`:
+
+> *"All forms in this project must use this hook — never `useForm()` directly."*
+
+- **`useZodForm({ schema, defaultValues })`** — every form. Validation is a Zod schema, never ad-hoc truthiness (`canApprove = !!name.trim() && !!signedAt`).
+- **`src/components/ui/RHFInput/`** — `InputField`, `SelectField`, `TextArea`, `DatePickerField`, `FileInput`, `SearchableSelectField`, `Checkbox`, `Radio`, `PhoneInputField`, `CountrySelectField`, `TimePickerField`, `ControlledDatePicker`, `FormFieldWrapper`. **Never hand-roll a field component** — check this folder first.
+
+Compliance audit (2026-07-12):
+
+| Component | `useState` | Zod/RHF |
+|---|---|---|
+| `AssessmentFormView.tsx` | **22** | ❌ none |
+| `Form32Editor.tsx` | **11** | ❌ none |
+| `HistoryFormView.tsx` | 24 | ✅ |
+| `SitInSection.tsx` | 6 | ✅ |
+| `Form285View.tsx` | 2 | ✅ |
+
+**Why I missed it:** the rule lives only in a hook's docstring — there is no `CLAUDE.md`/`AGENTS.md` in `tat-prereq`. That's the actual root cause, and it will keep biting until the convention is written down in the repo. Refactor tracked in [[tat-prereq Forms Refactor - Zod + RHF]].
+
 ## A wired hook with an empty branch is where a feature is supposed to live (2026-07-12)
 
 Twice this week the "missing feature" was an existing, already-fired hook whose non-matching branch just `return`ed:

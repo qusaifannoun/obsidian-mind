@@ -25,7 +25,11 @@ _What am I working toward right now?_
 
 ### Short-term (This Quarter)
 
-- Ship the [[TAT-409 Staff Management Subsystem]] FE ([[tat-prereq]]). **FE-complete for everything buildable without backend** (4 pages + TOR Details + documents + Forms 285/History/Assessment, dummy where no API). **Blocked on backend** for the TOR engine, eligibility, Form 32 template, and real form/document persistence. ✅ **Staff create/edit verified against staging (2026-06-07)** — caught + fixed 3 contract bugs, merged to `main` ([[TAT-432 Staff Profile]]).
+- Ship the [[TAT-409 Staff Management Subsystem]] ([[tat-prereq]] + [[tat-app-ws Backend]]). **No longer FE-only and no longer blocked on backend** — I'm now working across both, and the dummy data is long gone. The backend fix drop (2026-07-06) resolved the keystone gaps; everything since has been real end-to-end delivery.
+  - ✅ **The onboarding loop runs end to end (2026-07-12)** — instructor added → sit-in → evaluator → TM → History Form `APPROVED`. It had **never once completed** before; a [[TAT-429 Sit-In Eligibility & Move Semantics|circular dependency]] made it impossible.
+  - ✅ Staff create/edit verified on staging (2026-06-07) · History Form slice wired + verified across roles (2026-06-28) · Form 32 rejection history · [[Pending Review Requests - Reviewer Worklist|reviewer worklist]] · [[TAT-423 Assessment Report Rubric|assessment rubric + assessor model]] · [[History Form - Training & Validity Records|training & validity records]].
+  - **The real risk now is verification, not build.** Every feature touched this week had latent bugs the moment it was first actually driven — see [[Gotchas#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]. Large parts of what shipped this week are **still unexercised**.
+  - **Open, needing a BA call**: nobody can pause a TOR; requested roles frozen at creation ([[Staff Management - Unreachable Backend Endpoints]]); TAT-424 ↔ TAT-429 contradiction unrecorded in Jira.
 
 ### Medium-term (This Half)
 
