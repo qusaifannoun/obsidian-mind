@@ -560,12 +560,12 @@
         <p class="desc">Assessment, tor-matrix, pending-tors, tor-detail, and history-form pages carry “FE-only/dummy” comments but hit live backend endpoints — misleading for reviewers.</p>
         <div class="fix"><span class="flabel">Fix</span><div>Delete the stale comments so reviewers don't assume the pages are unwired.</div></div>
       </article>
-      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l12 notification recipients are db-config-driven (config) tat-422 tat-417 recipients come from notificationsetting.destination role codes; the mechanism is wired, but exact sets (e.g. em for 422 ac-06) depend on seed data. verify the notification-setting seeds per environment include the ac-required roles (e.g. em in “aircraft qualification pending pic review”). tat-app-ws" style="--row-c:var(--low-line)">
+      <article class="row" data-sev="low" data-plats="tat-app-ws" data-text="l12 notification recipients are db-config-driven (config) tat-422 tat-417 recipients come from notificationsetting.destination role codes; the mechanism is wired, but exact sets (e.g. em for 422 ac-06) depend on seed data. verify the notification-setting seeds per environment include the ac-required roles (e.g. em in “aircraft qualification pending review”). tat-app-ws" style="--row-c:var(--low-line)">
         <div class="rowhead"><span class="id">L12</span><h4 class="title">Notification recipients are DB-config-driven</h4></div>
         <div class="ac"><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-422" target="_blank" rel="noopener noreferrer">TAT-422<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><a class="jira" href="https://cryptonic-art.atlassian.net/browse/TAT-417" target="_blank" rel="noopener noreferrer">TAT-417<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.2 1h5.8v5.8"/><path d="M9 1 1 9"/></svg></a><code>(config)</code></div>
         <div class="plats"><span class="plat" data-p="tat-app-ws">tat-app-ws</span></div>
         <p class="desc">Recipients come from NotificationSetting.destination role codes; the mechanism is wired, but exact sets (e.g. EM for 422 AC-06) depend on seed data.</p>
-        <div class="fix"><span class="flabel">Fix</span><div>Verify the notification-setting seeds per environment include the AC-required roles (e.g. EM in “Aircraft Qualification Pending PIC Review”).</div></div>
+        <div class="fix"><span class="flabel">Fix</span><div>Verify the notification-setting seeds per environment include the AC-required roles (e.g. EM in “Aircraft Qualification Pending Review”).</div></div>
       </article>
       </div>
     </section>

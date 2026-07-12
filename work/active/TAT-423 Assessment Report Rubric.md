@@ -117,6 +117,24 @@ The two questions this note flagged to the BA on 2026-07-09 came back, and the a
 
 **`/my-assessments`** — the assessor's queue, mirroring `/sit-ins`. An assigned assessor previously had no way to find their work.
 
+## Approval requires a signature — reversing my own auto-approve (2026-07-12)
+
+BA rule: *the form is not approved until SA or TM has approved **and signed** it.* That killed the auto-approve-on-submit I'd shipped in `4f541a86` — and it was worse than merely wrong: an SA or TM submitting flipped the form straight to `APPROVED` with an **empty `tmSection`**. An approved Part-147 assessment carrying **no approver signature at all** — exactly what the paper form exists to prevent.
+
+Now **everyone** submits → `PENDING_TM_REVIEW`, and `APPROVED` is reachable **only** through the approve endpoint, which writes the approver's name/signature/date. SA's privilege is *"can do the approve step immediately themselves"*, not *"skips signing"*. `shouldAutoApproveAssessmentOnSubmit` / `resolveAssessmentStatusAfterSubmit` **deleted** rather than left as dead code describing a workflow that no longer exists. (`0bde7866`)
+
+Submission notifies **TM *and every SA*** ("Assessment Pending TM Review" destination `TM` → `TM, SA`) and lands in their `/my-assessments` queue — which already surfaced `PENDING_TM_REVIEW` to approvers.
+
+**SA force-delete** (`SM_DELETE_ASSESSMENT`, SA only): soft-delete via the `Base` plugin, so the record vanishes from every query (including the already-open guard, freeing a new assessment) but is recoverable. Writes an audit row and **enqueues a TOR re-sync** — deleting an *approved* assessment can legitimately drop the TOR out of `ACTIVE`, which the confirmation modal warns about.
+
+**Eligible assessors**: PIC users are now a **fallback**, listed only when no qualified instructor exists. Once a real assessor is available the PICs drop out.
+
+## Three more bugs, all found by driving it
+
+1. **`toAssessmentResponse` overwrote `tatId` with the Mongo userId** on *every read* (`8bbee3b8`): `return { ...assessment, tatId: String(assessment.userId) }`. So the TAT ID the assessor types is saved correctly and then **clobbered on the way back out**. This is the real source of the "TAT ID is auto-filled with an ObjectId" bug — I fixed the FE's read-only fallback earlier and **never checked the backend was doing the same thing at the source**.
+2. **The delete couldn't delete the records it exists to delete** (`df235b8c`). Soft-deleting via `assessment.save()` makes Mongoose re-validate the *whole* document — and staging has raw-inserted `StaffAssessment` docs missing `assignedBy` / `assignedAt` / `assessmentType`. **A delete implemented via `save()` can only delete documents that don't need deleting.** Now writes `deletedAt` with `updateOne`. See [[Gotchas#A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)]].
+3. **`TYPE_LABEL[assessmentType]` crashed the UI** (`d56e33e`) — `undefined.toLowerCase()`. Those same malformed records have no `assessmentType`. Guarded via `typeLabelOf()`. Same class as the `STATUS[value].cls` crash already in the vault: **a UI must never hard-crash on a backend enum value it doesn't know.**
+
 ## Open
 
 - [ ] **None of this has been exercised.** Every feature touched this week had latent bugs the moment it was first actually driven ([[Gotchas#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]). Expect the same.

@@ -9,6 +9,33 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)
+
+> [!danger] Setting `deletedAt` and calling `doc.save()` makes Mongoose re-validate the WHOLE document. A record missing required fields cannot be saved — so it cannot be deleted.
+> The SA force-delete 500'd on exactly the records it exists to remove:
+> ```
+> StaffAssessment validation failed: assignedBy is required, assignedAt is
+> required, assessmentType is required.
+> ```
+> **A delete implemented via `save()` can only delete documents that don't need deleting.** Use `updateOne({_id}, {deletedAt: new Date()})` — it doesn't run full-document validation. Also tolerate missing fields when writing the audit row (`assessment.status ?? null`).
+>
+> **The wider trap: raw-inserted documents that predate a `required: true`.** Staging has `StaffAssessment` docs with no `assignedBy` / `assignedAt` / `assessmentType` — inserted straight into Mongo, bypassing the schema, before those fields existed. Same family as the CARC-only `assessment_report` template. **Every write through `.save()` fails on them**, so they can't be repaired in the app either — delete is the only operation that works. And they're why the FE crashed on `TYPE_LABEL[assessmentType]`: the field is simply absent.
+
+## Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)
+
+> [!danger] I shipped a wrong compliance number because the FE recomputed a rule the backend already owns
+> The History Form's "Min 35 hrs / 2 years" badge was summed **client-side** from the mandatory-training rows. I asked Qusai whether the rule read mandatory training or training history, framed the question badly, got a reasonable answer to the wrong question, and rewired it to training history (`5159a07`) — which stores `durationHours: 0`, so the badge would have read **0 / 35 h for everyone**. A screenshot showing `56 / 35 h` is what caught it; I had changed a Part-147 number without checking it against real data.
+>
+> **The fix is not "revert" — it's to move the rule.** `calculateTrainingValidityHours` now computes the total on the backend (approved + non-expired, across the catalog *and* additional training) and returns it as `totalDurationHours`. The FE displays it and never recomputes. Same for the aircraft-qualification refresher date (`calculateAircraftRefresherDueDate`).
+>
+> **Rule: if a number is a business rule, the backend owns it and the FE renders it.** A duplicated rule doesn't just drift — it can be computing something else entirely while looking perfectly plausible. Two of the worst bugs this week were duplicated-rule bugs ([[Gotchas#The 35h/2yr badge summed the wrong collection (2026-07-12)|the collection mismatch]] and this one).
+
+## `refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)
+
+> [!warning] The aircraft-qualification card labelled `refresherDate` as "Refresher" — it read `Refresher: 10 Jul 2026 / Expires: 09 Jul 2028`, two years apart
+> Two distinct dates: **`refresherDate`** = when the refresher was performed (an input the PIC sets on approval); **`refresherExpiresAt`** = that + 2 years. The date a user actually wants — *when is the next one due* — is **neither**: it's `refresherExpiresAt − 1 month`, the same rule mandatory training already used (`calculateTrainingRefresherDate`).
+> Added `calculateAircraftRefresherDueDate` and a derived `refresherDueDate` on the response; the card now says **"Refresher due"**, which also makes the label honest — it's a deadline, not a record of the past. **A field name that describes the past being rendered as a future deadline is the same class as [[Gotchas#`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)|`StaffSitIn.active`]].**
+
 ## Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)
 
 > [!danger] Mongoose's enum validator whitelists `undefined` but **rejects `null`** — so `default: null` on an enum fails its own validation on every document that instantiates the field

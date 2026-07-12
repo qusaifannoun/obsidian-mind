@@ -35,6 +35,29 @@ The TAT repos ([[tat-prereq]], [[tat-app-ws Backend]], et al.) use **`dev`** as 
 
 As of 2026-06-18, the [[TAT-409 Staff Management Subsystem|TAT-409]] FE dummies have been **replaced with the real backend** (staging Swagger): staff-management-login, TOR matrix/details/pending, tor-documents, Form 285, Form 32 (rebuilt schema-driven), profiles catalog + `profiles/me`, qualifications, assessments, deactivate. Read paths verified vs staging; write paths wired but largely unexercised. The "FE-first dummy-data layer" pattern below is now historical for this subsystem (History + Assessment *forms* remain dummy — no backend). Instructor self-service is wired but **backend-blocked**: the instructor role 403s on `profiles/me` / `tor-documents` / `qualifications` until granted those actions server-side. Rule going forward: **FE follows the backend contract; align the FE to a ticket once its backend is approved.**
 
+## The backend owns business rules; the frontend renders the answer (2026-07-12)
+
+If a number or date encodes a **rule** — a compliance total, a validity window, a due date — it is computed **once, server-side**, and returned. The FE displays it and never recomputes it.
+
+- **35h / 2-year total** → `calculateTrainingValidityHours` on the backend, returned as `totalDurationHours` on the mandatory-training response.
+- **Aircraft refresher due date** → `calculateAircraftRefresherDueDate` (= expiry − 1 month), returned as a derived `refresherDueDate`.
+- **Training due date** → `calculateTrainingDueDate` (= accomplished + 2 years); the FE mirrors it *only* as a live preview in the add-form, never as the stored value.
+
+**Why this is a rule and not a preference:** a duplicated business rule doesn't merely drift — it can be computing something else entirely while looking completely plausible. Both of the worst bugs of the week were duplicated-rule bugs (see [[Gotchas#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]). A number that comes off the API can be wrong once; a number the FE derives can be wrong *differently* from the one eligibility actually uses, and nothing will ever reconcile them.
+
+## A wired hook with an empty branch is where a feature is supposed to live (2026-07-12)
+
+Twice this week the "missing feature" was an existing, already-fired hook whose non-matching branch just `return`ed:
+
+```ts
+const courseCode = await findCourseCodeByOnlineCourseId(onlineCourseId);
+if (!courseCode) return;   // ← not a mandatory refresher? do nothing at all
+```
+
+`applyOnlineCourseCompletion` was already called on every completion from **both** the progress and exam services. Completing one of the 5 mandatory refreshers filled its slot; completing **anything else silently did nothing**. The new auto-add-training-record feature is that `return` replaced with a branch — no new hook, no new call site.
+
+**When asked for "X should happen when Y happens", grep for the Y handler first.** The plumbing is usually already there and already fired, with a bare `return` where the behaviour belongs. Sibling of [[Gotchas#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]].
+
 ## Staff subsystem section placement: per-instructor lives on the profile (+read-only TOR mirror), per-license lives in the TOR (2026-07-09)
 
 Where a section renders in [[tat-prereq]] follows its **data ownership**, confirmed with the BA and grounded in the backend endpoints:
