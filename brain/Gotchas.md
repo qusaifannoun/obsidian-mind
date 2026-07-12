@@ -9,6 +9,28 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)
+
+> [!danger] Four times in one week, a "missing feature" was a **fully-working backend endpoint with no frontend affordance**
+> - **Aircraft-qualification writes** — FE stubbed the section read-only with a "no endpoint yet" note. `GET/POST/PATCH …/aircraft-qualifications` had existed all along.
+> - **Mandatory-training privileged save** — backend auto-approves for SA/AD/QM/TM and doesn't require evidence. The FE only ever built the *instructor* path: one button, disabled without a certificate, wired to the one endpoint that rejects privileged editors by design. SA could not record training for an instructor at all.
+> - **Course instructors list** — the endpoint existed; nothing displayed it, so adding an instructor gave zero feedback.
+> - **External teaching** — the code said *"backend has no list/approve surface yet"*. `GET …/external-teaching`, `PATCH …/approve` and `PATCH …/reject` all existed, and the FE even had approve/reject **mutations that nothing could call** because no UI listed the activities.
+>
+> **Rule: grep the backend controller before believing a frontend gate, a stub, or a comment.** In two of the four, the misleading comment is *why* the gap survived — someone read it, believed it, and moved on.
+>
+> **The mechanical version:** diff every backend route against every URL the frontends call. Reduce each route to its non-generic literal path segments and check whether any single FE file contains all of them — this survives the `${base(id)}/…/suffix` split that defeats a naive prefix grep. Run on all 108 `staff-management` routes it found **4 dead endpoints in one pass**, including *nobody can pause a TOR*. See [[Staff Management - Unreachable Backend Endpoints]].
+>
+> **Its blind spot:** it only finds endpoints nothing *calls*. It cannot find an endpoint that is called but only ever by the wrong role — which is exactly how the mandatory-training privileged save hid. That needs a role-vs-guard audit.
+
+## The 35h/2yr badge summed the wrong collection (2026-07-12)
+
+> [!warning] The History Form's "Min 35 hrs / 2 years" total was computed from mandatory training; the rule is met by training history
+> The FE summed **`mandatoryTraining` items** client-side (2-year window, **no status filter**, so it counted unapproved records). The Part-147 rule is met by **`trainingHistory`** records, which the backend sums properly — approved-only, windowed — in `calculateTotalTrainingDurationHours`. Different collections, different numbers.
+> The FE was **already fetching the authoritative value** (`totalDurationHours` on the training-history response), mapping it into its type, and **throwing it away**. Fixed `5159a07` by using it and deleting the client-side reduce.
+> **Two lessons.** (1) A duplicated business rule in the FE isn't just a drift risk — it can be computing something else *entirely* while looking plausible. (2) **I nearly "refactored" this silently** on the assumption it was the same rule implemented twice; reading the backend showed it summed a different collection, and swapping the number in a regulatory context is a BA decision, not a cleanup. **Check what a number means before you make it authoritative.**
+> Related: **the 35h minimum is enforced NOWHERE server-side** — no `MIN_HOURS`/`35` anywhere in `libs/database` or `libs/app-data`, and `isMandatoryTrainingValidForUser` (which gates TOR activation) never reads hours. The badge is decorative.
+
 ## `StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)
 
 > [!danger] `completeFinalAssessment` sets `status = APPROVED` **and** `active = false` together. Any read that filters `active: true` loses the record the instant the cycle succeeds.
