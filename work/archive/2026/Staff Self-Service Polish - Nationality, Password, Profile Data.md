@@ -1,11 +1,12 @@
 ---
 date: 2026-07-08
-quarter: Q3-2026
-status: active
 description: "tat-prereq staff self-service batch — nationality dropdown, national-ID validation, self-service change-password, full profiles/me mapping, per-TOR qualifications/assessments aggregation, DOB formatting, Form 285 title dropdown, manage-staff eye icon"
 tags:
   - work-note
-team: Backend
+  - project/tat
+status: completed
+quarter: Q3-2026
+project: tat-prereq
 ---
 
 # Staff Self-Service Polish — Nationality, Password, Profile Data

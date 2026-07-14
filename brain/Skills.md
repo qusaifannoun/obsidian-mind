@@ -10,6 +10,9 @@ tags:
 
 Custom slash commands, subagents, and reusable workflows. Defined in `.claude/commands/` and `.claude/agents/`.
 
+> [!important] Agents in the code repos never write here
+> They emit a VAULT HANDOFF block and you paste it into `/om-dump`. The prompt to give them lives in [[Agent Handoff Protocol]].
+
 ## Slash Commands
 
 ### Daily Workflow

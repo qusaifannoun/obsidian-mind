@@ -1,14 +1,13 @@
 ---
 date: 2026-06-04
 description: "Progress tracker for TAT-432 Staff Profile Management — FE in tat-prereq, real /user/details when signed in, dummy TORs + stubbed deactivation (those backends not built)"
-project: TAT
-status: active
-quarter: Q2-2026
-ticket: TAT-432
 tags:
   - work-note
   - project/tat
-  - project/staff-management
+status: active
+quarter: Q2-2026
+project: tat-prereq
+ticket: TAT-432
 ---
 
 # TAT-432 Staff Profile

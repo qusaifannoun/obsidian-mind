@@ -1,13 +1,13 @@
 ---
 date: 2026-06-02
 description: "Scope for TAT-428 Edit Issued Certificates — a tat-ws (admin) feature, not tat-portal; backend PATCH already exists, work is frontend wiring + Super Admin gating"
-project: TAT
-status: completed
-quarter: Q2-2026
-ticket: TAT-428
 tags:
   - work-note
   - project/tat
+status: completed
+quarter: Q2-2026
+project: tat-ws
+ticket: TAT-428
 ---
 
 # TAT-428 Edit Issued Certificates

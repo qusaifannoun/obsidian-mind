@@ -3,9 +3,10 @@ date: 2026-07-12
 description: "The TOR details endpoint reported ACTIVE while checking only 3 of the 6 activation gates — so TORs showed Active with null creation/expiry dates and the Assessment Report hid two outstanding assessments"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # TOR Activation — the Details Endpoint Lied About ACTIVE
@@ -76,4 +77,4 @@ Activation needs an approved assessment **per aircraft type**. Nothing in the UI
 - [[Gotchas#The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)]]
 - [[tat-app-ws Backend]] · [[tat-prereq]]
 - [[Debugging & Root Cause Analysis]] · [[Systems Thinking]]
-- [[work/Index]]
+- [[Index|Work Notes]]

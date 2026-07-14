@@ -3,9 +3,10 @@ date: 2026-07-08
 description: "Root-caused + shipped 6 bugs in one session — Form 32 PIC save clobber & create-401 (tat-app-ws), signature draw reuse (tat-prereq), and a cross-frontend auth bundle (reset endpoint, login min, x-client-app routing) across 3 repos."
 tags:
   - work-note
-status: active
+  - project/tat
+status: completed
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Form 32 PIC Bugs & Cross-Frontend Auth Fixes

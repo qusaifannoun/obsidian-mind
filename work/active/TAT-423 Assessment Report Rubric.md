@@ -1,11 +1,13 @@
 ---
 date: 2026-07-09
 description: "TAT-423 gap: the Assessment Report (TAT FORM 032) captured only the sign/approve shell, not the graded rubric. Contract + build plan to model the rubric, scores, objective, Part 147 compliance, and comments across backend + frontend."
-project: TAT-409 Staff Management Subsystem
-status: active
-quarter: Q3-2026
 tags:
   - work-note
+  - project/tat
+status: active
+quarter: Q3-2026
+project: tat-prereq
+ticket: TAT-423
 ---
 
 # TAT-423 Assessment Report Rubric
@@ -150,4 +152,4 @@ Submission notifies **TM *and every SA*** ("Assessment Pending TM Review" destin
 - [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]] — the assessment assign/submit/approve notifications
 - [[Staff Management Subsystem & TOR Model]] — domain reference
 - [[tat-app-ws Backend]] · [[tat-prereq]] — the two repos changed
-- [[work/Index]]
+- [[Index|Work Notes]]

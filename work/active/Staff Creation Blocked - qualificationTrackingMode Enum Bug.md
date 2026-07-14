@@ -3,9 +3,10 @@ date: 2026-07-07
 description: "Backend bug — enum Prop with default:null on User.qualificationTrackingMode blocked ALL staff creation on staging. Root-caused + fixed (dc8f3a4f). Includes the tracking-mode domain logic."
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Staff Creation Blocked — `qualificationTrackingMode` Enum Bug

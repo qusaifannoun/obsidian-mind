@@ -3,9 +3,10 @@ date: 2026-07-12
 description: "Additional training records in Updated Training & Validity — manual external entries + auto-added online-course completions, with the 35h total moved server-side after I shipped it wrong"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # History Form — Training & Validity Records

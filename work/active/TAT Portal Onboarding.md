@@ -1,12 +1,12 @@
 ---
 date: 2026-06-02
 description: "Getting oriented and productive on tat-portal — local setup, reading order, and a landing pad for the first tasks on the TAT storefront"
-project: TAT
-status: active
-quarter: Q2-2026
 tags:
   - work-note
   - project/tat
+status: backlog
+quarter: Q2-2026
+project: tat-portal
 ---
 
 # TAT Portal Onboarding

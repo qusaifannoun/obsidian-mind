@@ -35,6 +35,19 @@ views:
       - formula.quarter
       - description
   - type: table
+    name: Backlog
+    filters:
+      and:
+        - status == "backlog"
+    groupBy:
+      property: project
+      direction: ASC
+    order:
+      - file.name
+      - date
+      - project
+      - description
+  - type: table
     name: All by Quarter
     groupBy:
       property: formula.quarter

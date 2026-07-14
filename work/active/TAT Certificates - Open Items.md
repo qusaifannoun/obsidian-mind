@@ -1,12 +1,12 @@
 ---
 date: 2026-06-02
 description: "All open/missing items surfaced while working the certificate issue (TAT-428) — frontend gaps, backend dependencies, and unrelated bugs found along the way"
-project: TAT
-status: active
-quarter: Q2-2026
 tags:
   - work-note
   - project/tat
+status: backlog
+quarter: Q2-2026
+project: tat-ws
 ---
 
 # TAT Certificates - Open Items

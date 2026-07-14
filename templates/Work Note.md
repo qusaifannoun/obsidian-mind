@@ -1,10 +1,13 @@
 ---
 date: "{{date}}"
 description:
-project:
-status: active
 tags:
   - work-note
+  - project/tat
+status: active
+quarter:
+project:
+ticket:
 ---
 
 # {{title}}

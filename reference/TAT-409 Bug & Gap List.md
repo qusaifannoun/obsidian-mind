@@ -24,7 +24,9 @@ Consolidated output of the full [[TAT-409 Ticket Groups & Inspection Map|group-b
 > [!danger] The one defect to fix first — `tor.aircraftTypeIds` is never populated
 > A single unowned field cascades into **three** broken flows. Nothing ever writes `tor.aircraftTypeIds` (created `[]`, no code path adds to it). That breaks: (1) **aircraft-qual creation** — `assertAircraftOnTor` requires it → 422 create 400s; (2) **assignment eligibility** — an aircraftType requirement filters on it → pickers render **empty**; (3) **aircraft-qual validation** short-circuits to `true`. Combined with the sibling **missing "requested role" concept**, it also breaks Form 32 role-scoping and role-type eligibility. Resolve ownership (TAT-410 link-at-creation vs TAT-422 derive-from-approved-quals) before anything else.
 
-> [!success] Resolution status — 2026-07-06 (24 of 37 resolved)
+## Resolution status — 2026-07-06 (24 of 37 resolved)
+
+> [!success] 24 of 37 resolved
 > This list was the input to a fix cycle; most of it is now **closed**. The tables below are the *original* findings — treat them as historical, read against this status:
 > - **Backend shipped fixes (commit `db6922f7` "TAT Gap list" + TAT-422/423/424/429): 18 fixed** — verified by re-inspection. **Every Critical (C1–C4) and every High (H1–H8)** that was backend-owned, plus M4, M10, L1, L2, L7, L8, L12. The keystone C1 (`tor.aircraftTypeIds`) is now populated on qual approval; the backend adopted the same role→form mapping the FE gate uses.
 > - **Frontend fixed + shipped to `main` ([[tat-prereq]], 2026-07-06): 6** — M5 cert preview/download, M6 request-course-online, M8 Manage Staff pagination, M9 server-side role gating, M12 AD privileged editor, H8 2-year hours window. Verified live in-browser.

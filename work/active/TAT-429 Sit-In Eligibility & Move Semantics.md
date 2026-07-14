@@ -3,9 +3,11 @@ date: 2026-07-12
 description: "The Add Instructor eligible list applied TAT-424's Active-TOR rule to the sit-in path, creating a circular dependency that made new-instructor onboarding impossible; removed the gate and added move semantics"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
+ticket: TAT-429
 aliases:
   - TAT-429
 ---
@@ -38,7 +40,9 @@ addCourseInstructor   ← required an ACTIVE TOR
 
 **To get an Active TOR you need a sit-in; to get a sit-in you need an Active TOR.** A new instructor could never be bootstrapped. See [[Gotchas#Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)]].
 
-Staff creation auto-provisions three **DRAFT** TORs (CARC/EASA/GCAA) with `aircraftTypeIds: []` plus a History Form (`provisionInstructorTors` → `ensureForUser`). So the fresh instructor failed the TOR gate *twice over*: DRAFT status, and — because the course had an aircraft type — an empty `aircraftTypeIds` that `AC-10`'s clause can never match ([[Gotchas#`tor.aircraftTypeIds` is never populated — the keystone gap (2026-07-05)|the keystone gap]]).
+Staff creation auto-provisions three **DRAFT** TORs (CARC/EASA/GCAA) with `aircraftTypeIds: []` plus a History Form (`provisionInstructorTors` → `ensureForUser`). So the fresh instructor failed the TOR gate *twice over*: DRAFT status, and — because the course had an aircraft type — an empty `aircraftTypeIds` that `AC-10`'s clause can never match.
+
+**To be precise about that second one:** a freshly provisioned TOR *legitimately* starts with `aircraftTypeIds: []`; the field is populated later, by `$addToSet` on aircraft-qualification approval. It is **not** the never-written "keystone gap" I once claimed — I was wrong about that, and the correction is worth reading before reasoning about this field again: [[Gotchas#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)|the keystone correction]].
 
 ## The TAT-424 ↔ TAT-429 contradiction
 

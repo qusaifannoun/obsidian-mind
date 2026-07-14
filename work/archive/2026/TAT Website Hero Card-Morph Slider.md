@@ -1,13 +1,12 @@
 ---
 date: 2026-06-14
 description: "tat-website home hero rebuilt as an integrated GSAP card-morph slider (port of a CodePen 'timed cards opening' effect): next thumbnail expands into the full background while the old one shrinks back into a thumbnail"
-project: TAT
-status: completed
-quarter: Q2-2026
 tags:
   - work-note
   - project/tat
-  - project/tat-website
+status: completed
+quarter: Q2-2026
+project: tat-website
 ---
 
 # TAT Website Hero Card-Morph Slider

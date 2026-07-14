@@ -1,14 +1,13 @@
 ---
 date: 2026-06-10
 description: "tat-website client-logo work — added the Safran logo to the /clients grid (TAT-441) and refactored the home-page orbit to polar-coordinate positioning so logos sit on the orbit paths (TAT-440)"
-project: TAT
-status: completed
-quarter: Q2-2026
-ticket: TAT-440
 tags:
   - work-note
   - project/tat
-  - project/tat-website
+status: completed
+quarter: Q2-2026
+project: tat-website
+ticket: TAT-440
 ---
 
 # TAT-440 / TAT-441 — Client Logos & Safran

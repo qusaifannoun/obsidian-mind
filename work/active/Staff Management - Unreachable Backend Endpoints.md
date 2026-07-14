@@ -1,16 +1,17 @@
 ---
 date: 2026-07-12
-description: "Sweep of all 108 staff-management endpoints against every frontend — found 4 with no caller: TOR manual pause, TOR requested-roles, and a redundant training-duration route"
+description: "Sweep of all 108 staff-management endpoints against every frontend — 4 with no caller (TOR manual pause, requested-roles, a redundant training-duration route), plus the Form 32 approve endpoint: reachable by URL but dead by role algebra"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Staff Management — Unreachable Backend Endpoints
 
-Four times in one week a bug turned out to be **a working backend capability with no frontend affordance** (see [[Gotchas#An FE "no backend yet" comment is not evidence]]). Rather than keep finding these one bug report at a time, swept **all 108 `staff-management` routes** against every URL called by [[tat-prereq]], [[tat-ws]] and [[tat-portal]].
+Four times in one week a bug turned out to be **a working backend capability with no frontend affordance** (see [[Gotchas#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]]). Rather than keep finding these one bug report at a time, swept **all 108 `staff-management` routes** against every URL called by [[tat-prereq]], [[tat-ws]] and [[tat-portal]].
 
 **Result: 4 routes have no caller in any frontend.** Two are missing product capability; two are redundant.
 
@@ -51,8 +52,44 @@ Both `listTrainingHistory` (line 67) and `getTrainingDurationSummary` (line 81) 
 
 Worth confirming before deleting the route: nothing external (a report, an export) depends on it.
 
+## 4. The Form 32 approve endpoint is dead by role algebra — the class this sweep is blind to (2026-07-14)
+
+**This is the exact case the warning above says the URL diff cannot catch** — the route *is* called, so no URL is missing. It is unreachable for a different reason: **no role can ever legally call it.**
+
+The role sets are aliases of each other (`libs/app-data/src/lib/enums.ts`):
+
+```ts
+export const FORM_285_AUTO_APPROVE_ROLES = [
+  SystemRolesCodes.SUPERADMIN,
+  SystemRolesCodes.ADMIN,
+  SystemRolesCodes.QUALITY_MANAGER,
+  SystemRolesCodes.TRAINING_MANAGER,
+] as const;
+
+export const FORM_32_AUTO_APPROVE_ROLES = FORM_285_AUTO_APPROVE_ROLES;
+```
+
+`FORM_32_REVIEWER_ROLES` is `[TM, QM, SA]` — a **strict subset** of `FORM_32_AUTO_APPROVE_ROLES` `[SA, AD, QM, TM]`. So **every role that can review a Form 32 is also an auto-approver**, whose *save* already approves:
+
+```ts
+form.workflowStage = StaffTorFormWorkflowStage.APPROVED;   // staff-tor-form-32.service.ts:242
+form.status = syncFormStatusFromWorkflowStage(form.workflowStage);
+await form.save();
+```
+
+Which means the `assertCanReviewInstructorSaReview` fallthrough inside `assertCanApproveInstructorSaReview` is **dead code**: by the time anyone calls approve, their own save has already set the stage to `APPROVED`, and the guard throws:
+
+```ts
+if (ctx.stage === StaffTorFormWorkflowStage.APPROVED) {
+  throw new BadRequestException(ErrorMessages.torFormInvalidWorkflowTransition);
+}
+```
+
+**Needs a human who knows the intent — I did not touch it.** Either the endpoint should be deleted, *or* the role sets are wrong and a reviewer was meant to exist who approves **without** their save auto-approving. Those are very different products, and the code cannot tell you which was meant.
+
 ## Open
 
+- [ ] **Decide the intent behind the Form 32 approve endpoint (#4)** — delete the route, or fix the role sets so a non-auto-approving reviewer exists. Do not "fix" this by guessing
 - [ ] Ticket: TOR manual pause / resume UI (**#1**)
 - [ ] Ticket: requested-roles editor (**#2**)
 - [ ] Confirm with the BA who may pause a TOR, and whether requested-roles is privileged-only

@@ -3,9 +3,11 @@ date: 2026-06-18
 description: "Backend bugs and gaps blocking the Staff Management / PreRequisites FE, found while matching tat-prereq against tickets TAT-410–435. Endpoint-level handoff for the backend team."
 tags:
   - work-note
-status: active
+  - project/tat
+status: backlog
 quarter: Q2-2026
-team: Backend
+project: tat-app-ws
+ticket: TAT-409
 ---
 
 # TAT-409 — Backend Open Items

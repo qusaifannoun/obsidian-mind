@@ -3,9 +3,10 @@ date: 2026-07-09
 description: "Spec: turn the Pending TORs page from a per-staff list into a per-review-request worklist — each form/assessment/history item in a pending-review state as its own actionable row"
 tags:
   - work-note
-status: active
+  - project/tat
+status: backlog
 quarter: Q3-2026
-team: Backend
+project: tat-prereq
 ---
 
 # Pending Review Requests — Reviewer Worklist

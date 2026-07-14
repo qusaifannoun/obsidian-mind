@@ -3,9 +3,10 @@ date: 2026-06-23
 description: "Backend bug handoff — online-course exam forfeits timed-out attempts unscored instead of scoring saved answers (BA decision). Endpoint-level spec for the backend team."
 tags:
   - work-note
-status: active
+  - project/tat
+status: backlog
 quarter: Q2-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Online-Course Exam Timeout — Backend Bug (Handoff)

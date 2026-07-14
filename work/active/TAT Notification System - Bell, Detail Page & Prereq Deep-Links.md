@@ -1,11 +1,12 @@
 ---
 date: 2026-07-08
 description: "Notification system for tat-prereq — navbar bell with real-time flashing dot (Socket.IO), a notification detail page, and backend deep-links that route prereq notifications to the staff-management host."
-project: TAT-409 Staff Management Subsystem
-status: active
-quarter: Q3-2026
 tags:
   - work-note
+  - project/tat
+status: active
+quarter: Q3-2026
+project: tat-prereq
 ---
 
 # TAT Notification System — Bell, Detail Page & Prereq Deep-Links
@@ -59,4 +60,4 @@ Even after wiring `STAFF_MANAGEMENT_URL` + the repoint migration, staff-manageme
 - [[TAT Platform]] — how the frontends (dashboard / portal / staff) map to base URLs
 - [[Patterns#No comments or ticket numbers in code (all TAT repos)]] — followed throughout
 - [[Gotchas]] — the destructive role-action seeder / re-seed hazard that motivated the migration script
-- [[work/Index]]
+- [[Index|Work Notes]]

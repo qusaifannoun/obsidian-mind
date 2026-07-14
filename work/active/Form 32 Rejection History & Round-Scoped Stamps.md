@@ -3,9 +3,10 @@ date: 2026-07-09
 description: "Fix Form 32 rejection accumulation (round-scoped field stamps via clear-on-submit) and add a full per-item review timeline built on a unified reviewHistory event log"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Form 32 Rejection History & Round-Scoped Stamps
@@ -18,7 +19,7 @@ Plan from a `/grill-me` design session (2026-07-09). Two coupled changes: **(1)*
 ## Two things surfaced during implementation
 
 - **Reviewer-edits-discarded warning (`64ae543`).** `sendRejections()` calls `actions.reject(fields)` which sends *only* the rejected field ids/reasons — it does **not** call `save(buildBody())`. So a reviewer's edits to Name/Date/assessment/sections are silently dropped on reject; only Approve (which saves first) persists them. Added an amber warning in the review state. (Open: could make it dirty-aware, or add a standalone Save button — deferred.)
-- **The diff was always empty — a shallow-copy mutation bug (`8ad91259`).** `computeForm32Changes(current, merged)` never detected an `edited`/`uploaded` event because `mergeSaveDto` does `const sections = { ...current.sections }` (shallow) then mutates `existing.fileKey = …` — mutating `current`'s nested objects in place, so `current` and `merged` end up equal. Fix: deep-clone `current` into a `before` snapshot *before* the merge and diff against that. Caught by Qusai testing a document replacement (rejection showed, the replace didn't). See [[Gotchas#Shallow spread shares nested refs — a before/after diff of a mutated object is always empty]].
+- **The diff was always empty — a shallow-copy mutation bug (`8ad91259`).** `computeForm32Changes(current, merged)` never detected an `edited`/`uploaded` event because `mergeSaveDto` does `const sections = { ...current.sections }` (shallow) then mutates `existing.fileKey = …` — mutating `current`'s nested objects in place, so `current` and `merged` end up equal. Fix: deep-clone `current` into a `before` snapshot *before* the merge and diff against that. Caught by Qusai testing a document replacement (rejection showed, the replace didn't). See [[Gotchas#Shallow spread shares nested refs — a before/after diff of a mutated object is always empty (Form 32, 2026-07-09)]].
 
 ## Problem (confirmed in code)
 

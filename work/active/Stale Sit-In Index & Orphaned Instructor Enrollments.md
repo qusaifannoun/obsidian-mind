@@ -3,9 +3,10 @@ date: 2026-07-10
 description: "A schema rename left a unique non-sparse index on staffsitins, breaking every sit-in insert since 2026-06-26 and leaving orphaned instructor enrollments that silently hide instructors from the eligible list"
 tags:
   - work-note
+  - project/tat
 status: active
 quarter: Q3-2026
-team: Backend
+project: tat-app-ws
 ---
 
 # Stale Sit-In Index & Orphaned Instructor Enrollments

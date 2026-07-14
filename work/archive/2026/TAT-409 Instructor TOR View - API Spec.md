@@ -3,9 +3,11 @@ date: 2026-06-21
 description: "RESOLVED — backend granted instructors access to /tors/:torId/details, so the existing FE works unchanged. Spec kept for reference (the /tors/:id enrichment route was not taken)."
 tags:
   - work-note
+  - project/tat
 status: completed
 quarter: Q2-2026
-team: Backend
+project: tat-app-ws
+ticket: TAT-409
 ---
 
 > [!success] Resolved 2026-06-21

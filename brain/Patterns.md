@@ -68,17 +68,22 @@ The rule is stated in the repo, in the docstring of `src/hooks/use-zod-form.ts`:
 - **`useZodForm({ schema, defaultValues })`** — every form. Validation is a Zod schema, never ad-hoc truthiness (`canApprove = !!name.trim() && !!signedAt`).
 - **`src/components/ui/RHFInput/`** — `InputField`, `SelectField`, `TextArea`, `DatePickerField`, `FileInput`, `SearchableSelectField`, `Checkbox`, `Radio`, `PhoneInputField`, `CountrySelectField`, `TimePickerField`, `ControlledDatePicker`, `FormFieldWrapper`. **Never hand-roll a field component** — check this folder first.
 
-Compliance audit (2026-07-12):
-
-| Component | `useState` | Zod/RHF |
-|---|---|---|
-| `AssessmentFormView.tsx` | **22** | ❌ none |
-| `Form32Editor.tsx` | **11** | ❌ none |
-| `HistoryFormView.tsx` | 24 | ✅ |
-| `SitInSection.tsx` | 6 | ✅ |
-| `Form285View.tsx` | 2 | ✅ |
-
 **Why I missed it:** the rule lives only in a hook's docstring — there is no `CLAUDE.md`/`AGENTS.md` in `tat-prereq`. That's the actual root cause, and it will keep biting until the convention is written down in the repo. Refactor tracked in [[tat-prereq Forms Refactor - Zod + RHF]].
+
+> [!done] Resolved 2026-07-14 — and the 2026-07-12 audit above was wrong twice.
+> The repo now has a `CLAUDE.md` + `AGENTS.md` (`992d812`). The compliance audit I wrote here listed **two** violators and cleared `HistoryFormView`/`SitInSection`; a repo-wide grep found **six**, including both of those. See [[tat-prereq Forms Refactor - Zod + RHF]] and [[Gotchas#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]].
+
+## A convention that lives only in a docstring is unreachable — write it where startup reads (2026-07-14)
+
+The Zod+RHF rule was stated clearly, imperatively, and in exactly one place: a docstring inside `src/hooks/use-zod-form.ts`. You only read it if you already opened the hook you were supposed to know to use. **The rule was unreachable, not ignored** — six files broke it, mine included, and I would have followed it had I seen it.
+
+**Rule:** a convention only exists if it lives where an agent or a new dev reads *at startup* — `CLAUDE.md`, `AGENTS.md`, `.cursorrules`. Anywhere else (a docstring, a wiki page, a Slack message, one reviewer's memory) it is decoration, and the violation it produces is the *repo's* fault, not the author's.
+
+**Corollary — fix the reachability before the code.** The refactor's first commit added the `CLAUDE.md`, then swept the six files. Sweeping first would have left the rule just as unreachable, and the seventh violation would already be on its way. This is the same shape as [[Agent Handoff Protocol]]: put the instruction where the reader actually starts.
+
+**Smell to grep for:** an imperative in a code comment — *"must"*, *"never"*, *"always"* — in a repo with no agent-readable rules file. That comment is a rule that has already failed.
+
+**But a rules file is code, and it rots just as fast — with nothing to typecheck it.** Two days after the `tat-prereq` CLAUDE.md was written, it still advertised `ControlledDatePicker`, a component the *same sweep* had deleted. An agent reading it would have reached for a component that no longer exists. **When you delete or promote a shared primitive, the rules file is part of the blast radius** — grep it by name in the same commit. Nothing else will catch it.
 
 ## A wired hook with an empty branch is where a feature is supposed to live (2026-07-12)
 

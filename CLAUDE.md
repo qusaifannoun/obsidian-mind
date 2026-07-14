@@ -140,7 +140,25 @@ Use `thinking/` for drafts, reasoning, and analysis before writing final notes. 
 
 ### Creating Notes
 
-1. **Always use YAML frontmatter** with at minimum `date`, `description` (~150 chars), `tags`, and type-specific fields. Work notes and incidents also need `quarter` (e.g., `Q1-2026`). Incidents need `ticket`, `severity`, `role`.
+1. **Always use YAML frontmatter** with at minimum `date`, `description` (~150 chars), and `tags`, plus type-specific fields.
+
+   **Work notes use exactly this schema, in this order — no other fields:**
+
+   ```yaml
+   date: 2026-07-14
+   description: "one sentence, ~150 chars — lead with the finding, not the symptom"
+   tags:
+     - work-note
+     - project/tat
+   status: active        # active | backlog | completed
+   quarter: Q3-2026      # must match `date`
+   project: tat-prereq   # the REPO: tat-prereq | tat-app-ws | tat-portal | tat-ws | tat-website
+   ticket: TAT-409       # omit the line entirely when there is no ticket
+   ```
+
+   `project` is the **primary repo**, not a program name — `Work Dashboard.base` groups by it. Work spanning repos picks the primary one and links the rest from `## Related`. There is **no `team` field** on work notes (`team` belongs to `org/people/`, where `People Directory.base` reads it).
+
+   Incidents need `ticket`, `severity`, `role` in addition to the above.
 2. **Use templates** from `templates/`. Fill `{{placeholders}}` with real values.
 3. **Place files correctly**:
    - **Active** work notes, decisions, peer review prep -- `work/active/`
@@ -241,7 +259,10 @@ Use tags in frontmatter (not inline):
 
 - **Type**: `work-note`, `decision`, `perf`, `thinking`, `north-star`, `competency`, `person`, `team`, `brain`
 - **Index**: `index`, `moc`
-- **Status** (frontmatter field): `active`, `completed`, `archived`, `proposed`, `accepted`, `deprecated`
+- **Status** (frontmatter field): `active`, `backlog`, `completed`, `archived`, `proposed`, `accepted`, `deprecated`
+  - `active` = **in flight right now**. If you aren't touching it this week, it isn't active.
+  - `backlog` = real, unfinished, but not being worked — specs not yet built, handoffs waiting on another team, open-item lists. Stays in `work/active/`; `Work Dashboard.base` shows it under **Backlog**, not **Active Work**. This is what keeps `active/` honest instead of letting it become a landfill.
+  - `completed` = done. Move it to `work/archive/YYYY/` in the same commit.
 - **Team** (frontmatter field on people + work notes): your team names, e.g. `Backend`, `Platform`, `Mobile`
 - **Cycle** (frontmatter field on review-related notes): `h2-2024`, `h1-2025`, etc.
 - **Person** (frontmatter field on evidence notes): full name of the person

@@ -1,13 +1,13 @@
 ---
 date: 2026-07-05
 description: "TAT-436 — control certificate visibility for refresher courses: FE wiring of the SA-only publish endpoint + Unpublished indicator/Publish button on Manage Trainees (tat-ws)"
-project: TAT
-status: active
-quarter: Q2-2026
-ticket: TAT-436
 tags:
   - work-note
   - project/tat
+status: active
+quarter: Q3-2026
+project: tat-ws
+ticket: TAT-436
 ---
 
 # TAT-436 Refresher Certificate Publish

@@ -1,14 +1,13 @@
 ---
 date: 2026-06-04
 description: "Epic tracker for TAT-409 — a new internal Staff Management subsystem (instructors + TORs) on a separate SSO subdomain. 21 tickets organized into workstreams, with the repo/scope open questions surfaced"
-project: TAT
-status: active
-quarter: Q2-2026
-ticket: TAT-409
 tags:
   - work-note
   - project/tat
-  - project/staff-management
+status: active
+quarter: Q2-2026
+project: tat-prereq
+ticket: TAT-409
 ---
 
 # TAT-409 Staff Management Subsystem

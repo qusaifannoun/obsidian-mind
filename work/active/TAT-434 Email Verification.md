@@ -1,13 +1,13 @@
 ---
 date: 2026-06-02
 description: "Scope/gap analysis for TAT-434 email verification in tat-portal — feature is ~90% already built; only the post-signup confirmation message is missing"
-project: TAT
-status: active
-quarter: Q2-2026
-ticket: TAT-434
 tags:
   - work-note
   - project/tat
+status: active
+quarter: Q2-2026
+project: tat-portal
+ticket: TAT-434
 ---
 
 # TAT-434 Email Verification

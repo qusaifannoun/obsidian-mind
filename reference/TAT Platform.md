@@ -55,4 +55,4 @@ graph TD
 
 - [[TAT API & Auth Model]] — the shared contract every frontend depends on
 - [[North Star]] — current focus
-- Active work: see [[Work Notes]]
+- Active work: see [[Index|Work Notes]]
