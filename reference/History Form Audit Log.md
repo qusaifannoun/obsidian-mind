@@ -60,6 +60,7 @@ Same collection, but these carry `torId` (not `historyFormId`) and belong to oth
 
 - **Dead enum members** (not cleaned up — out of scope for the read-side work): `HISTORY_FORM_TRAINING_HISTORY_CREATED`, `HISTORY_FORM_TRAINING_HISTORY_UPDATED` (superseded by the non-prefixed `TRAINING_HISTORY_*`), and `TRAINING_HISTORY_EVIDENCE_REPLACED` (no replace-evidence action exists). Safe to delete from `StaffTorAuditEvent` if touched later.
 - The dedup groups to the **second**, so two identical (event, actor, from, to) actions within the same second would collapse — a non-issue for manual HF actions.
+- **Assessments can't be isolated in this schema.** `ASSESSMENT_*` rows carry only `torId`, but a TOR has one assessment **per aircraft type**, so a single assessment's trail can't be read out. The requested fix adds a generic `subjectType`/`subjectId` and threads `assessmentId` through the six assessment `writeAudit` sites — see [[TAT-409 Backend Open Items#Assessment audit entries are TOR-scoped, not assessment-scoped — blocks the per-assessment audit timeline]].
 
 ## Related
 

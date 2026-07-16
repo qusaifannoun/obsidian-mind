@@ -9,6 +9,13 @@ tags:
 
 Recurring patterns discovered across work.
 
+## TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)
+
+Convention (Qusai, 2026-07-16): a large share of TAT bug/task work is written up in a **Word document**, not on Jira. When a `/om-dump` (or any handoff) arrives with **`Ticket: —`**, that means there is no ticket — **leave the ticket field blank; do not infer a Jira number from the feature or a related note.** I did exactly that once — labelled an assessment-audit backend item `Ticket: TAT-423` because it touched the assessment feature — and it was wrong; the item wasn't on Jira at all.
+
+- Real ticket numbers come **only** from an explicit `Ticket:` value or the TAT-410→435 ticket sweep already recorded in [[TAT-409 Backend Open Items]] — not from feature association.
+- If a dumped bug clearly *should* have a ticket but doesn't, note it as an open question; don't manufacture one. Reference the **feature** note instead (e.g. `Feature: [[TAT-423 Assessment Report Rubric]]`), which carries the association without falsely claiming a ticket.
+
 ## No comments or ticket numbers in code (all TAT repos)
 
 Hard rule (Qusai, 2026-07-07): **do not leave comments in any code file I write or touch — and never write ticket/task numbers (e.g. `// TAT-409`) into the code.** Qusai's feedback: it leaves too many comments and task numbers behind, which makes the code look bad. Write self-explanatory code (clear names) instead of explanatory comments.
@@ -131,6 +138,12 @@ Building [[tat-prereq]] FE pages ahead of the backend ([[TAT-409 Staff Managemen
 
 **Where a real API already exists** (some do — see [[TAT-409 Staff Management Subsystem#Backend APIs — available vs held (staging Swagger, 2026-06-04)]]), the fetcher calls it when there's a **session** and falls back to dummy only when there's **no token** (offline FE dev / dev auth bypass): `if (!getAccessToken()) return DUMMY; return client.get(realEndpoint)...`. So logging in hits the real backend; no login renders dummy. Manage Staff uses `GET /user/all` this way.
 
+## Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control
+
+Before adding any filter control, trace the field to its source. A `<select>` is trivial to render, but if the field it filters on isn't in the response payload **and** isn't an accepted query param, the control is dead two ways over: you can't filter client-side (data absent) and a param the query DTO doesn't declare gets silently dropped by class-validator's whitelist. This is the inverse of the [[Staff Management - Unreachable Backend Endpoints|dead-endpoint]] class — there a working backend had no FE affordance; here an FE affordance has no backend data.
+
+The [[Aircraft Category Filter - TOR Matrix|TOR Matrix B1/B2 filter]] (2026-07-16) looked like a one-line toolbar addition but `aircraftCategory` lived only on `StaffQualification` — not the TOR row, the matrix response DTO, or the query DTO — so it shipped full-stack: a new enum query param + a `qualificationModel.distinct("userId", { aircraftCategory })` intersect, mirroring the existing `aircraftTypeId` filter, then the FE select. When the matrix filters already run server-side, a new filter joins them **server-side** (see the dummy-data note above: "move filter into fetcher params when the backend supports it") rather than being bolted on in the view.
+
 ## Dev auth bypass (tat-prereq)
 
 FE pages are auth-gated by `proxy.ts`, but FE-only dev has no backend session. A **dev-only, env-flagged** bypass (`NEXT_PUBLIC_DEV_AUTH_BYPASS=true`, **non-production only**) makes the proxy skip gating and `AuthHydrator` seed a dummy Super Admin, so role-gated pages render without logging in. Hard-disabled in prod (`NODE_ENV` guard). Default `false` in `.env.example`.
@@ -224,3 +237,11 @@ The "reject one item → the whole form rejects and the remaining Reject buttons
 Rule: **before replicating a multi-reject fix, confirm the items actually share one status.** Independent per-row records with their own status are already correct — forcing accumulate-and-send onto them is wasted work. Related: [[Gotchas]].
 
 **Same mechanism drives auth links (reset-password / verify-email), but the per-client branch list is DUPLICATED per resolver (2026-07-08).** The client is detected from the **`x-client-app` request header** — every FE sets it (`tat-prereq` → `staff-management`, `tat-portal` → `online-courses`; `tat-ws`/website send nothing → default dashboard). But `CommonService` has a **separate resolver per link type** — `resolveClientBaseUrl`, `resolveResetPasswordUrl`, `resolveVerifyEmailUrl`, `resolveLoginUrl` — each with its **own** branch list. `resolveClientBaseUrl` handled `staff-management`, but `resolveResetPasswordUrl` only branched on `online-courses`, so staff forgot-password links fell through to the **dashboard** URL. Fix = add the `clientApp === 'staff-management'` branch to `resolveResetPasswordUrl` too (derives `${staffManagementUrl}/reset-password`). **Rule: adding/fixing a client means auditing ALL the resolvers, not just `resolveClientBaseUrl`.** Related auth fixes same day: reset-password FE calls **`PATCH /auth/reset-password/:token`** with `{ password }` (not `POST /auth/reset-password` → "Cannot POST"); the reset page's Email field was dead UI (token identifies the user); and **login forms must not enforce password strength/length** (`min(1)`, not `min(8)`) — that belongs on creation/reset, else admin-issued/legacy short passwords can't sign in.
+
+## Server-generated form PDFs — reuse the shared Puppeteer pipeline; aggregate cross-service data in the controller
+
+Exporting a TAT form as a PDF ([[Export History Form - TAT Form 031 PDF|Form 031]], [[Export Assessment Report - TAT Form 032 PDF|Form 032]], and the pre-existing Form 32/285) all use **one shared pipeline**: a pure `build<Form>PdfHtml(input)` util produces an HTML string → `generatePdfFromHtml(html, forPrint?, landscape?)` (HTML → Puppeteer → A4 PDF) → `s3Service.uploadFile(..., FileUploadCategory.<X>)` → `signFileKey` → return `{ downloadUrl }`. The FE fetcher hits `GET .../download` and does `window.open(url, '_blank', 'noopener,noreferrer')`. **Never hand-roll a second Puppeteer path** — extend the shared util instead (the `landscape` flag was added this way, default `false` so every existing caller stays portrait).
+
+HTML reproduction tips that worked: one bordered `<table>` **per section** (not one giant table) with a `<colgroup>` per section for column control; `table-layout: fixed` + `margin-bottom: -1px` to collapse the seams between section tables; checkboxes as `&#9746;`/`&#9744;`; embed images (logo, **signatures**) as base64 `data:` URIs *before* rendering (`s3Service.getFile` returns raw base64 — wrap it as `data:image/png;base64,…`, inferring MIME from the key extension). Match the official form's exact spelling, even typos ("ASSESSEMENT", "COMUNCATION", "REFFERENCE").
+
+**Cross-service aggregation goes in the controller, not the service.** The History-Form export needs data from four services (history-form + mandatory-training + training-history + sit-in). Putting all four injections into `StaffHistoryFormService` would create a **circular DI** (the mandatory/sit-in services already depend on it). Instead the **controller** — which already injects every service — fetches the sibling sections and passes them into `historyFormService.downloadPdf(actor, userId, sections)`, exactly the compose-in-controller idiom `getMyHistoryForm` already used. The service owns only the data it already owns (basic info, quals, audit log) plus S3/PDF.

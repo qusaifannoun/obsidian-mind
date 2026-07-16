@@ -9,6 +9,24 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## "Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)
+
+> [!warning] An Approved **Form 32** was still editable by the owning instructor — they could reopen and resubmit it — while **Form 285** and the **Assessment** report had locked on approval all along.
+> There is no shared "approved ⇒ read-only" mechanism across the [[tat-prereq]] forms; each one re-implements it. Form 285 locks + renders a PDF; the Assessment cards flip to `reportReadOnly`; **Form 32 did neither.** Its list wrapped approved rows in a live `<Link>`, and its editor gated reopen on ownership alone (`canReopen = isOwner && status === 'Approved'`), so approval wasn't final for the person it certifies.
+>
+> **The trap: partial coverage reads as done.** Two of three forms locked, so "approved forms are read-only" felt true — until you check the third. When a cross-cutting rule (lock-on-approve, audit-on-write, evidence-required) is implemented per-instance instead of shared, **audit every instance, not the one in front of you** — same shape as the Zod+RHF and TOR-activation duplications.
+>
+> Fix locks the owner (`isSelf && !canReview && status === 'Approved'`): non-clickable rows + an editor redirect so a direct URL can't bypass it; reviewers keep full access. **Still unexercised in a browser**, and *whether* to remove the owner's reopen entirely is an open product question. See [[Form 32 Approved Lock - Owner Read-Only]].
+
+## The same state has two names — backend serializes `PENDING_PIC` as `'pending'`, the FE expects `'pending_pic'` (2026-07-15)
+
+> [!danger] An instructor's aircraft qualification was invisible to its reviewer — no Approve/Reject controls, blank badge — because the FE literal for that state never equalled the string the backend actually sends.
+> Backend `StaffAircraftQualificationStatus.PENDING_PIC` serializes as **`"pending"`** (`enums.ts:1184`; external-teaching shares it at `:1192`), but the FE type and **every** comparison expect **`"pending_pic"`** (`qualification.ts:14`). So `status === 'pending_pic'` was always false: the reviewer gate `canReview && status === 'pending_pic'` (`TorQualifications.tsx:238`) never rendered, and `STATUS_LABEL/STATUS_STYLE["pending"]` were `undefined` → blank badge.
+>
+> **The tell: exactly one status value misbehaved.** Every other enum member matched byte-for-byte, so the whole qualifications UI looked healthy and only this one state silently dead-ended — instructor stuck, admin with no action. When a status-driven UI works for N-1 states and mysteriously dies on the Nth, suspect the *string*, not the logic.
+>
+> Fixed by normalizing at the **fetcher boundary** (`src/api/Qualifications/qualifications.ts` maps `"pending" → "pending_pic"` on every read, both `StaffQualification` and `ExternalTeachingActivity`). No write-side mapping — `status` is server-controlled. **Still unexercised in a browser.** Same family as the [[Patterns]] "keep the FE enum mirrored to the backend" rule: the enum *member* matched, its *serialized value* didn't. See [[Aircraft Qualification Approval Invisible - Status String Mismatch]].
+
 ## The Approve button approved the form, then asked the backend to approve it again — and showed you the 400 (2026-07-14)
 
 > [!danger] The approval **succeeded**. The error on screen was the *second* attempt failing because the first one worked.
@@ -266,6 +284,10 @@ Two confusingly-named things in [[tat-ws]]. `usePatchOnlineCourseCertificate` (i
 
 `GET /online-courses/certificates/my` returns the logged-in user's own issued certs **including `pdfUrl`**, and its `@Roles(...SystemRolesCodes)` guard **includes `TRAINEE = "TR"`** — so [[tat-portal]] (the student storefront) can call it directly. Don't assume the `/online-courses/certificates/*` endpoints are admin-only just because [[tat-ws]] uses them; the `/my` variant is for trainees. Each cert carries `enrollmentId` + `type` (`EXAM` | `ATTENDANCE`) for matching to a course card. Context: [[TAT Certificates - Open Items]].
 
+## tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`
+
+A learner who fails an online-course exam only ever gets an **attendance** certificate, not a full one — but [[tat-portal]]'s `MyCourseCard` rendered a single hardcoded "Take Certificate" label for both outcomes, so a failed learner's button was indistinguishable from a passing learner's (2026-07-15). The data was already there: the enrollment carries a backend-authoritative **`passed`** boolean. The trap is the *other* field — a local `examPassed` that hardcodes `examMark >= 70`. Passing threshold is per-course (`passPercentage`), so `examPassed` silently drifts wrong the moment any course sets a threshold ≠ 70. Rule: branch outcome UI on the backend's `passed`, never on a client-recomputed threshold. Fix added `examFailed = hasExam && examMark !== null && !passed` and labeled the completion cert "Attendance Certificate" when true. Edge caveat: assumes `showCourseCompletionCertificate` isn't set true while retake attempts remain, else it could read "Attendance" prematurely. Context: [[TAT Certificates - Open Items#Frontend (us — tat-portal)]], sibling gotcha [[Gotchas#Online-course certs ARE trainee-reachable (storefront)]].
+
 ## Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted
 
 [[tat-ws]]'s shared `CertificateEditor` Preview button hit this (2026-06-26): there are **two** preview endpoints and the editor must pick by domain. Aircraft/general templates use single-brace `{ token }` and `POST /certificate-templates/preview`; online-course templates use double-brace `{{ token }}` and `POST /online-courses/certificate-templates/preview`. Both share the **identical** `{ content }` → `{ previewContent }` shape, so a mis-wire **type-checks and returns 200** — but the aircraft endpoint doesn't substitute `{{ }}` tokens, so the online preview renders with placeholders still showing. The editor was originally hardwired to the aircraft hook regardless of its `courseType` prop; fix routes online templates to `usePostPreviewOnlineCertificateTemplate`. Lesson: when two endpoints share a request/response shape but differ in server-side behavior (token dialect), nothing local catches the mismatch — only a visual/staging check does. Context: [[TAT Certificates - Open Items]], [[TAT API & Auth Model#Certificate template preview (two endpoints, by domain)]].
@@ -443,3 +465,9 @@ Alternative fix (not taken): bump `@nx/eslint-plugin` to a version where the aut
 > `seedNotificationSettings` takes an early `continue` on any existing setting after syncing **only `parameters`** — it never updates `destination`, `action`, or `notificationTemplate`. The seed file says "Assessment Pending TM Review" goes to `["TM", "SA"]`; the DB row still says `["TM"]` from its first seed, so **Super Admins never receive it** no matter what the JSON claims. 67 settings are "synced" on every boot, parameters only — so any of them can be drifted the same way.
 >
 > Fixing it properly means making the seeder sync `destination` too, which would overwrite destinations deliberately customized in the DB. **Unresolved — needs a product call.**
+
+## Certified-by / approver identity lives only in the audit log — the form wipes field reviews on approval (2026-07-16)
+
+Building the [[Export History Form - TAT Form 031 PDF|History Form PDF]], the "Certified by" block needed the approving Training Manager's name + date. There is **no form-level `approvedBy`/`approvedAt`/`certifiedBy`** on `StaffHistoryForm` — and `approveBasicInfo` **wipes** `basicInfoFieldReviews = {}` on approval (per-field `reviewedBy`/`reviewedAt` only survive for *rejected* fields). So an approved form retains **no** in-document record of who approved it. The only persistent source is the **audit log**: filter `listAuditLog` for event `HISTORY_FORM_APPROVED` (fallback `HISTORY_FORM_BASIC_INFO_APPROVED`) → its `actorName` + `createdAt`. See [[History Form Audit Log]].
+
+Related data-locality trap in the same subsystem: the aircraft **name** and **category (B1/B2)** are NOT on the TOR-matrix / qualification read DTOs — resolve the name from `AircraftTrainingTypes.aircraftTypeWithEngine`, and category lives only on `StaffQualification` (see [[Aircraft Category Filter - TOR Matrix]]). And "Successfully assessed as" comes from the **sit-in** record's `assessments[]`, not `StaffAssessmentService` (which has no per-user lister).

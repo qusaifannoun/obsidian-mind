@@ -9,6 +9,10 @@ tags:
 
 Architectural or workflow decisions worth recalling. Link to the full [[Decision Record]] when one exists.
 
+## 2026-07-15 — Purchase-terms acknowledgment is a nudge, not provable consent
+
+The [[tat-portal]] course-detail *Important Notes* (auto-close forfeiture, exam-retake fees, 3-day refund — all material money terms) now require a checkbox acknowledgment before Add-to-Cart/Enroll. **Qusai scoped it deliberately as a UX nudge, not provable consent — frontend-only, no backend.** Nothing is recorded server-side and the gate is bypassable by a direct `POST` to cart-add/checkout. Rationale: keep scope small; the modal's job is to make a buyer *see* the terms, not to produce a legal record. **Revisit trigger:** if consent ever needs to be *provable*, add a thin per-order acknowledgment on the backend. Full record: [[Course Purchase Important-Notes Acknowledgment Gate]].
+
 ## 2026-07-14 — Shared components beat per-document fidelity, even on official forms
 
 Form 32 renders as the official **TAT FORM 032-A** and had a bespoke compact **38px** field style (`docInput`) to look like the paper document; the shared `RHFInput` fields are **44px**. Offered the choice between adding a `size="compact"` variant across the shared library (exact document fidelity, a size axis maintained forever) or letting the document take standard sizes, **Qusai chose standard sizes** — fewer moving parts, internally consistent with the app, at the cost of a chunkier-looking 032-A.

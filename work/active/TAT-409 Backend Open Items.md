@@ -132,6 +132,39 @@ training records on the instructor's shared History Form.
 
 ---
 
+## 🟢 New gap — found while wiring the FE (2026-07-15)
+
+### Assessment audit entries are TOR-scoped, not assessment-scoped — blocks the per-assessment audit timeline
+**Source:** Word-doc bug list (not on Jira) · **Feature:** [[TAT-423 Assessment Report Rubric|assessment report]] · **Severity:** Medium · **Not started — blocks the FE audit-timeline feature**
+
+Product wants a **form-level audit log on each Staff assessment** (a reusable timeline on every assessment card). The backend **already writes the events** — the problem is read-side isolation.
+
+**Observed:** `StaffTorAuditLog` rows are scoped to **`torId` only**. Assessment `writeAudit(tor, …)` passes just `tor._id`, but a TOR has **multiple assessments (one per aircraft type)**, so every assessment on a TOR shares one undifferentiated trail — the FE can't isolate a single assessment's history.
+
+**Evidence:**
+```
+staff-tor-audit-log.schema.ts   stores torId/userId/historyFormId/event/from/to/triggeredBy
+                                 — no generic entity ref
+staff-assessment.service.ts:691 writeAudit(tor, event, from, to, actor)  — only tor._id
+                                 events recorded at :161 / :251 / :422 / :474 / :578 / :646  (six call sites)
+enums.ts:1224                    StaffAssessmentStatus = assigned/draft/pending_tm_review/approved
+                                 — NO rejected state
+```
+
+**Requested (backend):**
+1. Add a generic **`subjectType` + `subjectId`** pair to `StaffTorAuditLog` (so any entity — assessment, later others — can be isolated, not just TOR/HF).
+2. Thread **`assessmentId`** through **all six** `writeAudit` call sites.
+3. New **`GET …/assessments/:assessmentId/audit-log`** — events + `triggeredBy` resolved to a name, sorted **ascending**. Mirror the History Form read side (dedup, name resolution) — see [[History Form Audit Log#Read side (added 2026-07-11)]].
+4. **Product decision:** is a **reject-back** flow in scope? The assessment status enum has no `REJECTED` today; adding the audit view may expose the need for it.
+
+**FE follow-up (separate):** one reusable `AuditTimeline` component on each assessment card, reused for Form 32. The History Form already shipped `HistoryFormAuditTimeline.tsx` — generalize that rather than build a new one.
+
+**Touches (backend):** `libs/schemas/.../staff-tor-audit-log.schema.ts` · `libs/database/.../staff-assessment.service.ts` · the staff-management assessment controller/module.
+
+Related: [[TAT-423 Assessment Report Rubric]] (the assessment feature) · [[History Form Audit Log]] (the schema + the read-side pattern to mirror).
+
+---
+
 ## 🟡 Auto-behaviour / enrichment
 
 ### 6. Auto-update TOR indicators
