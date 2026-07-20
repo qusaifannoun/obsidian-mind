@@ -34,8 +34,14 @@ The Assessment Report ([[TAT-423 Assessment Report Rubric|TAT Form 032]]) had no
 - **Not run against a live DB record or browser.** Signatures render **blank** in the local test (no S3) — they embed from `signatureKey` at runtime. Signature **MIME is inferred from the key extension** (defaults to PNG); a typeless/other-format key may not render.
 - Puppeteer needs Chromium on the server.
 
+## Enhancements (2026-07-16)
+
+- **Full-height landscape.** The PDF rendered into the top ~55% of the page. Switched to **A4 landscape** (added an optional `landscape` flag to the shared `generatePdfFromHtml`, default `false` so History / Form 32 / 285 stay portrait) and made the rubric + sign-off tables **grow to fill the page** via a flex-column `.sheet` + `.grow` (`flex:1`). The full-height styling landed as `b70f0f28 "fix assessment form styling"` (Qusai committed it).
+- **Training-Manager comments field.** The TM sign-off was name/signature/date only (the assessor's "Comments" label was really just the overall-rating control). Added an optional `comments` to the **shared** `StaffAssessmentSignature` sub-doc + `ApproveStaffAssessmentDTO`; `approve()` writes `tmSection.comments`; rendered in the "COMMENTS BY THE TRAINING MANAGER" block; FE shows a comments `TextArea` only on the TM approve path and on the approved summary. Committed `ed3f21a8` (app-ws) / `1244ce0` (prereq). Verified via a real rendered PDF. This field is what drove [[Assessment Privileged Approval - TM Section While Assigned]].
+
 ## Related
 
+- [[Assessment Privileged Approval - TM Section While Assigned]] — made the TM section (and this comment) reachable for privileged users before submission
 - [[Export History Form - TAT Form 031 PDF]] — sibling feature; shared `generatePdfFromHtml` pipeline (which this feature extended with `landscape`)
 - [[TAT-423 Assessment Report Rubric]] — the rubric + assessor model this renders
 - [[History Form Buttons Unified - InlineAction Primitive]] — same file family (assessment/history forms)

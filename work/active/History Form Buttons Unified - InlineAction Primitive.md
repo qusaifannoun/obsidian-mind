@@ -30,6 +30,18 @@ project: tat-prereq
 - **Not browser-verified** — filled pills are taller than the old text-links; row layouts (Approve+Reject side-by-side, and the "Reject this field" / "Undo" buttons that sit inside text lines in Basic Info) need an eyeball.
 - **This-file-first:** the same inline-button mess still exists in `Form32Editor.tsx`, `AssignedSitInsView.tsx`, `AssignedAssessmentsView.tsx` — `InlineAction` is shared and ready for them.
 
+## Sweep continued + kebab reversal (2026-07-16)
+
+The `InlineAction` rollout reached two more files:
+
+- **`TypeTrainingCourseSection.tsx`** — the 4 hand-rolled Edit / Delete / Save / Cancel buttons routed through `InlineAction` (tones brand / reject / neutral). Committed `f924363`.
+- **`InitialDocuments.tsx`** — **replaced the kebab (⋮ `RowActionsMenu`) with inline tone-coded `InlineAction` buttons** (Upload/Replace = brand, Approve = green, Reject/Delete = red) side by side, per Qusai's request. Committed `823828b`. Also fixed a stray broken `bg-error-600` style on the assessment Delete button.
+
+> [!important] Kebab-rule reversal
+> This **overrides** the standing *"Table row actions = kebab menu only"* rule (Qusai, 2026-06-04) for the Initial-TOR-Documents list — he explicitly asked for inline buttons. The kebab-only rule is **no longer absolute**; inline `InlineAction` buttons are an accepted alternative when he asks. Recorded in [[Patterns]].
+
+Still remaining with the same inline-button mess: `AssignedSitInsView`, `AssignedAssessmentsView`.
+
 ## Related
 
 - [[History Form - Training & Validity Records]] — the view this refactor lives in

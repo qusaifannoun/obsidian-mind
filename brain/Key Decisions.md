@@ -9,6 +9,14 @@ tags:
 
 Architectural or workflow decisions worth recalling. Link to the full [[Decision Record]] when one exists.
 
+## 2026-07-16 — A privileged approver can approve an Assessment from any pre-approval state
+
+To let a Super Admin operate the Assessment TM section without waiting for the two-role flow, the backend `approve()` was relaxed to reject only when already `APPROVED` (it stays `assertApprover`-gated). **Implication Qusai accepted:** a privileged SA/TM can now approve an assessment straight from `assigned`/`draft` — i.e. **without the assessor filling the rubric or signing**. The sequential *"instructor fills & submits → TM approves"* flow is bypassable by a privileged user. Open guardrail question (require rubric filled first?) is flagged, not decided. Full record: [[Assessment Privileged Approval - TM Section While Assigned]].
+
+## 2026-07-16 — "Row actions = kebab only" is now a default, not a hard rule
+
+Qusai asked to replace the kebab (⋮) with **inline [[History Form Buttons Unified - InlineAction Primitive|InlineAction]] buttons** on the Initial-TOR-Documents list. The 2026-06-04 kebab-only rule still stands as the default, but **inline tone-coded buttons are an accepted alternative when he explicitly asks per surface** — don't auto-convert either way. See [[Patterns#Table row actions = kebab menu only]].
+
 ## 2026-07-15 — Purchase-terms acknowledgment is a nudge, not provable consent
 
 The [[tat-portal]] course-detail *Important Notes* (auto-close forfeiture, exam-retake fees, 3-day refund — all material money terms) now require a checkbox acknowledgment before Add-to-Cart/Enroll. **Qusai scoped it deliberately as a UX nudge, not provable consent — frontend-only, no backend.** Nothing is recorded server-side and the gate is bypassable by a direct `POST` to cart-add/checkout. Rationale: keep scope small; the modal's job is to make a buyer *see* the terms, not to produce a legal record. **Revisit trigger:** if consent ever needs to be *provable*, add a thin per-order acknowledgment on the backend. Full record: [[Course Purchase Important-Notes Acknowledgment Gate]].

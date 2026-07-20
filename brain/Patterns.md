@@ -160,6 +160,9 @@ Plain Tailwind tables styled with the shared theme tokens (no MUI X DataGrid / T
 
 Hard rule (Qusai, 2026-06-04): **never expose row actions as bare icons/buttons**. Every table row's actions live in a **kebab (⋮) button → dropdown menu**, each item rendered as **icon + text**. Reusable component: `src/components/ui/RowActionsMenu.tsx` (Radix dropdown; takes `actions: { label, icon, onClick, destructive?, disabled? }[]`; trigger/menu items `stopPropagation` so a clickable row doesn't fire). The actions column header is empty (`sr-only "Actions"`). Used by the Manage Staff table (Edit; Deactivate etc. will be added as menu items, not new buttons).
 
+> [!warning] No longer absolute (Qusai, 2026-07-16)
+> Qusai explicitly asked to **replace the kebab with inline buttons** on the Initial-TOR-Documents list (→ [[History Form Buttons Unified - InlineAction Primitive#Sweep continued + kebab reversal (2026-07-16)]]). So the kebab-only rule is now the *default*, not a hard law: **inline tone-coded [[History Form Buttons Unified - InlineAction Primitive|InlineAction]] buttons are an accepted alternative when he asks for them.** Don't silently convert kebabs to inline (or vice-versa) — follow the explicit request per surface.
+
 ## tat-ws: always use the shared `Table` component
 
 Standing rule (Qusai, 2026-06-28): in [[tat-ws]], **every table uses the shared `components/Table/Table.tsx`**. New tables are built with it; any existing hand-rolled `<table>` we touch gets **migrated** to it. Don't hand-roll `<table>`/`<thead>`/`<tbody>` markup in tat-ws anymore.
@@ -245,3 +248,21 @@ Exporting a TAT form as a PDF ([[Export History Form - TAT Form 031 PDF|Form 031
 HTML reproduction tips that worked: one bordered `<table>` **per section** (not one giant table) with a `<colgroup>` per section for column control; `table-layout: fixed` + `margin-bottom: -1px` to collapse the seams between section tables; checkboxes as `&#9746;`/`&#9744;`; embed images (logo, **signatures**) as base64 `data:` URIs *before* rendering (`s3Service.getFile` returns raw base64 — wrap it as `data:image/png;base64,…`, inferring MIME from the key extension). Match the official form's exact spelling, even typos ("ASSESSEMENT", "COMUNCATION", "REFFERENCE").
 
 **Cross-service aggregation goes in the controller, not the service.** The History-Form export needs data from four services (history-form + mandatory-training + training-history + sit-in). Putting all four injections into `StaffHistoryFormService` would create a **circular DI** (the mandatory/sit-in services already depend on it). Instead the **controller** — which already injects every service — fetches the sibling sections and passes them into `historyFormService.downloadPdf(actor, userId, sections)`, exactly the compose-in-controller idiom `getMyHistoryForm` already used. The service owns only the data it already owns (basic info, quals, audit log) plus S3/PDF.
+
+## Async default-value prefill in react-hook-form (tat-prereq)
+
+`useZodForm`/RHF captures `defaultValues` **at mount**, so a value that arrives later from an async fetch (staff profile, saved signature, etc.) will **not** appear in the field. To prefill from async data without clobbering user/saved input:
+
+```ts
+const { data: staff } = useStaffDetail(staffId, { enabled: !field }); // don't fetch if already filled
+useEffect(() => {
+  if (!staff || form.getValues('name')) return;      // only when still empty
+  form.setValue('name', `${staff.firstName} ${staff.lastName}`.trim());
+}, [staff, form]);
+```
+
+Rules: **`setValue` only when the field is empty** (never overwrite a saved value), and gate the query `enabled` on emptiness so it doesn't fire on already-filled / read-only forms. Used by [[Auto-Populate Instructor Name in Forms]] (instructor name from the staff profile) and [[Profile Signature Sign Button]] (saved signature from `/auth/me`). Note this is a **convenience prefill, not auto-save** — the value is set client-side; the user still has to Save/Submit for it to persist.
+
+## Confirm the config/URL exists before wiring a cross-app link (tat-prereq)
+
+Companion to [[Patterns#Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control|"confirm the backend can filter"]]. A link to another app (e.g. History Form → the [[tat-portal]] online courses) needs that app's **base URL as config** — tat-prereq only had `API_URL` / `S3_BASE` / `DASHBOARD_URL`. Added an **optional** `NEXT_PUBLIC_ONLINE_COURSES_URL` and made the link helper return `null` when unset, so the control simply doesn't render until the env var is provided per environment. See [[History Form Online Course Deep-Links]] — the link was invisible locally purely because the var wasn't set. Rule: a cross-app deep link is a **dead control** until its base URL is configured; make it null-safe and flag the deploy dependency.

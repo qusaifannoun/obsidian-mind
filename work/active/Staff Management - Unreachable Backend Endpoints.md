@@ -103,5 +103,6 @@ if (ctx.stage === StaffTorFormWorkflowStage.APPROVED) {
 - [[TAT-409 Staff Management Subsystem]] · [[Staff Management Subsystem & TOR Model]]
 - [[TAT-409 Bug & Gap List]] — the earlier manual inspection; this sweep is its mechanical counterpart
 - [[Aircraft Category Filter - TOR Matrix]] — the **inverse** case: an FE control with no backend data (vs a backend capability with no FE control here)
+- [[TOR Document History - Hide File Key]] — the unbounded document-history growth + orphaned-S3 cleanup is another backend follow-up in this subsystem
 - [[tat-app-ws Backend]] · [[tat-prereq]] · [[tat-ws]]
 - [[Systems Thinking]] — replaced one-bug-at-a-time discovery with an exhaustive reachability diff
