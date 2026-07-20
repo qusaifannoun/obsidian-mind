@@ -1,13 +1,14 @@
 ---
 date: 2026-07-19
-description: "SA-only absolute-date override that replaces the computed mandatory-training refresher date at two scopes — per-instructor slot and course-wide fleet stamp; design only, backend handed to BE"
+description: "SA-only absolute-date override replacing the computed mandatory-training refresher date at two scopes (per-instructor slot + course fleet stamp); FE shipped & aligned to the backend the BE team delivered — TAT-447, pending staging verification"
 tags:
   - work-note
   - decision
   - project/tat
-status: backlog
+status: active
 quarter: Q3-2026
 project: tat-prereq
+ticket: TAT-447
 ---
 
 # Refresher Date Override — SA-Only Absolute-Date Override
@@ -20,7 +21,7 @@ The BA reframed a "make the period configurable" ask mid-grill. The 2-year manda
 Scope is locked to the **7 mandatory training courses only** (`StaffHistoryMandatoryTraining`). The override sets the stored date on those slots — mirroring the existing aircraft-qualification refresher override precedent — and does **not** touch the 2-year period constant itself.
 
 > [!abstract] Ticket
-> To be created and assigned to [[Dania]]. Not started.
+> [TAT-447](https://cryptonic-art.atlassian.net/browse/TAT-447) — created, written in the team's Current/Desired/Requirements format, assigned to [[Dania]]. Backend + FE shipped.
 
 ## Decisions (resolved in the grill)
 
@@ -39,16 +40,34 @@ Scope is locked to the **7 mandatory training courses only** (`StaffHistoryManda
 - **Audit precedent to mirror:** `staff-qualification.schema.ts:125-134` (`refresherUpdateSource` / `refresherUpdateNote` / `refresherUpdatedAt`).
 - **Role set to reuse for gating (but narrowed to SA per BA):** `MANDATORY_TRAINING_PRIVILEGED_EDITOR_ROLES = FORM_285_AUTO_APPROVE_ROLES` [SA, AD, QM, TM] at `enums.ts:1054`. SA-only precedent = cert publish `@Roles(SUPERADMIN)` at `online-course-certificate.controller.ts:77`.
 
+## Shipped (2026-07-20)
+
+Built end-to-end. Wrote a self-contained backend handoff prompt for the BE team (they don't share this vault); they shipped both endpoints in [[tat-app-ws Backend]], and I read their shipped contract and aligned the FE to it.
+
+**One correction surfaced by reading the shipped code:** the per-instructor route shipped as `.../refresher-date`, **not** the `.../refresher-override` I'd originally assumed and wired — the tat-prereq call would have 404'd. Fixed the fetcher URL. The tat-ws fleet-stamp path, both request bodies `{ dueDate, reason? }`, and the `{ affected }` JSON response all matched as assumed; also surfaced the real affected-instructor count in the tat-ws success toast.
+
+**Confirmed backend model (from tat-app-ws):**
+- One DTO `OverrideMandatoryRefresherDTO` `{ dueDate: YYYY-MM-DD (@IsDateString), reason?: string (max 500) }` for **both** scopes.
+- `refresherDate = dueDate − 30 days` — a **fixed 30-day** subtraction (`ONE_MONTH_MS`), not a calendar month.
+- Only **accomplished** slots are touched; fleet stamp is **mandatory-courses-only** and returns `{ affected: number }`; per-instructor returns the updated `MandatoryTrainingItemResponseDTO`.
+- Four new slot audit fields (`refresherOverrideSource / By / At / Reason`), **cleared on a real completion**.
+- Both routes gated by action `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER`.
+
+**Shipped endpoints:**
+- Per-instructor: `PATCH /staff-management/profiles/:userId/history-form/mandatory-training/:courseCode/refresher-date` (`staff-management.controller.ts`).
+- Fleet stamp: `PATCH /online-courses/:id/refresher-date` → `{ affected }` (`online-course.controller.ts`).
+
+**Commits (all on `dev`, tsc-clean):** tat-prereq `9ff648b` (FE) + `1771a68` (URL fix) · tat-ws `e2ee0e0` (fleet stamp) + `82b0273` (affected-count toast).
+
 ## Status
 
-Design only. Nothing built. FE (tat-prereq + tat-ws) is the next session's work; backend handed to the BE team.
+Backend + FE shipped and aligned. **Not browser/staging-verified.** No FE work outstanding.
 
-## Still open (backend, BE team)
+## Still open (verification)
 
-- [ ] **Schema:** add `refresherOverrideBy` / `refresherOverrideAt` / `refresherOverrideSource` / `refresherOverrideReason?` to `StaffHistoryMandatoryTraining`.
-- [ ] **Service:** SA-only `setSlotRefresherDate` (per-instructor) + `bulkStampCourseRefresherDate` (mandatoryCourseCode → all accomplished slots) + audit + review-history timeline entry.
-- [ ] Gate the fleet stamp to **mandatory-training courses only**; allow **past dates**; **reset-to-computed deferred**.
-- [ ] **Notifications** fire immediately when an override pushes a reminder into the past (accepted — no handling this pass).
+- [ ] **Per-instructor:** as SA, set a date on an **accomplished** row → Due updates, Refresher shows −1 month, row refreshes.
+- [ ] **Fleet stamp:** as SA, set a date on a mandatory course → toast shows the real count; only **accomplished** holders change; not-started rows untouched.
+- [ ] **Confirm SA users actually have the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` action granted** — otherwise both calls 403 despite the SA-only FE gate.
 
 ## Related
 
