@@ -1,11 +1,11 @@
 ---
 date: 2026-07-19
-description: "SA-only absolute-date override replacing the computed mandatory-training refresher date at two scopes (per-instructor slot + course fleet stamp); FE shipped & aligned to the backend the BE team delivered — TAT-447, pending staging verification"
+description: "SA-only absolute-date override replacing the computed mandatory-training refresher date at two scopes (per-instructor slot + course fleet stamp); shipped, aligned to the BE team's contract, and verified end-to-end on staging — TAT-447, feature complete"
 tags:
   - work-note
   - decision
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ticket: TAT-447
@@ -61,16 +61,32 @@ Built end-to-end. Wrote a self-contained backend handoff prompt for the BE team 
 
 ## Status
 
-Backend + FE shipped and aligned. **Not browser/staging-verified.** No FE work outstanding.
+**Verified end-to-end on staging (2026-07-23) — feature complete.** SuperAdmin successfully overrode the date on both scopes: per-instructor (tat-prereq Training & Validity row) and the course fleet stamp (tat-ws `/manage-courses/online-courses/[id]/refresher`). No FE work outstanding.
 
-## Still open (verification)
+## Verified (2026-07-23)
 
-- [ ] **Per-instructor:** as SA, set a date on an **accomplished** row → Due updates, Refresher shows −1 month, row refreshes.
-- [ ] **Fleet stamp:** as SA, set a date on a mandatory course → toast shows the real count; only **accomplished** holders change; not-started rows untouched.
-- [ ] **Confirm SA users actually have the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` action granted** — otherwise both calls 403 despite the SA-only FE gate.
+- [x] **Per-instructor:** as SA, set a date on an **accomplished** row in tat-prereq — the override took effect (not 403).
+- [x] **Fleet stamp:** as SA, set a date on a mandatory course in tat-ws — the override took effect (not 403).
+- [x] **SA holds the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` action grant** — the load-bearing unknown from the checklist. Confirmed by the overrides succeeding rather than 403'ing.
+
+tat-ws UI route: `apps/tat-ws/src/app/(private)/manage-courses/online-courses/[id]/refresher/page.tsx` + `_components/ManageRefresherDate/index.tsx`. Shipped commits unchanged: tat-prereq `9ff648b`+`1771a68` · tat-ws `e2ee0e0`+`82b0273`.
+
+## Open spec questions — block the Slice 0 resolver (2026-07-23)
+
+This feature is the target of [[TAT Delivery Orchestrator|Slice 0]] — a pure resolver `(instructor, course) → effective refresher date` rebuilt **from the ACs, not from the shipped code**. Running that lens over the Override ACs surfaced **four precedence/lifecycle questions the ACs never state.** They map onto the [[Spec Gap Taxonomy & Grilling Agent|grilling lenses]] (collision · order-sensitivity · exclusion); a human must answer them before the resolver can be coded correctly, because "tests from ACs, never from coder output" means the shipped code's ad-hoc choices don't count as spec.
+
+1. **Precedence between calculated / per-instructor / course-level is never stated** *(collision lens)*. The grill decided "accomplished rows override, not-yet-accomplished stay computed" and "fleet stamp clobbers per-instructor (last-write-wins)" — but a full read-time ordering across all three sources is **not an AC**. Partially implied, not written.
+2. **A new per-instructor override applied *after* a course override — allowed or blocked?** *(order-sensitivity lens)*. The grill states the reverse (fleet clobbers per-instructor); last-write-wins *implies* instructor-after-course is allowed, but it is **not stated explicitly**.
+3. **Future course completion recalculates — does it wipe an existing override?** *(order-sensitivity lens)*. **Effectively answered:** the grill says overrides are transient and a real completion recomputes accomplished + 2y, and the shipped backend **clears the four audit fields on completion**. This decision exists but was never promoted to an AC — do that.
+4. **How to remove an override and revert to the calculated date** *(exclusion lens)*. **Genuinely unspecified** — no AC, no grill decision, and nothing in the shipped contract describes an un-override / revert path. This is the real gap.
+
+> [!question] Honest status vs the dump
+> The dump framed all four as open; on inspection #3 is already decided-and-shipped (completion wipes) and #2 is implied by last-write-wins. Truly undecided: **#1** (a full precedence ordering as an AC) and **#4** (a revert path, which doesn't exist anywhere). Resolving these = promote #2/#3 into written ACs and get a product decision on #1/#4.
 
 ## Related
 
+- [[TAT Delivery Orchestrator]] — Slice 0 rebuilds this feature's resolver from ACs; these four questions block it
+- [[Spec Gap Taxonomy & Grilling Agent]] — the four questions are a live instance of the three grilling lenses
 - [[History Form - Training & Validity Records]] — the section this override acts on
 - [[Staff Management Subsystem & TOR Model]] — domain reference (Due = Accomplished + 2y; Refresher = Due − 1 month)
 - [[tat-prereq Forms Refactor - Zod + RHF]] — the FE form conventions the per-instructor control must follow

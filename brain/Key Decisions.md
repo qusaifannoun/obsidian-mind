@@ -9,6 +9,10 @@ tags:
 
 Architectural or workflow decisions worth recalling. Link to the full [[Decision Record]] when one exists.
 
+## 2026-07-23 — Multi-agent delivery is an assembly line: parallel vertical slices, not role specialization
+
+The only surviving rationale for a multi-agent delivery pipeline is **throughput via parallelism** — running vertical slices at different pipeline stations at once. **Role specialization was rejected** (a discipline-split agent was not shown to beat one well-prompted agent). Because agents are **stateless**, the whole problem reduces to what's in each agent's context window at run time: [[TAT Delivery Orchestrator|Claude Code is the control plane]], `codex exec` is a coder station. Load-bearing constraints Qusai fixed: **worktree+branch per task · merge-on-green one slice at a time · the branch's own coder resolves conflicts (not the manager) · dependencies are a DAG topologically sorted, never runtime judgment · tests written from the ACs, never from coder output · handoff via filesystem + git diffs, never shared context.** Design-stage — nothing built; first action is Slice 0, the pure refresher-date resolver. Full record: [[TAT Delivery Orchestrator]].
+
 ## 2026-07-16 — A privileged approver can approve an Assessment from any pre-approval state
 
 To let a Super Admin operate the Assessment TM section without waiting for the two-role flow, the backend `approve()` was relaxed to reject only when already `APPROVED` (it stays `assertApprover`-gated). **Implication Qusai accepted:** a privileged SA/TM can now approve an assessment straight from `assigned`/`draft` — i.e. **without the assessor filling the rubric or signing**. The sequential *"instructor fills & submits → TM approves"* flow is bypassable by a privileged user. Open guardrail question (require rubric filled first?) is flagged, not decided. Full record: [[Assessment Privileged Approval - TM Section While Assigned]].

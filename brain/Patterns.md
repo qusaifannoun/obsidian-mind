@@ -9,6 +9,25 @@ tags:
 
 Recurring patterns discovered across work.
 
+## Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)
+
+When the vault's record of what's done drifts from reality, the two directions cost wildly differently, so the verification model should be **asymmetric**:
+
+- **Dangerous — vault says DONE when it isn't.** The [[TAT Delivery Orchestrator|orchestrator DAG]] consumes a **false satisfied dependency** and builds downstream on it; the failure surfaces far from its cause.
+- **Cheap — vault says NOT DONE when it is.** The agent just redoes finished work. Wasted cycles, no corruption.
+
+**Rule: bias every doubt toward NOT-DONE.** A stale "unverified" is a redo; a stale "verified" is a landmine. Corollary: `verified` is a *timestamp, not a property* — it says when it was checked, not that it still holds (see [[Gotchas#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]). Make re-verification mechanical (a code pointer → grep/CI) so a claim can *expire* when its pointer moves. Full design: [[Vault Provenance & Verification Model]]. Same spirit as [[Agent Handoff Protocol]] — verified must mean *exercised*, not built.
+
+## Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)
+
+Design rule for the [[TAT Delivery Orchestrator|delivery pipeline]]: spec gaps are **three kinds, each cheapest to catch at a different stage** — pushing all three to end-stage QA is the most expensive place to find any of them.
+
+- **Traceability gap** (spec says it, code doesn't) → **automate**: every AC → ≥1 test → ≥1 code path.
+- **Conventional omission** (forgot "forgot password", forgot undo) → a **grilling agent**.
+- **Contextual intent** (the client-specific *why*) → **human only**, *mined* by the grilling agent — it can surface the question but never answer it.
+
+The grilling agent needs **fixed lenses, not vibes**: (1) where two rules collide, (2) whether A-then-B differs from B-then-A, (3) what "must update X" silently excludes. It **asks before suggesting an answer** (a suggested answer gets rubber-stamped instead of yielding real intent), **terminates in a written artifact** (resolved rules appended as new ACs, not a chat log), and **only asks about ambiguities that would change code or a test assertion** (the stopping rule). Full design: [[Spec Gap Taxonomy & Grilling Agent]].
+
 ## TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)
 
 Convention (Qusai, 2026-07-16): a large share of TAT bug/task work is written up in a **Word document**, not on Jira. When a `/om-dump` (or any handoff) arrives with **`Ticket: —`**, that means there is no ticket — **leave the ticket field blank; do not infer a Jira number from the feature or a related note.** I did exactly that once — labelled an assessment-audit backend item `Ticket: TAT-423` because it touched the assessment feature — and it was wrong; the item wasn't on Jira at all.

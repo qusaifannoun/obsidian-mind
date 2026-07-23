@@ -54,5 +54,6 @@ graph TD
 ## Related
 
 - [[TAT API & Auth Model]] — the shared contract every frontend depends on
+- [[TAT Delivery Orchestrator]] — design-stage multi-agent pipeline that drives these repos as stations
 - [[North Star]] — current focus
 - Active work: see [[Index|Work Notes]]

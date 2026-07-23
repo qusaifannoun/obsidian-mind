@@ -9,6 +9,15 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## "Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)
+
+> [!warning] The vault's `verified` marker records *when* a fact was checked, not that it is *still* true. A bullet verified three weeks ago is trusted today even if the code moved underneath it.
+> This is a property of the vault-as-state-store, and it bites the [[TAT Delivery Orchestrator|delivery pipeline]] hardest: the dependency DAG reads vault state to decide a slice's prerequisites are done, so a stale "verified" becomes a **false satisfied dependency** the whole pipeline builds on.
+>
+> **Second trap in the same place: a consistency-based write gate filters noise, not falsehood.** A gate that only admits writes agreeing with the incumbent rejects a *correction* exactly as readily as an *error* — both disagree with what's stored. Consistency is not truth; a confidently-wrong bullet becomes self-protecting.
+>
+> **Mitigation direction** (proposal, not built): store a **code pointer** (`file:line`/symbol/test) with each verified bullet so re-verification is grep/CI instead of re-reasoning, and a **provenance field** (which model/harness wrote it). Full design + the drift asymmetry: [[Vault Provenance & Verification Model]]. Same family as [[Agent Handoff Protocol]]'s "never claim verified if you only built or typechecked it."
+
 ## "Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)
 
 > [!warning] An Approved **Form 32** was still editable by the owning instructor — they could reopen and resubmit it — while **Form 285** and the **Assessment** report had locked on approval all along.
