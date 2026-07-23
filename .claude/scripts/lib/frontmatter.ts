@@ -3,7 +3,7 @@
  * frontmatter fields, and wikilink presence on non-trivial notes.
  */
 
-import { basename } from "node:path";
+import { basename, posix } from "node:path";
 import { readFileSync } from "node:fs";
 
 const ROOT_FILES: ReadonlySet<string> = new Set([
@@ -25,6 +25,33 @@ const SKIP_PATH_SEGMENTS: readonly string[] = [
 	"templates/",
 	"thinking/",
 ];
+
+/**
+ * Return true if the path is an auto-memory file in ~/.claude/ that should
+ * be flagged (#81). Only MEMORY.md (the auto-loaded index) is allowed there
+ * — all durable knowledge goes to brain/ topic notes per CLAUDE.md.
+ *
+ * The path is lexically normalized first (separators unified, `.`/`..`
+ * segments collapsed) so a path can't dodge the check by spelling the
+ * memory dir indirectly. Callers should additionally pass a
+ * realpath-resolved path when the file exists, so symlinked spellings are
+ * caught too — see the guard in validate-write.ts.
+ *
+ * The predicate requires BOTH `/.claude/` and `/memory/` segments and
+ * exempts `MEMORY.md` by basename, so it never fires on vault paths like
+ * `brain/Memories.md`, project paths containing the word "memory", or
+ * other `.claude/projects/<x>/` subdirs (transcripts, hook output).
+ */
+export function isBlockedMemoryPath(filePath: string): boolean {
+	// Separators unified FIRST, then posix-normalize: normalize() on a POSIX
+	// host doesn't treat "\" as a separator, so backslash-spelled ".."
+	// segments would otherwise survive uncollapsed.
+	const normalized = posix.normalize(filePath.replaceAll("\\", "/"));
+	if (!normalized.includes("/memory/")) return false;
+	if (!normalized.includes("/.claude/")) return false;
+	const base = basename(normalized);
+	return base !== "MEMORY.md";
+}
 
 /**
  * Return true if the file should be skipped (not validated).
@@ -80,7 +107,25 @@ export function validateContent(content: string): string[] {
 		);
 	}
 
+	const ticketLinks = countTicketIdWikilinks(content);
+	if (ticketLinks > 0) {
+		warnings.push(
+			`${ticketLinks} ticket-ID wikilink(s) (e.g. [[PROJ-…]]) — ticket IDs are plain text or tracker links, never wikilinks (they are not notes)`,
+		);
+	}
+
 	return warnings;
+}
+
+/**
+ * Count [[PROJ-12345]]-shaped wikilinks — ticket IDs are not notes, and
+ * these phantom edges are what a broken-link gate later trips on (#108).
+ * Matches the bare form and the table-escaped-pipe forms. Exported so
+ * validate-write can emit the machine-readable policy result (#117) from
+ * the same decision validateContent's prose comes from.
+ */
+export function countTicketIdWikilinks(content: string): number {
+	return content.match(/\[\[[A-Z]{2,10}-\d+(\\\||&#124;|\||\]\])/g)?.length ?? 0;
 }
 
 /**
