@@ -1,0 +1,16 @@
+{
+  "infra": [
+    "scripts/loom",
+    ".claude/commands/delegate.md"
+  ],
+  "neverTouch": [
+    "work",
+    "perf",
+    "org",
+    "reference",
+    "brain/Memories.md",
+    "brain/North Star.md",
+    "Home.md",
+    "vault-manifest.json"
+  ]
+}
