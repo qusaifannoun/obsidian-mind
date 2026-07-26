@@ -1,0 +1,10 @@
+{
+  "extends": "../../.claude/scripts/tsconfig.json",
+  "compilerOptions": {
+    "typeRoots": [
+      "../../.claude/scripts/node_modules/@types",
+      "./node_modules/@types"
+    ]
+  },
+  "include": ["**/*.ts"]
+}

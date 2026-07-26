@@ -1,0 +1,10 @@
+{
+  "slices": [
+    {
+      "id": "codex-smoke",
+      "plan": "scripts/loom/jobs/codex-smoke.plan.md",
+      "station": "codex",
+      "test": "test -f CODEX_SMOKE.md && grep -q 'orchestrator worktree' CODEX_SMOKE.md"
+    }
+  ]
+}

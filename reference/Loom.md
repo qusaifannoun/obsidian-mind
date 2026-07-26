@@ -1,17 +1,20 @@
 ---
 date: 2026-07-23
-description: "Design-stage architecture for a multi-agent delivery pipeline — Claude Code as control plane routing vertical slices to codex-exec coder stations via git worktrees; nothing built yet"
+description: "Loom — a portable, agent-agnostic multi-agent delivery pipeline: a control plane routes vertical slices to coder stations in isolated git worktrees, test-gated and merge-on-green. Harness built and proven (sim + codex); TAT is its first project"
 tags:
   - reference
   - project/tat
+aliases:
+  - Delivery Orchestrator
+  - Orchestrator
 ---
 
-# TAT Delivery Orchestrator
+# Loom
 
-A **design-stage** architecture for driving delivery across the [[TAT Platform]] repos with multiple coding agents. Nothing here is built or run — this note is the decision record for the shape, so the first line of code inherits it. The control plane lives in this vault's tooling ([[tat-prereq]] et al. are the repos it operates on, as *stations*).
+**Loom** is a portable, **agent-agnostic** delivery pipeline for driving code changes across a repo with multiple coding agents. It isn't tied to any one project — the same setup runs across repos; [[TAT Platform]] is its first instantiation. The control plane lives in this vault's tooling (`scripts/loom/`); the repos it operates on are *stations*. The name is the weave: parallel worktree threads woven back into one `main`.
 
-> [!warning] Nothing built
-> Whole system unbuilt as of 2026-07-23. The next action is **Slice 0** (see below); everything else is downstream of that one diff. Do not treat any part of this as verified — it is a plan.
+> [!success] Harness built & proven (2026-07-23)
+> The control plane lives in `scripts/loom/` and the delivery loop runs **end to end** — proven with a deterministic `sim` station and a real `codex` station (worktree → station → test-gate → merge-on-green, dry-run by default). Agent-agnosticism is real: stations are command templates in `stations.config.json`, so codex / claude / gemini / aider are config lines, not code. What remains design-stage is **Slice 0**, the first real *product* slice (the refresher-date resolver), still blocked on two open ACs — see the Slice 0 open questions below.
 
 ## The core rationale
 

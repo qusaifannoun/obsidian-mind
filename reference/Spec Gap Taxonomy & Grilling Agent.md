@@ -8,7 +8,7 @@ tags:
 
 # Spec Gap Taxonomy & Grilling Agent
 
-A **design-stage** process note for the [[TAT Delivery Orchestrator]]. The orchestrator writes **tests from the acceptance criteria, never from coder output** — which only works if the ACs are *complete* before decomposition. This note is how the ACs get complete: catching each kind of spec gap at the stage where it's cheapest to catch.
+A **design-stage** process note for the [[Loom]]. The orchestrator writes **tests from the acceptance criteria, never from coder output** — which only works if the ACs are *complete* before decomposition. This note is how the ACs get complete: catching each kind of spec gap at the stage where it's cheapest to catch.
 
 > [!warning] Design note
 > Nothing built or measured. The gap-catch rate by stage is unknown (see Still open).
@@ -45,7 +45,7 @@ The grilling agent sits in the middle: it catches conventional omissions outrigh
 
 ## Related
 
-- [[TAT Delivery Orchestrator]] — this note supplies the *complete ACs* that the orchestrator's "tests from ACs" stage depends on
+- [[Loom]] — this note supplies the *complete ACs* that the orchestrator's "tests from ACs" stage depends on
 - [[Agent Handoff Protocol]] — same principle: a session ends in a written artifact, never in shared context
 - [[Patterns#Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)]]
 - [[TAT Platform]] — the delivery this process feeds

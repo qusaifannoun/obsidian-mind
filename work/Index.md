@@ -66,7 +66,7 @@ Real, unfinished, but **not being worked right now** — specs awaiting a build,
 All archived to `work/archive/2026/`.
 
 ### Q3 2026
-- [[Refresher Date Override - SA-Only Absolute-Date Override]] — TAT-447, **shipped + verified end-to-end on staging (2026-07-23)**: SA-only absolute-date override replacing the computed mandatory-training refresher date at **two scopes** — per-instructor slot ([[tat-prereq]]) + course fleet stamp ([[tat-ws]]); last-write-wins, a real completion wipes it. SA confirmed to hold the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` grant (overrides took effect, not 403). tat-prereq `9ff648b`+`1771a68` · tat-ws `e2ee0e0`+`82b0273`. Two resolver-level spec gaps (precedence ordering, revert path) lifted onto [[TAT Delivery Orchestrator]] Slice 0
+- [[Refresher Date Override - SA-Only Absolute-Date Override]] — TAT-447, **shipped + verified end-to-end on staging (2026-07-23)**: SA-only absolute-date override replacing the computed mandatory-training refresher date at **two scopes** — per-instructor slot ([[tat-prereq]]) + course fleet stamp ([[tat-ws]]); last-write-wins, a real completion wipes it. SA confirmed to hold the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` grant (overrides took effect, not 403). tat-prereq `9ff648b`+`1771a68` · tat-ws `e2ee0e0`+`82b0273`. Two resolver-level spec gaps (precedence ordering, revert path) lifted onto [[Loom]] Slice 0
 - [[Form 32 PIC Bugs & Cross-Frontend Auth Fixes]] — Form 32 PIC save clobber (`0969d044`) + create-401 seed gap, signature-draw reuse, and a cross-repo auth bundle (reset endpoint, login min, `x-client-app` routing); all pushed to `dev` (2026-07-08)
 - [[Staff Self-Service Polish - Nationality, Password, Profile Data]] — QA batch: nationality dropdown, national-ID validation, self-service change-password, `profiles/me` full-mapping fix, per-TOR quals/assessments aggregation, DOB format, Form 285 title dropdown, Manage Staff eye icon; shipped `dev` + verified on staging (`c267616`/`4a17423`/`af17500`, 2026-07-08)
 
@@ -79,7 +79,7 @@ All archived to `work/archive/2026/`.
 ## Reference
 
 - [[TAT Platform]] — system map of all 5 repos and how they connect
-- [[TAT Delivery Orchestrator]] — **design-stage** multi-agent delivery pipeline (Claude Code control plane → codex-exec coder stations via git worktrees); nothing built yet
+- [[Loom]] — **design-stage** multi-agent delivery pipeline (Claude Code control plane → codex-exec coder stations via git worktrees); nothing built yet
 - [[Spec Gap Taxonomy & Grilling Agent]] — **design-stage** companion: three kinds of spec gap, each caught at the cheapest stage; how ACs get complete before the pipeline runs
 - [[Vault Provenance & Verification Model]] — **design-stage**: why the vault's "verified" is only a timestamp, a proposed code-pointer + provenance schema, and the DONE-vs-NOT-DONE drift asymmetry the DAG depends on
 - [[TAT API & Auth Model]] — the shared backend contract
@@ -93,14 +93,14 @@ All archived to `work/archive/2026/`.
 
 | Date | Decision | Status | Link |
 |------|----------|--------|------|
-| 2026-07-23 | Multi-agent delivery pipeline is an **assembly line, not an org chart** — parallelism for throughput, not role specialization. Worktree+branch per slice, merge-on-green one at a time, tests from ACs not coder output, handoff via filesystem+diffs. Design-stage; first action is Slice 0 (the resolver) | proposed | [[TAT Delivery Orchestrator]] |
+| 2026-07-23 | Multi-agent delivery pipeline is an **assembly line, not an org chart** — parallelism for throughput, not role specialization. Worktree+branch per slice, merge-on-green one at a time, tests from ACs not coder output, handoff via filesystem+diffs. Design-stage; first action is Slice 0 (the resolver) | proposed | [[Loom]] |
 | 2026-07-19 | Don't make the 2y mandatory-training period configurable — add **one** SA-only absolute-date override that replaces the computed refresher date at two scopes (per-instructor slot + course fleet stamp). Last-write-wins; a real completion wipes it; SA-only on every platform | accepted | [[Refresher Date Override - SA-Only Absolute-Date Override]] |
 | 2026-07-15 | Course-purchase Important-Notes acknowledgment is a frontend **UX nudge, not provable consent** — no backend, deliberately bypassable. Revisit with a per-order acknowledgment only if consent must become provable | accepted | [[Course Purchase Important-Notes Acknowledgment Gate]] |
 | 2026-07-14 | Form 32 drops its bespoke 38px document styling for the shared 44px fields — shared-component consistency beats per-document fidelity. Precedent for Form 285 / TAT Form 031 | accepted | [[Form 32 Field Sizing - Shared Components Over Document Fidelity]] |
 
 ## Open Questions
 
-- **Refresher-date resolver — 2 unresolved precedence/lifecycle ACs** (block [[TAT Delivery Orchestrator|Slice 0]]): a full precedence ordering (calculated/per-instructor/course) and a revert-to-calculated path are genuinely unspecified. Completion-wipes and last-write-wins are decided, just not yet written as ACs. The shipped feature is done + staging-verified; these belong to the *resolver rebuild*, so they now live on [[TAT Delivery Orchestrator#Slice 0 open questions (inherited from the archived Override note)]]. Pending product decision
+- **Refresher-date resolver — 2 unresolved precedence/lifecycle ACs** (block [[Loom|Slice 0]]): a full precedence ordering (calculated/per-instructor/course) and a revert-to-calculated path are genuinely unspecified. Completion-wipes and last-write-wins are decided, just not yet written as ACs. The shipped feature is done + staging-verified; these belong to the *resolver rebuild*, so they now live on [[Loom#Slice 0 open questions (inherited from the archived Override note)]]. Pending product decision
 
 ## Archive
 

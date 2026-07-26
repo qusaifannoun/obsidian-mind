@@ -13,14 +13,14 @@ Recurring patterns discovered across work.
 
 When the vault's record of what's done drifts from reality, the two directions cost wildly differently, so the verification model should be **asymmetric**:
 
-- **Dangerous — vault says DONE when it isn't.** The [[TAT Delivery Orchestrator|orchestrator DAG]] consumes a **false satisfied dependency** and builds downstream on it; the failure surfaces far from its cause.
+- **Dangerous — vault says DONE when it isn't.** The [[Loom|orchestrator DAG]] consumes a **false satisfied dependency** and builds downstream on it; the failure surfaces far from its cause.
 - **Cheap — vault says NOT DONE when it is.** The agent just redoes finished work. Wasted cycles, no corruption.
 
 **Rule: bias every doubt toward NOT-DONE.** A stale "unverified" is a redo; a stale "verified" is a landmine. Corollary: `verified` is a *timestamp, not a property* — it says when it was checked, not that it still holds (see [[Gotchas#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]). Make re-verification mechanical (a code pointer → grep/CI) so a claim can *expire* when its pointer moves. Full design: [[Vault Provenance & Verification Model]]. Same spirit as [[Agent Handoff Protocol]] — verified must mean *exercised*, not built.
 
 ## Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)
 
-Design rule for the [[TAT Delivery Orchestrator|delivery pipeline]]: spec gaps are **three kinds, each cheapest to catch at a different stage** — pushing all three to end-stage QA is the most expensive place to find any of them.
+Design rule for the [[Loom|delivery pipeline]]: spec gaps are **three kinds, each cheapest to catch at a different stage** — pushing all three to end-stage QA is the most expensive place to find any of them.
 
 - **Traceability gap** (spec says it, code doesn't) → **automate**: every AC → ≥1 test → ≥1 code path.
 - **Conventional omission** (forgot "forgot password", forgot undo) → a **grilling agent**.

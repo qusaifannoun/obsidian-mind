@@ -55,7 +55,7 @@ Each field exists because its absence caused a real problem:
 
 ## Related
 
-- [[TAT Delivery Orchestrator]] — the code→code sibling of this protocol; same refusal of shared context in favor of filesystem + git diffs, applied to coder stations instead of the vault
+- [[Loom]] — the code→code sibling of this protocol; same refusal of shared context in favor of filesystem + git diffs, applied to coder stations instead of the vault
 - [[Skills]] — the vault's commands, including `/om-dump`
 - [[Patterns]] · [[Gotchas]] — where durable lessons from a handoff end up
 - [[TAT Platform]] — the repos this protocol covers

@@ -73,7 +73,7 @@ tat-ws UI route: `apps/tat-ws/src/app/(private)/manage-courses/online-courses/[i
 
 ## Open spec questions — block the Slice 0 resolver (2026-07-23)
 
-This feature is the target of [[TAT Delivery Orchestrator|Slice 0]] — a pure resolver `(instructor, course) → effective refresher date` rebuilt **from the ACs, not from the shipped code**. Running that lens over the Override ACs surfaced **four precedence/lifecycle questions the ACs never state.** They map onto the [[Spec Gap Taxonomy & Grilling Agent|grilling lenses]] (collision · order-sensitivity · exclusion); a human must answer them before the resolver can be coded correctly, because "tests from ACs, never from coder output" means the shipped code's ad-hoc choices don't count as spec.
+This feature is the target of [[Loom|Slice 0]] — a pure resolver `(instructor, course) → effective refresher date` rebuilt **from the ACs, not from the shipped code**. Running that lens over the Override ACs surfaced **four precedence/lifecycle questions the ACs never state.** They map onto the [[Spec Gap Taxonomy & Grilling Agent|grilling lenses]] (collision · order-sensitivity · exclusion); a human must answer them before the resolver can be coded correctly, because "tests from ACs, never from coder output" means the shipped code's ad-hoc choices don't count as spec.
 
 1. **Precedence between calculated / per-instructor / course-level is never stated** *(collision lens)*. The grill decided "accomplished rows override, not-yet-accomplished stay computed" and "fleet stamp clobbers per-instructor (last-write-wins)" — but a full read-time ordering across all three sources is **not an AC**. Partially implied, not written.
 2. **A new per-instructor override applied *after* a course override — allowed or blocked?** *(order-sensitivity lens)*. The grill states the reverse (fleet clobbers per-instructor); last-write-wins *implies* instructor-after-course is allowed, but it is **not stated explicitly**.
@@ -85,7 +85,7 @@ This feature is the target of [[TAT Delivery Orchestrator|Slice 0]] — a pure r
 
 ## Related
 
-- [[TAT Delivery Orchestrator]] — Slice 0 rebuilds this feature's resolver from ACs; these four questions block it
+- [[Loom]] — Slice 0 rebuilds this feature's resolver from ACs; these four questions block it
 - [[Spec Gap Taxonomy & Grilling Agent]] — the four questions are a live instance of the three grilling lenses
 - [[History Form - Training & Validity Records]] — the section this override acts on
 - [[Staff Management Subsystem & TOR Model]] — domain reference (Due = Accomplished + 2y; Refresher = Due − 1 month)

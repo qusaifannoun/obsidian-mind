@@ -1,0 +1,36 @@
+{
+  "worktreeBase": "../.loom/worktrees",
+  "reportBase": "../.loom/reports",
+  "defaultStation": "sim",
+  "stations": {
+    "sim": {
+      "command": "bash",
+      "args": ["{promptFile}"],
+      "cwd": "{worktree}"
+    },
+    "codex": {
+      "command": "codex",
+      "args": ["exec", "-s", "workspace-write", "-o", "{output}", "{promptText}"],
+      "cwd": "{worktree}",
+      "timeoutMs": 900000
+    },
+    "claude": {
+      "command": "claude",
+      "args": ["-p", "{promptText}", "--permission-mode", "acceptEdits"],
+      "cwd": "{worktree}",
+      "timeoutMs": 900000
+    },
+    "gemini": {
+      "command": "gemini",
+      "args": ["-y", "-p", "{promptText}"],
+      "cwd": "{worktree}",
+      "timeoutMs": 900000
+    },
+    "aider": {
+      "command": "aider",
+      "args": ["--yes", "--no-auto-commits", "--message", "{promptText}"],
+      "cwd": "{worktree}",
+      "timeoutMs": 900000
+    }
+  }
+}

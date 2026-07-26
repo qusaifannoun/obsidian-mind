@@ -1,0 +1,10 @@
+{
+  "slices": [
+    {
+      "id": "hello",
+      "plan": "scripts/loom/jobs/hello.plan.sh",
+      "station": "sim",
+      "test": "test -f ORCHESTRATOR_HELLO.md && grep -q 'delivery loop' ORCHESTRATOR_HELLO.md"
+    }
+  ]
+}

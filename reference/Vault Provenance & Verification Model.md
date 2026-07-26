@@ -8,7 +8,7 @@ tags:
 
 # Vault Provenance & Verification Model
 
-A **design-stage** note on how the vault stores *truth* — the state store the [[TAT Delivery Orchestrator]] reads when its dependency DAG decides a slice's prerequisites are satisfied. If the vault says DONE and it isn't, the DAG consumes a false satisfied dependency and builds on sand.
+A **design-stage** note on how the vault stores *truth* — the state store the [[Loom]] reads when its dependency DAG decides a slice's prerequisites are satisfied. If the vault says DONE and it isn't, the DAG consumes a false satisfied dependency and builds on sand.
 
 > [!warning] Proposal only
 > The schema changes below are **not applied** — they are a proposed change to the frontmatter schema in `vault-manifest.json`. Nothing has been written to the manifest. Left as a proposal per propose-before-implement.
@@ -30,7 +30,7 @@ Two additions to each verified bullet's provenance:
 
 Vault state drifts from reality in two directions, and they cost wildly differently:
 
-- **Dangerous: vault says DONE when it isn't.** The orchestrator's [[TAT Delivery Orchestrator|dependency DAG]] consumes a **false satisfied dependency** and proceeds — the failure propagates downstream and surfaces far from its cause.
+- **Dangerous: vault says DONE when it isn't.** The orchestrator's [[Loom|dependency DAG]] consumes a **false satisfied dependency** and proceeds — the failure propagates downstream and surfaces far from its cause.
 - **Cheap: vault says NOT DONE when it is.** The agent just **redoes work that was already finished.** Wasted cycles, no corruption.
 
 So the verification model should be **asymmetric**: bias every doubt toward NOT-DONE. A stale "unverified" is a redo; a stale "verified" is a landmine. Same spirit as [[Agent Handoff Protocol]]'s rule — *never claim verified if you only built or typechecked it* — and the recurring "unexercised fixes go under Still open" discipline.
@@ -47,7 +47,7 @@ None of these are measured yet; all are computable from the git history:
 
 ## Related
 
-- [[TAT Delivery Orchestrator]] — the DAG that consumes vault state; a false "satisfied dependency" is the dangerous drift direction above
+- [[Loom]] — the DAG that consumes vault state; a false "satisfied dependency" is the dangerous drift direction above
 - [[Spec Gap Taxonomy & Grilling Agent]] — sibling design note; grilling produces ACs, this governs whether the vault's record of them stays true
 - [[Agent Handoff Protocol]] — the handoff rule this generalizes: verified must mean exercised, not built
 - [[Gotchas#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]

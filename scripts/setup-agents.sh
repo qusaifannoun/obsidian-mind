@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup-agents.sh — install the CLI agents + supporting tools for the TAT orchestrator.
+# setup-agents.sh — install the CLI agents + supporting tools for the Loom.
 # Usage:
 #   ./setup-agents.sh                  # interactive picker
 #   ./setup-agents.sh claude codex     # non-interactive
