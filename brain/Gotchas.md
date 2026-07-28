@@ -9,6 +9,47 @@ tags:
 
 Things that have bitten before and will bite again.
 
+## A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)
+
+> [!danger] `const max = await Model.findOne({}).sort({ seq: -1 }); next = parseInt(max.seq) + 1` — looks obviously correct, is wrong three separate ways, and passes every single-user test
+> Each mechanism below is sufficient on its own to produce duplicates. None is visible when you create one record at a time by hand, which is how this kind of field always gets tested.
+>
+> **1. Read-then-write is not atomic.** Two concurrent creates read the same max and write the same next value. Without a unique index the database accepts both silently. **Use a counters document and `findOneAndUpdate({_id}, {$inc:{seq:1}}, {upsert:true, returnDocument:"after"})`** — atomic at the document level, one round trip, no sort.
+>
+> **2. Global query middleware silently applies to your scan.** `UserSchema = SchemaFactory.createForClass(User).add(BaseSchema)` — and **Mongoose's `Schema.prototype.add` merges the source schema's `callQueue`**, i.e. its registered pre/post hooks, not just its paths. So the [[tat-app-ws Backend]] soft-delete plugin (`base.schema.ts`, injects `deletedAt: null` into every `find`/`findOne`) applied to the max-scan. Soft-delete the highest holder and their number becomes invisible — the next create reuses it. **Any "internal" query through a Mongoose model inherits every plugin on every schema that was `.add()`-ed in. Use the raw driver (`this.db.db.collection(...)`) when you need to bypass them.**
+>
+> **3. Zero-padded numeric strings sort lexicographically.** `padStart(3,"0")` gives `"001".."999"`, then `"1000"`. `sort({field: -1})` on a String path compares character by character, so **`"999"` sorts above `"1000"`** (`'9' > '1'`). Past 999 rows the scan returns `"999"` forever and every subsequent record is assigned `"1000"`. Silent, permanent, and it only appears long after the code looks proven in production. **A padded string is a display format, not a sort key.**
+>
+> **Adding the unique index to existing data has its own trap.** A plain `unique: true` on a field the existing rows don't have indexes every one of them as `null` and fails to build on the second document — the same non-sparse behaviour as [[#`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)|the stale-index trap]]. Use a **partial** index: `partialFilterExpression: { field: { $type: "string" } }`.
+>
+> **A server-allocated identifier the client can set is not server-allocated.** The field had been added to `AdminUserDTO` and `ExtSignUpDTO` (the *public* signup path) and forwarded into `create()`. The allocator's guard is `if (!this.field)`, so any request supplying a value **skips allocation and leaves the counter un-advanced** — and once the unique index is live, a client sending a taken value gets a raw `E11000` instead of a validation error. Mark such fields `immutable: true` and keep them out of every DTO.
+>
+> **Backfilling does not test the allocator.** The migration was a raw-driver bulk write; it never went through `pre("save")`. Green migration output says nothing about whether the allocation path works. Fix: `ce3dd6cb`. Context: [[Sequential User Number - Atomic Allocation & Backfill]].
+
+## `dev` and `staging` are the same database in this project — not two environments (2026-07-28)
+
+> [!warning] The vault says "staging deploys from `dev`". That describes the **branch**, not the data store — and reading it as two databases produced three confidently wrong warnings in a row
+> The `tat-development.oemqsva.mongodb.net` cluster holds exactly one application database: **`tat-dev`** (the others are `questionbank`, `admin`, `local`). The `dev` branch, `api-dev.tat147.com`, and "staging" all point at it. So a migration run against `tat-dev` **is** the staging migration — there is no second run pending.
+>
+> Verify with a `listDatabases` call before reasoning about environment ordering; it is one read-only query and it settles the question. As of 2026-07-28 there is **no production environment at all** (Qusai) — `dev` is the only one. Context: [[Sequential User Number - Atomic Allocation & Backfill]].
+
+## Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)
+
+> [!danger] `mcp__..._qmd__status` returns `{"totalDocuments":0,"collections":[]}` while `qmd --index obsidian-mind status` reports 84 documents — at the same moment, on the same machine
+> QMD stores each index in its own SQLite file. This vault's lives at `~/.cache/qmd/obsidian-mind.sqlite` (the `qmd_index` field in `vault-manifest.json`); QMD's *default* store is `~/.cache/qmd/index.sqlite` and is empty.
+>
+> **Why the plugin can only ever read the empty one.** The qmd plugin registers its MCP server as bare `command: "qmd", args: ["mcp"]` with no index scoping. Per the header comment in `.claude/scripts/qmd-mcp.mjs`, **`qmd --index <name> mcp` ignores the `--index` flag** (`mcp/server.js` calls `getDefaultDbPath()` regardless) — which is precisely why this vault ships a wrapper that forces `INDEX_PATH` instead. The plugin has no wrapper, so it always opens the default store.
+>
+> **Both servers connect, so nothing looks broken.** `claude mcp list` showed `plugin:qmd:qmd ✔ Connected` *and* `qmd ✔ Connected`. They register identical tool names; the plugin's won the namespace and surfaced as `mcp__plugin_qmd_qmd__*`, while the vault's correctly-scoped tools were never exposed to the model at all.
+>
+> **Rules:**
+> - Do **not** install the qmd plugin in this vault — the vault already ships the same capability, correctly scoped, via `.mcp.json` → `.claude/scripts/qmd-mcp.mjs` and its own `qmd` skill. Remove it with `claude plugin uninstall qmd@qmd -y`.
+> - A `0 documents` reading is only the harmless stale connect-time banner CLAUDE.md warns about **if a live `status` call disagrees with it.** Here the live call *agreed* — 0 documents *and* 0 collections, matching the default store exactly. That distinction is the whole diagnosis: compare against `qmd --index <name> status` before concluding either way.
+> - Uninstalling does **not** restore the tools mid-session — the tool registry is fixed at session start. Use the CLI (`qmd --index obsidian-mind query "<topic>" --no-rerank`) until the next session.
+> - Add `--no-rerank` to CLI queries or the first reranked query stalls downloading a 639MB model.
+>
+> Do not "fix" this by re-running `scripts/qmd-bootstrap.ts` — the index was never the problem. The bootstrap reported `0 new, 0 updated, 84 unchanged`, confirming it was already current.
+
 ## "Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)
 
 > [!warning] The vault's `verified` marker records *when* a fact was checked, not that it is *still* true. A bullet verified three weeks ago is trusted today even if the code moved underneath it.
@@ -259,7 +300,7 @@ The [[TAT-409 Staff Management Subsystem|History Form]] (TAT-417/418/419) backen
 
 - **A certificate/evidence is REQUIRED for a non-privileged (instructor) save** — both mandatory training (`saveMandatoryTraining`/`submitMandatoryTraining`) and training-history (`addTrainingHistory`) do `if (!isPrivileged && !dto.evidenceFileKey) → 400 (…Incomplete)`. The FE-first build had the certificate as **"optional"** (mandatory) or **absent entirely** (training history), so an instructor's record **400'd every time** while SA worked. Fix: certificate required (disabled submit + hint until attached) for the instructor; optional for SA. Found only by logging in as the instructor.
 - **SA writes auto-approve and skip the workflow.** A privileged save sets status **APPROVED** directly (the "privileged-role auto-approve" pattern, see [[Patterns]]) and **computes Due/Refresher immediately**; the instructor's submit goes to **PENDING_APPROVAL** and Due/Refresher stay null until a reviewer approves. So SA can't reach a PENDING state through the normal UI, and `submit` 403s for SA (SA lacks `SM_SUBMIT_MANDATORY_TRAINING`) — the save already auto-approved, so there's nothing to submit.
-- **Sit-in eligibility needs a slot in `PENDING_SIT_IN`, which only an instructor submit produces** — so the whole **[[TAT-429]] add-instructor → sit-in → [[TAT-409 Staff Management Subsystem|TAT-421]]** chain is un-testable as SA (the eligible-instructors list is empty). Verifying it requires a real instructor submit first.
+- **Sit-in eligibility needs a slot in `PENDING_SIT_IN`, which only an instructor submit produces** — so the whole **[[TAT-429 Sit-In Eligibility & Move Semantics|TAT-429]] add-instructor → sit-in → [[TAT-409 Staff Management Subsystem|TAT-421]]** chain is un-testable as SA (the eligible-instructors list is empty). Verifying it requires a real instructor submit first.
 - **The History Form GET 404s until the form exists.** It's created lazily by `ensureForUser` on **TOR creation** and on writes (`POST training-history` etc.) — **not** by the GET, which hard-404s. Pre-existing dev instructors have no form → the page errored; the FE now treats a 404 as a not-yet-created empty Draft (`getHistoryForm`/`getTrainingHistory`/`getSitIn` return empty on 404). `PATCH basic-info` does **not** ensure either, so a brand-new instructor relies on the form existing from TOR creation.
 - **Refresher date = accomplished + 23 months** (= Due − 1 month, Due = accomplished + 2y). Verified on staging.
 - **Aircraft qualifications have no write API.** The `StaffHistoryForm.aircraftQualifications` schema field exists and the shell returns a count, but **no service writes it** and there's no list/CRUD endpoint — so the "Type Training Course" section stays read-only/count-only until the backend ships it.
