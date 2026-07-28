@@ -55,5 +55,5 @@ Normalize at the **fetcher boundary** — `src/api/Qualifications/qualifications
 - [[Pending Review Requests - Reviewer Worklist]] — the reviewer approve/reject worklist this state feeds
 - [[TAT-423 Assessment Report Rubric]] — reads `StaffQualification` (APPROVED) for eligible assessors; same qualification domain
 - [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] — sibling FE/BE enum mismatch in the same subsystem
-- [[Gotchas#The same state has two names — backend serializes PENDING_PIC as 'pending', the FE expects 'pending_pic' (2026-07-15)]]
+- [[Gotchas - Forms & Approval#The same state has two names — backend serializes `PENDING_PIC` as `'pending'`, the FE expects `'pending_pic'` (2026-07-15)]]
 - [[Patterns]] — keep the FE enum mirrored to the backend; this is the read-boundary corollary

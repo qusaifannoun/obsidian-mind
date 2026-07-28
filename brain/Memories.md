@@ -12,7 +12,13 @@ Persistent context and knowledge retained across sessions. Each topic lives in i
 
 - [[Key Decisions]] — architectural and workflow decisions worth recalling
 - [[Patterns]] — recurring patterns and conventions discovered across work
-- [[Gotchas]] — things that have bitten before and will bite again
+- [[Gotchas]] — index of things that have bitten before and will bite again; split into six domain notes on 2026-07-28, **add new entries to the domain note, not the index**
+  - [[Gotchas - Backend Schema & Data]] — Mongoose document/schema mechanics: enum defaults, index lifecycle, subdocument spreads, sequence allocation
+  - [[Gotchas - Backend Services & Environment]] — seeding, notification plumbing, API contract shapes, which DB an environment actually points at
+  - [[Gotchas - TOR & Staff Management]] — TOR activation, sit-in eligibility, staff profile and qualification traps
+  - [[Gotchas - Forms & Approval]] — Form 32/285, History Form, approval and permission rules, post-approval locking
+  - [[Gotchas - Frontend]] — component and framework traps across tat-prereq, tat-portal, tat-ws
+  - [[Gotchas - Tooling & Method]] — toolchain, vault tooling, and recurring reasoning failures
 - [[People & Context]] — org structure, teams, review history, dynamics
 - [[North Star]] — living goals document, read at session start
 - [[Skills]] — custom slash commands and workflows

@@ -21,7 +21,7 @@ The next major build on the [[TAT Platform]]: a **new internal subsystem** for m
 
 > [!success] History Form slice wired to the real backend + verified (2026-06-28)
 > The TAT-417/418/419/420/421/429 backend shipped, and the FE was wired + verified across roles against staging. Six commits + a layout pass: **TAT-420** protected-courses UI (`tat-ws` `0065d3d`), **TAT-429** add-instructor→sit-in (`tat-ws` `1f38541`), **TAT-417** history form + training history (`29d0d1f`), **TAT-418** mandatory training & validity (`68d0e8e`), **TAT-419** training & validity review (`b3a9440`), **TAT-421** sit-in & final assessment (`65d6227`), then the single-document **TAT Form 031** layout (`1e7b07d`) + Due Date column (`ca1c331`) + two contract-trap fixes (`e1eb0f0`, `276e051`).
-> **Verified live**: 420 on staging; instructor record→submit→**Pending**; SA **field-reject** (Rejected + reason); read paths + date math (Due +2y, Refresher +23mo). Caught **two contract bugs** only visible as a real instructor — evidence is required for non-privileged saves (see [[Gotchas#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]). **Still deferred**: 419 approve path, and the 429-POST→sit-in→421 chain (needs an instructor whose mandatory slot is `PENDING_SIT_IN` + an evaluator).
+> **Verified live**: 420 on staging; instructor record→submit→**Pending**; SA **field-reject** (Rejected + reason); read paths + date math (Due +2y, Refresher +23mo). Caught **two contract bugs** only visible as a real instructor — evidence is required for non-privileged saves (see [[Gotchas - Forms & Approval#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]). **Still deferred**: 419 approve path, and the 429-POST→sit-in→421 chain (needs an instructor whose mandatory slot is `PENDING_SIT_IN` + an evaluator).
 
 ## What "new frontend subsystem" means here (refining the initial read)
 
@@ -95,7 +95,7 @@ Spec: `https://staging.api.tat147.com/api/docs` (JSON at `/api/docs-json`). Stra
 - Staff **Active/Inactive deactivation** + qualification tracking (TAT-432 AC-05+) — status is derived provisionally from soft-delete for now.
 
 > [!note] Shipped since (2026-06-28) — no longer held
-> The **History Form** slice has a full backend now, all under `/staff-management/profiles/:userId/history-form/*` + `/sit-ins/*` + `/enrollment/instructors/*`: basic-info, mandatory-training (save/submit/approve/reject), training-history (add/approve/reject), sit-in (submit/final-assessment), eligible-instructors/add. Wired + verified — see the success callout at the top of this note. Branches on `isPrivileged` — non-privileged saves **require evidence** ([[Gotchas#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)|see Gotchas]]).
+> The **History Form** slice has a full backend now, all under `/staff-management/profiles/:userId/history-form/*` + `/sit-ins/*` + `/enrollment/instructors/*`: basic-info, mandatory-training (save/submit/approve/reject), training-history (add/approve/reject), sit-in (submit/final-assessment), eligible-instructors/add. Wired + verified — see the success callout at the top of this note. Branches on `isPrivileged` — non-privileged saves **require evidence** ([[Gotchas - Forms & Approval#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)|see Gotchas]]).
 
 ## Open questions
 

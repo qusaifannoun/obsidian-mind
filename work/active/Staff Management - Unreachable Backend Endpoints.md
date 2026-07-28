@@ -11,7 +11,7 @@ project: tat-app-ws
 
 # Staff Management — Unreachable Backend Endpoints
 
-Four times in one week a bug turned out to be **a working backend capability with no frontend affordance** (see [[Gotchas#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]]). Rather than keep finding these one bug report at a time, swept **all 108 `staff-management` routes** against every URL called by [[tat-prereq]], [[tat-ws]] and [[tat-portal]].
+Four times in one week a bug turned out to be **a working backend capability with no frontend affordance** (see [[Gotchas - Tooling & Method#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]]). Rather than keep finding these one bug report at a time, swept **all 108 `staff-management` routes** against every URL called by [[tat-prereq]], [[tat-ws]] and [[tat-portal]].
 
 **Result: 4 routes have no caller in any frontend.** Two are missing product capability; two are redundant.
 
@@ -48,7 +48,7 @@ It is set **once**, at TOR creation, from `resolveDefaultRequestedRoleCodes(user
 
 Both `listTrainingHistory` (line 67) and `getTrainingDurationSummary` (line 81) call the **identical** `calculateTotalTrainingDurationHours(form.trainingHistory)`. The list endpoint already returns `totalDurationHours`, so the standalone route adds nothing.
 
-**But the sweep did surface a real bug through it.** See [[Gotchas#The 35h/2yr badge summed the wrong collection (2026-07-12)]] — the FE badge summed **mandatory training** items while the rule is met by **training history** records. Fixed (`5159a07`): the FE already fetched the authoritative `totalDurationHours` and was **discarding it**.
+**But the sweep did surface a real bug through it.** See [[Gotchas - TOR & Staff Management#The 35h/2yr badge summed the wrong collection (2026-07-12)]] — the FE badge summed **mandatory training** items while the rule is met by **training history** records. Fixed (`5159a07`): the FE already fetched the authoritative `totalDurationHours` and was **discarding it**.
 
 Worth confirming before deleting the route: nothing external (a report, an export) depends on it.
 

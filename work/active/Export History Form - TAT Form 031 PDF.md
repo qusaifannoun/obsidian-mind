@@ -25,7 +25,7 @@ The [[History Form - Training & Validity Records|History Form]] had no export/pr
 ## Two non-obvious data findings
 
 1. The aircraft **name** and **category (B1/B2)** are NOT on the matrix/qual read DTOs — the name is resolved from `AircraftTrainingTypes.aircraftTypeWithEngine`. (Same gap the [[Aircraft Category Filter - TOR Matrix]] work hit from the other side.)
-2. **"Certified by" has no form-level `approvedBy` field** — `approveBasicInfo` *wipes* `basicInfoFieldReviews` on approval, so the only persistent record of the approver identity + date is the **audit log** (event `HISTORY_FORM_APPROVED` → `actorName`/`createdAt`). See [[History Form Audit Log]] and [[Gotchas#Certified-by / approver identity lives only in the audit log — the form wipes field reviews on approval (2026-07-16)]].
+2. **"Certified by" has no form-level `approvedBy` field** — `approveBasicInfo` *wipes* `basicInfoFieldReviews` on approval, so the only persistent record of the approver identity + date is the **audit log** (event `HISTORY_FORM_APPROVED` → `actorName`/`createdAt`). See [[History Form Audit Log]] and [[Gotchas - Forms & Approval#Certified-by / approver identity lives only in the audit log — the form wipes field reviews on approval (2026-07-16)]].
 
 ## Evidence
 

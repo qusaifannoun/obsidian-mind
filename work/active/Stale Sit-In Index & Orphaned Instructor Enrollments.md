@@ -19,7 +19,7 @@ Repro: `POST /api/enrollment/instructors/add/:courseId` from [[tat-ws]]'s `AddIn
 
 `cd30796b` (TAT-429, 2026-06-26) renamed `StaffSitIn.enrollmentId` → `periodEnrollmentId`. The new field is correctly `unique + sparse`. The **old** `enrollmentId_1` index — `unique`, **not** sparse — was never dropped, because `autoIndex: true` creates indexes but never removes them.
 
-Nothing writes `enrollmentId` anymore, so every new sit-in has the field absent. A non-sparse index records absent as `null`. Doc #1 indexed on `null`; doc #2 collided. **Every `sitInModel.create()` on staging has failed since 2026-06-26** — the instructor-add path is just where it surfaced. See [[Gotchas#`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)]].
+Nothing writes `enrollmentId` anymore, so every new sit-in has the field absent. A non-sparse index records absent as `null`. Doc #1 indexed on `null`; doc #2 collided. **Every `sitInModel.create()` on staging has failed since 2026-06-26** — the instructor-add path is just where it surfaced. See [[Gotchas - Backend Schema & Data#`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)]].
 
 ## Why the second error looked unrelated
 

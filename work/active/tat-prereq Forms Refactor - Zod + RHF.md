@@ -22,7 +22,7 @@ He was not wrong. Both offending files are **mine** (TAT-423 assessment rubric +
 [[tat-prereq]] already has the full infrastructure — see [[Patterns#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]. `src/hooks/use-zod-form.ts` states it outright: *"All forms in this project must use this hook — never `useForm()` directly."*
 
 > [!warning] This initial scope was wrong — kept to show how the estimate moved
-> I believed only two files broke the rule, and that `HistoryFormView` / `SitInSection` complied. The repo-wide grep found **six** violators, including both of those. See [[Gotchas#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]].
+> I believed only two files broke the rule, and that `HistoryFormView` / `SitInSection` complied. The repo-wide grep found **six** violators, including both of those. See [[Gotchas - Forms & Approval#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]].
 
 ## Scope
 
@@ -86,7 +86,7 @@ The audit also **corrected the framing on the two known ones**: `Form32Editor`'s
 | `2770a81` | `HistoryFormView`, 1584 → **1128 lines** |
 | `9cb30a4` | `Form32InstanceList` + `SitInSection` — the sit-in's real rule (*"fill at least one role date"*) was buried in a boolean chain; now a schema `refine` |
 | `50ae353` | `ControlledDatePicker` deleted — **dead by construction**: its own docstring said it existed "for local-state forms that were on a raw `<input type=date>`", exactly what the refactor abolished |
-| `063e0df` | Follow-up: `onApprove` calls save **only**. Form 32's Approve was firing `save` *then* `approve` — but every role that sees that button auto-approves on save, so the second call hit an already-`APPROVED` stage and threw a 400. **The approval had succeeded; the UI showed the error anyway.** Pre-existing — the refactor carried the two-call sequence over verbatim, exposing it rather than causing it. See [[Gotchas#The Approve button approved the form, then asked the backend to approve it again — and showed you the 400 (2026-07-14)]] |
+| `063e0df` | Follow-up: `onApprove` calls save **only**. Form 32's Approve was firing `save` *then* `approve` — but every role that sees that button auto-approves on save, so the second call hit an already-`APPROVED` stage and threw a 400. **The approval had succeeded; the UI showed the error anyway.** Pre-existing — the refactor carried the two-call sequence over verbatim, exposing it rather than causing it. See [[Gotchas - Forms & Approval#The Approve button approved the form, then asked the backend to approve it again — and showed you the 400 (2026-07-14)]] |
 
 Killed repo-wide along the way: `readError` (3 private copies → `formatApiError`), hand-rolled `primaryBtn`/`secondaryBtn`/`dangerBtn` (the shadcn `Button` already existed), a duplicated `SectionHeader`, and 2 of 4 `formatDate` copies.
 

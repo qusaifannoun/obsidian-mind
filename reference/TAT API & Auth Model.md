@@ -71,7 +71,7 @@ The shared `CertificateEditor` has a Preview button that renders the in-progress
 | Token syntax | single-brace `{ token }` | double-brace `{{ token }}` |
 | Request / response | `{ content }` → `{ previewContent }` (identical shape) | same: `{ content }` → `{ previewContent }` |
 
-The editor routes by its `courseType` prop (`'online'` → online endpoint). Using the wrong one is silent — the aircraft endpoint won't touch `{{ }}` tokens, so an online preview comes back with placeholders unfilled. See [[Gotchas#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]. Wired 2026-06-26 ([[TAT Certificates - Open Items]]).
+The editor routes by its `courseType` prop (`'online'` → online endpoint). Using the wrong one is silent — the aircraft endpoint won't touch `{{ }}` tokens, so an online preview comes back with placeholders unfilled. See [[Gotchas - Frontend#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]. Wired 2026-06-26 ([[TAT Certificates - Open Items]]).
 
 ## Media (protected content)
 

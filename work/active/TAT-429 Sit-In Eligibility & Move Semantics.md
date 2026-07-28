@@ -38,11 +38,11 @@ sit-in created        ← ONLY by addCourseInstructor      (sole sitInModel.crea
 addCourseInstructor   ← required an ACTIVE TOR
 ```
 
-**To get an Active TOR you need a sit-in; to get a sit-in you need an Active TOR.** A new instructor could never be bootstrapped. See [[Gotchas#Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)]].
+**To get an Active TOR you need a sit-in; to get a sit-in you need an Active TOR.** A new instructor could never be bootstrapped. See [[Gotchas - TOR & Staff Management#Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)]].
 
 Staff creation auto-provisions three **DRAFT** TORs (CARC/EASA/GCAA) with `aircraftTypeIds: []` plus a History Form (`provisionInstructorTors` → `ensureForUser`). So the fresh instructor failed the TOR gate *twice over*: DRAFT status, and — because the course had an aircraft type — an empty `aircraftTypeIds` that `AC-10`'s clause can never match.
 
-**To be precise about that second one:** a freshly provisioned TOR *legitimately* starts with `aircraftTypeIds: []`; the field is populated later, by `$addToSet` on aircraft-qualification approval. It is **not** the never-written "keystone gap" I once claimed — I was wrong about that, and the correction is worth reading before reasoning about this field again: [[Gotchas#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)|the keystone correction]].
+**To be precise about that second one:** a freshly provisioned TOR *legitimately* starts with `aircraftTypeIds: []`; the field is populated later, by `$addToSet` on aircraft-qualification approval. It is **not** the never-written "keystone gap" I once claimed — I was wrong about that, and the correction is worth reading before reasoning about this field again: [[Gotchas - TOR & Staff Management#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)|the keystone correction]].
 
 ## The TAT-424 ↔ TAT-429 contradiction
 
@@ -70,10 +70,10 @@ TAT-424 was approved first and written as a global rule; whoever implemented it 
 
 ## Bugs found by walking the path
 
-Unblocking the deadlock didn't reveal one bug — it revealed **every bug downstream of it**, all at once. None were regressions; all had been unreachable since TAT-421 shipped. See [[Gotchas#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]].
+Unblocking the deadlock didn't reveal one bug — it revealed **every bug downstream of it**, all at once. None were regressions; all had been unreachable since TAT-421 shipped. See [[Gotchas - Tooling & Method#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]].
 
 1. **Completed sit-in 404'd and rendered as an empty section** (`0bab2340`). `completeFinalAssessment` sets `status = APPROVED` **and** `active = false` together, but `getSitInForTrainee` queried `active: true` — so approving the sit-in is exactly what made it invisible. The FE was already correct (`SitInSection.tsx:177` renders an approved sit-in read-only); it only showed empty because the 404 made `sitIn` null.
-2. **The Instructors list showed a completed instructor as "No sit-in" / "Unassigned"** (`0c1f1cbb`). Same `active: true` trap — **in an endpoint I'd written myself that morning**, before I understood the field. See [[Gotchas#`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)]].
+2. **The Instructors list showed a completed instructor as "No sit-in" / "Unassigned"** (`0c1f1cbb`). Same `active: true` trap — **in an endpoint I'd written myself that morning**, before I understood the field. See [[Gotchas - TOR & Staff Management#`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)]].
 3. **`SIT_IN_CREATED` recorded the instructor as the actor** (`b5e0ddc1`). `createForPeriodCourseEnrollment` passed `instructorUserId` as `triggeredBy`, so the audit trail claimed the instructor created their own sit-in when an SA/TM had clicked Add Instructor. Every other event in the chain records the real actor. **An audit trail that misattributes is worse than one that's missing** — it doesn't look broken, it looks like a different fact.
 4. **`sit_in_moved` had no label** (`9cb360f`) — rendered as a raw enum string in the Activity Log.
 
@@ -90,7 +90,7 @@ The status column is the real value: the onboarding progression was previously *
 ## What is NOT fixed (deliberately out of scope)
 
 - **Teaching/examining assignment keeps the TAT-424 rule.** `course.service.ts`, `schedule.service.ts`, and the instructor pickers are untouched — 424 is correct where it belongs. Only the *pre-qualification* sit-in path is exempt.
-- ~~**`tor.aircraftTypeIds` is still never populated**, so aircraft-type courses return zero eligible instructors for teaching assignment.~~ **WRONG — corrected 2026-07-12.** It *is* populated (`$addToSet` on aircraft-qualification approval), and the vault already said so. See [[Gotchas#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)]]. An instructor with no approved aircraft qualification is *correctly* excluded from an aircraft-type course — that's the rule working, not a bug.
+- ~~**`tor.aircraftTypeIds` is still never populated**, so aircraft-type courses return zero eligible instructors for teaching assignment.~~ **WRONG — corrected 2026-07-12.** It *is* populated (`$addToSet` on aircraft-qualification approval), and the vault already said so. See [[Gotchas - TOR & Staff Management#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)]]. An instructor with no approved aircraft qualification is *correctly* excluded from an aircraft-type course — that's the rule working, not a bug.
 - **TAT-424 AC-09 has no TOR gate at all on assessor/assessment assignment** — `staff-assessment.service.ts` doesn't even import the eligibility service.
 
 ## Open
@@ -99,7 +99,7 @@ The status column is the real value: the onboarding progression was previously *
 - [x] `SIT_IN_MOVED` label added to `EVENT_LABELS` in [[tat-prereq]] (`9cb360f`)
 - [ ] **Confirm the TOR actually activated** after HF `APPROVED` — that's the last link in the bootstrap chain (`staff-tor-sync.processor`) and the whole point of the fix. Not yet verified.
 - [ ] **Verify the move path on staging** — none of it has been exercised: the Move confirmation, the soft-delete of the old enrollment, the `SIT_IN_MOVED` audit row, the 409 at `pending_tm_review`, and the stranded-evaluator notification
-- [ ] Verify the "Sit-In Moved To Another Course" notification setting actually seeds on deploy — `sendNotification` silently no-ops if the setting is missing (see [[Gotchas#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]])
+- [ ] Verify the "Sit-In Moved To Another Course" notification setting actually seeds on deploy — `sendNotification` silently no-ops if the setting is missing (see [[Gotchas - Backend Services & Environment#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]])
 - [ ] Comment on TAT-424 / TAT-429 recording the exemption, so the TOR filter isn't reinstated
 - [ ] **Remove-instructor endpoint** — nothing in the codebase can un-enroll an instructor from a course. Deferred deliberately; can largely reuse `deactivateForMove`
 - [x] ~~Separate ticket for the `aircraftTypeIds` keystone gap~~ — **not a gap; it was already fixed. My claim was wrong.**

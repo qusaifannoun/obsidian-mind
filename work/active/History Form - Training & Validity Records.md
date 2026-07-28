@@ -39,19 +39,19 @@ The **Updated Training & Validity** section of the [[Staff Management Subsystem 
 
 **I framed the question badly, got a reasonable answer to the wrong question, and changed a Part-147 compliance number without checking it against real data.**
 
-The fix is not a revert — it's moving the rule. `calculateTrainingValidityHours` now computes the total **server-side** (approved + non-expired, across the catalog **and** the additional rows) and returns it as `totalDurationHours`. The FE displays it and never recomputes. See [[Gotchas#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]] and [[Patterns#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
+The fix is not a revert — it's moving the rule. `calculateTrainingValidityHours` now computes the total **server-side** (approved + non-expired, across the catalog **and** the additional rows) and returns it as `totalDurationHours`. The FE displays it and never recomputes. See [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]] and [[Patterns#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
 
 ## Aircraft qualification — wrong refresher date
 
 The qualification card labelled **`refresherDate`** as "Refresher" — but that's when the *last* refresher was **performed**, not when the next is **due**. It read `Refresher: 10 Jul 2026 / Expires: 09 Jul 2028`: two years apart.
 
-The next refresher falls due **one month before expiry** — the same rule mandatory training already used. Added `calculateAircraftRefresherDueDate`, exposed a derived `refresherDueDate`, and the card now reads **"Refresher due"** — which makes the label honest. See [[Gotchas#`refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)]].
+The next refresher falls due **one month before expiry** — the same rule mandatory training already used. Added `calculateAircraftRefresherDueDate`, exposed a derived `refresherDueDate`, and the card now reads **"Refresher due"** — which makes the label honest. See [[Gotchas - TOR & Staff Management#`refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)]].
 
 ## Open
 
 - [ ] **Nothing here has been exercised.** Every feature touched this week had latent bugs the moment it was first actually driven.
 - [ ] Consider making `OnlineCourse.duration` required — auto-added records are only as good as the course data.
-- [ ] **Pre-existing bug left alone**, sitting right beside the code I touched: the mandatory branch of `applyOnlineCourseCompletion` does `{ ...slots[index] }` — spreading a live Mongoose subdocument, the trap that silently drops nested arrays (it already ate the mandatory-training review history once). See [[Gotchas#Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)]].
+- [ ] **Pre-existing bug left alone**, sitting right beside the code I touched: the mandatory branch of `applyOnlineCourseCompletion` does `{ ...slots[index] }` — spreading a live Mongoose subdocument, the trap that silently drops nested arrays (it already ate the mandatory-training review history once). See [[Gotchas - Backend Schema & Data#Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)]].
 - [ ] The training-history section still stores `durationHours: 0` and lands records straight at `APPROVED` (per TAT-417 AC-17). It no longer feeds the 35h total, so this is now harmless — but the field is dead weight.
 
 ## Related

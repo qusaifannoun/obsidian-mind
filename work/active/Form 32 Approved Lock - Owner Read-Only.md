@@ -45,4 +45,4 @@ Lock the owner out of an approved instance while leaving reviewers untouched. Th
 - [[Aircraft Qualification Approval Invisible - Status String Mismatch]] — sibling tat-prereq approval-gating fix from the same day
 - [[Form 32 PIC Bugs & Cross-Frontend Auth Fixes]] — earlier Form 32 reviewer/role work
 - [[tat-prereq Forms Refactor - Zod + RHF]] — `Form32InstanceList` / `Form32Editor` were part of that sweep
-- [[Gotchas#"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)]]
+- [[Gotchas - Forms & Approval#"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)]]

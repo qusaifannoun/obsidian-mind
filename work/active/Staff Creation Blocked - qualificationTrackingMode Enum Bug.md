@@ -85,7 +85,7 @@ With no default, the path stays **`undefined`** on create; Mongoose skips enum v
 
 ## Recurring pattern
 
-This is the **3rd/4th instance** of `enum + default:null` in `tat-app-ws` schemas — see [[Gotchas#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)]]. The two earlier siblings (`refresherUpdateSource`, `workflowStage`) are now fixed with the additive style; these two (`qualificationTrackingMode`, `Auditor.type`) were the remaining open ones. Worth a lint rule / schema review to catch the next one.
+This is the **3rd/4th instance** of `enum + default:null` in `tat-app-ws` schemas — see [[Gotchas - Backend Schema & Data#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)]]. The two earlier siblings (`refresherUpdateSource`, `workflowStage`) are now fixed with the additive style; these two (`qualificationTrackingMode`, `Auditor.type`) were the remaining open ones. Worth a lint rule / schema review to catch the next one.
 
 ## Follow-ups (separate from this fix)
 
@@ -98,5 +98,5 @@ This is the **3rd/4th instance** of `enum + default:null` in `tat-app-ws` schema
 - [[tat-app-ws Backend]] · [[tat-prereq]] · [[TAT Platform]]
 - [[TAT-432 Staff Profile]] — the create/edit forms this unblocks · [[TAT-409 Staff Management Subsystem]]
 - [[Staff Management Subsystem & TOR Model]] — subsystem domain
-- [[Gotchas#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)]] — the recurring anti-pattern
-- [[Gotchas#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)]] — prior create-flow contract lessons
+- [[Gotchas - Backend Schema & Data#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)]] — the recurring anti-pattern
+- [[Gotchas - Backend Services & Environment#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)]] — prior create-flow contract lessons
