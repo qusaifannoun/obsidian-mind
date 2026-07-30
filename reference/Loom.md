@@ -1,6 +1,6 @@
 ---
 date: 2026-07-23
-description: "Loom — a portable, agent-agnostic multi-agent delivery pipeline: a control plane routes vertical slices to coder stations in isolated git worktrees, test-gated and merge-on-green. Harness built and proven (sim + codex); TAT is its first project"
+description: "Loom — a portable, agent-agnostic delivery pipeline routing vertical slices to coder stations in isolated git worktrees, test-gated and merge-on-green. Extracted 2026-07-30 to Black-Lotus98/loom and shipped as a Claude Code plugin"
 tags:
   - reference
   - project/tat
@@ -11,10 +11,30 @@ aliases:
 
 # Loom
 
-**Loom** is a portable, **agent-agnostic** delivery pipeline for driving code changes across a repo with multiple coding agents. It isn't tied to any one project — the same setup runs across repos; [[TAT Platform]] is its first instantiation. The control plane lives in this vault's tooling (`scripts/loom/`); the repos it operates on are *stations*. The name is the weave: parallel worktree threads woven back into one `main`.
+**Loom** is a portable, **agent-agnostic** delivery pipeline for driving code changes across a repo with multiple coding agents. It isn't tied to any one project — the same setup runs across repos; [[TAT Platform]] is its first instantiation. The repos it operates on are *stations*. The name is the weave: parallel worktree threads woven back into one `main`.
 
-> [!success] Harness built & proven (2026-07-23)
-> The control plane lives in `scripts/loom/` and the delivery loop runs **end to end** — proven with a deterministic `sim` station and a real `codex` station (worktree → station → test-gate → merge-on-green, dry-run by default). Agent-agnosticism is real: stations are command templates in `stations.config.json`, so codex / claude / gemini / aider are config lines, not code. What remains design-stage is **Slice 0**, the first real *product* slice (the refresher-date resolver), still blocked on two open ACs — see the Slice 0 open questions below.
+> [!success] Harness built & proven (2026-07-23), extracted and shipped as a plugin (2026-07-30)
+> The delivery loop runs **end to end** — worktree → station → test-gate → merge-on-green, dry-run by default. Agent-agnosticism is real: stations are command templates in `stations.config.json`, so codex / claude / gemini / aider are config lines, not code. What remains design-stage is **Slice 0**, the first real *product* slice (the refresher-date resolver), still blocked on two open ACs — see the Slice 0 open questions below.
+
+## Where Loom lives (as of 2026-07-30)
+
+**Its own repo: `Black-Lotus98/loom`** — no longer `scripts/loom/` in this vault. It was extracted because a tool that only exists inside a personal vault can't be handed to anyone, and keeping a second copy would have forked it.
+
+The repo is both a plugin and a plugin marketplace, so it installs through Claude Code's own machinery:
+
+```
+/plugin marketplace add Black-Lotus98/loom
+/plugin install loom@qusaifannoun
+```
+
+The slash command is now **`/loom:delegate`** (plugin skills are namespaced), and `loom` / `loom-run` land on `PATH` via the plugin's `bin/` while it's enabled.
+
+**Per-project scoping is the install scope**, not a Loom feature: *User* = every project, *Project* = everyone on this repo (committed `.claude/settings.json`), *Local* = you on this repo only. A repo can advertise Loom to whoever clones it via `extraKnownMarketplaces` + `enabledPlugins`.
+
+**Per-project behavior** is a separate axis — a config chain where shipped defaults are always the base and each layer overrides the last: `<plugin>` → `~/.claude/loom/` → `./.loom/stations.config.json` → `--config`. Stations merge key by key, so a repo opts in with just `{"defaultStation": "claude"}`.
+
+> [!bug] `--merge` reported success while merging nothing (found 2026-07-30)
+> `stageAll()` staged the station's work inside the worktree but **nothing ever committed it**, so `loom/<id>` still pointed at the base commit. `git merge` answered "Already up to date", exited 0, and the report printed `merged: yes` while the base branch never moved and the file never appeared. The bug survived from the original build because **dry-run is the default, so the merge path had never once been driven** — the same class of trap as [[Gotchas - Tooling & Method#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]. Fixed: slices commit in their worktree before the gate, and `--merge` now verifies `HEAD` actually advanced, reporting a no-op as a no-op.
 
 ## The core rationale
 

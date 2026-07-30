@@ -1,8 +1,5 @@
 {
-  "infra": [
-    "scripts/loom",
-    ".claude/commands/delegate.md"
-  ],
+  "infra": [],
   "neverTouch": [
     "work",
     "perf",
