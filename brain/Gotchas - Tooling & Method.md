@@ -17,7 +17,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **A test gate does not save you**, because the gate runs *after* the station is finished. It catches a bad result; it cannot give the agent the feedback loop it needed while working.
 >
-> **Fix:** a `setup` step that runs in the worktree *before* the station, declared once per repo in `.loom/stations.config.json`. `ln -sfn ../../<repo>/node_modules node_modules` is enough and beats `npm ci` on speed. A non-zero exit must fail the slice without starting the station — an agent that cannot verify itself should not run at all. Shipped in Loom v1.1.0.
+> **Fix:** a `setup` step that runs in the worktree *before* the station, declared once per repo in `.loom/stations.config.json`. A non-zero exit must fail the slice without starting the station — an agent that cannot verify itself should not run at all. Shipped in Loom v1.1.0.
+>
+> **A `node_modules` symlink is only half a fix (corrected 2026-07-30, v1.1.1).** `ln -sfn ../../<repo>/node_modules node_modules` is the obvious fast path and it does make **eslint, tsc, and jest** work. But **Next.js/Turbopack rejects it** — it resolves the real path, finds it outside the project root, and refuses before compiling. Re-running the TAT-451 slice with the symlink, codex reported lint clean *and* `the production build is blocked before compilation by this worktree's node_modules symlink escaping Turbopack's filesystem root`. Use `npm ci` for a Next repo. `cp -al` should work (paths stay inside the root) but is **untested**.
+>
+> The correction matters more than the detail: the first fix looked complete because *most* of the toolchain came back green. Partial tool availability is the dangerous state — it buys enough confidence to stop looking.
 >
 > **Generalises past Loom.** Any harness that hands an agent an isolated checkout owns this problem: CI containers, sandboxes, fresh clones. The rule is *provision the ignored deps before the agent starts*, not before the gate.
 

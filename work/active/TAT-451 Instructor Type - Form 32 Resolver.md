@@ -1,6 +1,6 @@
 ---
 date: 2026-07-30
-description: "First slice of TAT-451 — a pure instructor-type → Form 32 A/B resolver, delivered by a live codex station through Loom. Built, tested, unmerged: it has no callers until TAT-448 lands"
+description: "First slice of TAT-451 — a pure instructor-type → Form 32 A/B resolver, delivered by a live codex station through Loom and merged to dev with the repo's first test suite. Remaining ACs blocked on TAT-448"
 tags:
   - work-note
   - project/tat
@@ -13,10 +13,11 @@ ticket: TAT-451
 # TAT-451 Instructor Type - Form 32 Resolver
 
 The pure resolver mapping an instructor's authorization type to the Form 32 role forms that
-apply. **Built and green, deliberately unmerged** — see Still open.
+apply. **Merged to `dev` 2026-07-30** — `56dc8cd` (resolver) + `dc7ab8f` (its tests).
 
 This was also [[Loom]]'s first slice driven by a real coder station rather than the
-deterministic `sim` one.
+deterministic `sim` one, and it was delivered **twice**: once blind, once with the toolchain
+available, producing a byte-identical diff both times.
 
 ## Why this slice existed
 
@@ -32,7 +33,7 @@ doctrine in [[Loom]].
 
 ## What shipped
 
-Two files, 26 insertions, on branch `loom/tat-451-instructor-type` (not merged to `dev`):
+Two files, 26 insertions, squash-merged to `dev` as `56dc8cd`:
 
 - `src/enums/instructor-type.ts` — `INSTRUCTOR_TYPES` const map, `InstructorType` derived via
   `keyof typeof`, sorted options array. Mirrors `src/enums/staff-role.ts` exactly.
@@ -71,21 +72,29 @@ exactly the two files named, and left `FORM32_REQUIRED_ROLE` and `form32VisibleF
 alone. **Review nit:** `INSTRUCTOR_TYPE_OPTIONS` emits `{value, label}` where
 `STAFF_ROLE_OPTIONS` emits `{code, label}` — small idiom drift, worth aligning before merge.
 
-It also could not build, lint, or test its own work — the worktree had no `node_modules`.
-The code was right by luck, not by verification. See
-[[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]].
+**The first run could not build, lint, or test its own work** — the worktree had no
+`node_modules`, and the code was right by luck rather than by verification. The re-run with
+Loom's `setup` step gave it eslint/tsc/jest and produced a **byte-identical diff**, which is
+the reassuring outcome: the toolchain confirmed the work rather than changing it. See
+[[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]]
+— including why the symlink fix was only half a fix.
+
+## Verified on `dev` after the merge
+
+`tsc` clean · `npm run lint` **0 errors** (2 pre-existing `<img>` warnings in
+`SignatureInput.tsx`, untouched by this change) · `npx jest` 6/6 passing.
 
 ## Still open
 
-- **Unmerged, and dead code if merged today.** `instructorForm32Keys` has **zero callers**
-  until **TAT-448** (Configure Instructor Type During Creation, Ready for Dev, unbuilt)
-  supplies the configured per-authority type. Merge as groundwork or hold the branch and
-  land both together — a decision, not an oversight.
+- **`instructorForm32Keys` has zero callers.** Merged as groundwork on Qusai's call;
+  **TAT-448** (Configure Instructor Type During Creation, Ready for Dev, unbuilt) supplies the
+  configured per-authority type that will drive it.
 - **Only AC-02–AC-05 of TAT-451.** AC-01 (per-authority independence), AC-06 (feeding the TOR
   approval workflow), AC-07 (cascade on type change) and AC-08 (audit log) are untouched.
-- Not wired into `form32VisibleForRoles`. Visibility still gates A and B on the `IN` role,
-  so **user-visible behaviour is unchanged** — nothing was verified in a running app.
-- The `{value, label}` vs `{code, label}` drift above.
+- Not wired into `form32VisibleForRoles`. Visibility still gates A and B on the `IN` role, so
+  **user-visible behaviour is deliberately unchanged** — there is nothing to browser-verify yet.
+- The `{value, label}` vs `{code, label}` drift above — still unaligned.
+- **`dev` is not pushed.** Both commits are local.
 
 ## Related
 
