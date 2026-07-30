@@ -37,6 +37,15 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **The wider trap: raw-inserted documents that predate a `required: true`.** Staging has `StaffAssessment` docs with no `assignedBy` / `assignedAt` / `assessmentType` — inserted straight into Mongo, bypassing the schema, before those fields existed. Same family as the CARC-only `assessment_report` template. **Every write through `.save()` fails on them**, so they can't be repaired in the app either — delete is the only operation that works. And they're why the FE crashed on `TYPE_LABEL[assessmentType]`: the field is simply absent.
 
+## A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)
+
+> [!danger] A new TOR activation gate would have returned `true` for every document, forever, because the query feeding it selected four fields and the guard read a fifth
+> Adding `instructorTypeValid` to `TorActivationGates` ([[Instructor Type - Per-Authority Form 32 Split]]) — a TOR whose owner holds `IN` but whose type is `NONE` must not activate. Both gate-construction sites were wired. But `findUserIdsWithIncompleteTors` ran `.select("_id userId licenseId activatedAt")`, so `tor.instructorType` and `tor.requestedRoleCodes` both arrived `undefined`, the consistency check saw "no instructor role", and returned `true`.
+>
+> **Nothing fails.** No error, no warning, no type complaint — `tsc` is satisfied because the projected type is optional. A guard that never fires is indistinguishable from a guard whose condition is never met, and the tests pass because unit tests call the pure function directly with real arguments.
+>
+> **Rule: when adding a field to a predicate, grep every `.select(` / `.project(` that feeds it** before trusting a single test run. In Mongoose the projection is the real type boundary, and it is invisible at the call site.
+
 ## Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)
 
 > [!danger] Mongoose's enum validator whitelists `undefined` but **rejects `null`** — so `default: null` on an enum fails its own validation on every document that instantiates the field
@@ -49,6 +58,8 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 > ```
 >
 > **This was the 5th instance.** The [[#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)|2026-07-05 note]] already said it deserved *"a lint/schema-review rather than a one-off patch"* — that call was right, and it took three more instances to act on. Now enforced: **`npm run check:schemas`** (`scripts/check-nullable-enums.mjs`, `.github/workflows/checks.yml`). Three more latent copies were found and fixed in `user.schema` (`qualificationCategory` ×3 — unexploded only because those subdocs are `default: null` on `User`, so they're never instantiated on a plain user create).
+>
+> **6th instance, 2026-07-30 — and the first the guard actually caught.** Adding `instructorType` to `staff-tor.schema.ts` ([[Instructor Type - Per-Authority Form 32 Split]]) I wrote `enum: InstructorType, default: null` — the identical mistake, in a field that every TOR instantiates. **`tsc` passed it happily**; `npm run check:schemas` rejected it in under a second, named the file, line and field, and printed the exact fix. Three months of instances 1–5 were each found in production or at runtime. This one never left the working tree. That is the whole return on the check, and it argues for reaching for a guard script the *second* time a bug class appears, not the fifth.
 >
 > **The check itself nearly shipped useless.** My first version regexed the `@Prop({…})` body for `enum:` + `default: null` — and was wrong **in both directions**: it false-positived on `course-schedule` (an unrelated nested `default: null` in the same `@Prop`) and **false-negatived on the very bug it was written for** (a single-line prop let the enum-value capture run past the comma and swallow `default: null`, so it saw "null" in the enum and passed). **A check that misses the bug it was written for is worse than no check — it certifies the code as clean.** The working version resolves each `enum:` field's *enclosing object* and reads that object's own top-level `default:`. Verified both ways: clean on the fixed tree, catches all 4 real violations when the fixes are reverted.
 

@@ -16,6 +16,7 @@ Split into domain notes on 2026-07-28, when the single file reached 96KB. Substa
 
 _Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation._
 
+- [[Gotchas - Backend Schema & Data#A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)|A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)]]
 - [[Gotchas - Backend Schema & Data#A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)|A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)]]
 - [[Gotchas - Backend Schema & Data#A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)|A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)]]
 - [[Gotchas - Backend Schema & Data#Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)|Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)]]
@@ -75,6 +76,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal and tat-ws — Next.js, MUI, React Query, uploads and layout._
 
+- [[Gotchas - Frontend#A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)|A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)]]
 - [[Gotchas - Frontend#Card-morph slider: keep the OUTGOING card full-screen until the new one covers it|Card-morph slider: keep the OUTGOING card full-screen until the new one covers it]]
 - [[Gotchas - Frontend#`router.refresh()` does NOT invalidate the React Query cache (tat-portal)|`router.refresh()` does NOT invalidate the React Query cache (tat-portal)]]
 - [[Gotchas - Frontend#App-shell layout: pin to the viewport, scroll only `<main>`|App-shell layout: pin to the viewport, scroll only `<main>`]]

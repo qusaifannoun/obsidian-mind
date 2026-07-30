@@ -75,7 +75,7 @@ cd ../wt-<slice> && codex -a never -s workspace-write exec "$(cat plan.md)" -o r
 
 ## First live slice — delivered 2026-07-30
 
-The loop has now run end to end with a **real coder station**, not the deterministic `sim` one: [[TAT-451 Instructor Type - Form 32 Resolver]], a pure instructor-type → Form 32 A/B resolver in [[tat-prereq]], delivered by `codex` 0.145.0. Two files, 26 insertions, GREEN, re-verified independently (6/6 AC tests, `tsc` clean, `eslint` clean). Dry-run — nothing merged.
+The loop has now run end to end with a **real coder station**, not the deterministic `sim` one: [[Instructor Type - Per-Authority Form 32 Split|the TAT-451 instructor-type resolver]] in [[tat-prereq]], delivered by `codex` 0.145.0. Two files, 26 insertions, GREEN, re-verified independently (6/6 AC tests, `tsc` clean, `eslint` clean). Dry-run — nothing merged.
 
 **What it proved beyond "it runs":** the station read the repo's own `AGENTS.md` first and adopted the existing idiom rather than inventing one, and the tests-from-ACs constraint held in practice — the gate's tests were written from the ticket before the station ran and injected at gate time, so they could not ratify the coder's choices.
 

@@ -13,7 +13,7 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 > [!danger] codex followed `AGENTS.md`'s "run lint and build before you finish" and got `sh: next: command not found`, exit 127
 > `git worktree add` gives you a checkout of tracked files — **nothing gitignored comes with it.** No `node_modules`, no `vendor/`, no `.venv`. Every build, lint, typecheck, and test command in the repo's own agent instructions fails instantly inside a fresh worktree.
 >
-> **The damage is silent, not loud.** The station doesn't stop; it writes the code anyway, blind. On the first live [[Loom]] slice ([[TAT-451 Instructor Type - Form 32 Resolver|TAT-451]]) the output happened to be correct — but it was correct by luck, not because anything checked it. A larger slice would have come back subtly wrong with the same GREEN.
+> **The damage is silent, not loud.** The station doesn't stop; it writes the code anyway, blind. On the first live [[Loom]] slice ([[Instructor Type - Per-Authority Form 32 Split|TAT-451]]) the output happened to be correct — but it was correct by luck, not because anything checked it. A larger slice would have come back subtly wrong with the same GREEN.
 >
 > **A test gate does not save you**, because the gate runs *after* the station is finished. It catches a bad result; it cannot give the agent the feedback loop it needed while working.
 >

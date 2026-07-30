@@ -70,6 +70,10 @@ If a number or date encodes a **rule** — a compliance total, a validity window
 - **Aircraft refresher due date** → `calculateAircraftRefresherDueDate` (= expiry − 1 month), returned as a derived `refresherDueDate`.
 - **Training due date** → `calculateTrainingDueDate` (= accomplished + 2 years); the FE mirrors it *only* as a live preview in the add-form, never as the stored value.
 
+- **Which Form 32 sections apply to an instructor** → `formKeyMatchesRequestedRoles` on the backend, enforced with a `ForbiddenException` and applied to every list the FE receives. [[tat-prereq]] had held a *second* copy of that rule for months (`FORM32_REQUIRED_ROLE`), fed from the **staff member's** roles while the backend read the **TOR's** — same table, different input, free to disagree, and only the backend's was per-authority. Deleted 2026-07-30; see [[Instructor Type - Per-Authority Form 32 Split]].
+
+**A fork can hide behind a comment that was true once.** The FE copy carried "the backend has no `role` field on Form 32 templates", which justified it at the time and was simply never revisited. Nobody re-checked because the comment read like a finding. **Stale justification is how duplicated rules survive review** — when a comment explains why a rule is duplicated, treat it as a claim to re-verify, not a reason to stop looking.
+
 **Why this is a rule and not a preference:** a duplicated business rule doesn't merely drift — it can be computing something else entirely while looking completely plausible. Both of the worst bugs of the week were duplicated-rule bugs (see [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]). A number that comes off the API can be wrong once; a number the FE derives can be wrong *differently* from the one eligibility actually uses, and nothing will ever reconcile them.
 
 ## One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)

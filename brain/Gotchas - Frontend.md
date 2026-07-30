@@ -8,6 +8,17 @@ tags:
 # Gotchas - Frontend
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)
+
+> [!danger] An instructor editing their own profile would have cleared `instructorType` on every one of their TORs, having never seen the control that sets it
+> `StaffForm` is one component serving admin-create, admin-edit and self-edit. The new *Instructor authorization* card renders only when `!self && role === 'IN'` ([[Instructor Type - Per-Authority Form 32 Split]]) — but **the Zod schema still carries the field, and `EMPTY_STAFF_FORM` still defaults it to all-`None`**. Submit handlers pass the whole values object straight through (`onSubmit={(values) => mutate(values)}`), so self-edit would have POSTed `{CARC:'none', EASA:'none', GCAA:'none'}` and the backend would have obediently applied it.
+>
+> **Conditional *rendering* is not conditional *submission*.** RHF keeps every registered default in the values object regardless of what is on screen, and a shared form multiplies the blast radius: the person triggering the wipe is the one with the least authority to change the field.
+>
+> **Fix:** strip the field at the submit boundary, where the component already knows whether the section was shown — not in the fetcher, which only sees a payload. `onSubmit(shown ? values : {...values, field: undefined})`.
+>
+> Generalises to any form reused across roles: **audit which defaults survive when a section is hidden**, and treat "hidden" as "must not be transmitted", not merely "not editable".
+
 ## Card-morph slider: keep the OUTGOING card full-screen until the new one covers it
 
 When one element morphs into a full-screen background (a thumbnail "opening" into the hero — the [[TAT Website Hero Card-Morph Slider]] effect), the naïve approach shrinks the old background into a thumbnail *while* the new one grows — leaving a moment where **neither covers the viewport**, so the page background flashes through (white). Fix (the CodePen's actual trick): keep the outgoing card **full-screen** (slight `scale` zoom, behind the incoming one) for the whole tween and only **snap** it into its thumbnail slot `onComplete`. Belt-and-suspenders: give the hero container a dark background so any micro-gap (incl. first paint before measure) never shows white. Three more traps from the same build:
