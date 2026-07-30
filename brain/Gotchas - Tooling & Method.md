@@ -8,6 +8,19 @@ tags:
 # Gotchas - Tooling & Method
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)
+
+> [!danger] codex followed `AGENTS.md`'s "run lint and build before you finish" and got `sh: next: command not found`, exit 127
+> `git worktree add` gives you a checkout of tracked files — **nothing gitignored comes with it.** No `node_modules`, no `vendor/`, no `.venv`. Every build, lint, typecheck, and test command in the repo's own agent instructions fails instantly inside a fresh worktree.
+>
+> **The damage is silent, not loud.** The station doesn't stop; it writes the code anyway, blind. On the first live [[Loom]] slice ([[TAT-451 Instructor Type - Form 32 Resolver|TAT-451]]) the output happened to be correct — but it was correct by luck, not because anything checked it. A larger slice would have come back subtly wrong with the same GREEN.
+>
+> **A test gate does not save you**, because the gate runs *after* the station is finished. It catches a bad result; it cannot give the agent the feedback loop it needed while working.
+>
+> **Fix:** a `setup` step that runs in the worktree *before* the station, declared once per repo in `.loom/stations.config.json`. `ln -sfn ../../<repo>/node_modules node_modules` is enough and beats `npm ci` on speed. A non-zero exit must fail the slice without starting the station — an agent that cannot verify itself should not run at all. Shipped in Loom v1.1.0.
+>
+> **Generalises past Loom.** Any harness that hands an agent an isolated checkout owns this problem: CI containers, sandboxes, fresh clones. The rule is *provision the ignored deps before the agent starts*, not before the gate.
+
 ## Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)
 
 > [!danger] `mcp__..._qmd__status` returns `{"totalDocuments":0,"collections":[]}` while `qmd --index obsidian-mind status` reports 84 documents — at the same moment, on the same machine

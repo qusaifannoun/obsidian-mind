@@ -73,11 +73,20 @@ cd ../wt-<slice> && codex -a never -s workspace-write exec "$(cat plan.md)" -o r
 > [!bug] `codex exec` is read-only by default — and fails blocked ops *silently*
 > `codex exec` runs **read-only** unless `-s workspace-write` is passed, so the write flag is mandatory for a coder station. With `-a never`, a blocked operation **fails silently back to the model** rather than prompting — the model may report success it didn't achieve. **Read `report.md` skeptically**, and trust the `git diff` + test results over the coder's own account. This is the same failure mode [[Agent Handoff Protocol]] guards against: "never claim something is verified if you only built or typechecked it."
 
-## Next action — Slice 0: the resolver
+## First live slice — delivered 2026-07-30
 
-The whole system is downstream of one diff. Slice 0 is the **resolver**: a pure function `(instructor, course) → effective refresher date`, plus override storage and an audit-log schema. **No UI.** One worktree, one `plan.md`, one diff. It exercises the entire delegation loop on the smallest real unit of work before anything else is attempted.
+The loop has now run end to end with a **real coder station**, not the deterministic `sim` one: [[TAT-451 Instructor Type - Form 32 Resolver]], a pure instructor-type → Form 32 A/B resolver in [[tat-prereq]], delivered by `codex` 0.145.0. Two files, 26 insertions, GREEN, re-verified independently (6/6 AC tests, `tsc` clean, `eslint` clean). Dry-run — nothing merged.
 
-This grounds the orchestrator in real TAT work: the refresher-date rule already shipped once by hand — see [[Refresher Date Override - SA-Only Absolute-Date Override]] — and its "compute the rule once, server-side" shape is exactly the kind of pure, testable slice the pipeline wants first.
+**What it proved beyond "it runs":** the station read the repo's own `AGENTS.md` first and adopted the existing idiom rather than inventing one, and the tests-from-ACs constraint held in practice — the gate's tests were written from the ticket before the station ran and injected at gate time, so they could not ratify the coder's choices.
+
+> [!danger] The station could not verify its own work — a fresh worktree has no `node_modules`
+> codex followed `AGENTS.md`'s "run lint and build before you finish" and got `sh: next: command not found`, exit 127. It wrote the code blind. It was correct **by luck, not by verification**; a larger slice would have returned subtly wrong with the same GREEN. A test gate does not cover this — the gate runs *after* the station is done, so it catches a bad result but never gives the agent its feedback loop. Fixed in **Loom v1.1.0** by a `setup` command that runs in the worktree before the station, declared once per repo in `.loom/stations.config.json`. Full entry: [[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]].
+
+## The originally-planned Slice 0 — still blocked
+
+Slice 0 was to be the **refresher-date resolver**: a pure function `(instructor, course) → effective refresher date`, plus override storage and an audit-log schema. **No UI.** It remains blocked on the two open ACs below, so TAT-451 took its place as the first real slice — same pure-resolver shape, no unresolved spec.
+
+This grounds Loom in real TAT work: the refresher-date rule already shipped once by hand — see [[Refresher Date Override - SA-Only Absolute-Date Override]] — and its "compute the rule once, server-side" shape is exactly the kind of pure, testable slice the pipeline wants first.
 
 > [!warning] Slice 0 is blocked on unresolved ACs (2026-07-23)
 > Rebuilding the resolver *from ACs, not the shipped code* immediately hit precedence/lifecycle questions the Override ACs never state — full history in [[Refresher Date Override - SA-Only Absolute-Date Override#Open spec questions — block the Slice 0 resolver (2026-07-23)]] (now archived). This is the pipeline working as designed: the [[Spec Gap Taxonomy & Grilling Agent|grilling stage]] must clear these before any coder station touches Slice 0. The shipped code picked answers, but "tests from ACs, never from coder output" forbids reading them off it.
