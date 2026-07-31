@@ -1,6 +1,6 @@
 ---
 date: 2026-07-30
-description: "Every instructor saw both Form 32A and 32B because both mapped to the single IN role code. Adds InstructorType per TOR (= per authority), plus creation/edit UI and an audit trail"
+description: "Every instructor saw both Form 32A and 32B — both mapped to the single IN code. Adds InstructorType per TOR (= per authority), the create/edit UI, and an audit trail"
 tags:
   - work-note
   - project/tat

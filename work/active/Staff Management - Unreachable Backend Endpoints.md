@@ -38,6 +38,11 @@ Method: extract every `@Get/@Post/@Patch/@Delete` from `staff-management.control
 - **`buildStaffTorEligibilityFilter`** — the assignment-eligibility filter (TAT-424 AC-11: role must match the requested qualification; see [[TAT-429 Sit-In Eligibility & Move Semantics]])
 - **Form 32 role scoping** — which of A / B / C / D (Theoretical Instructor · Practical Instructor · Examiner · Assessor) an instructor gets
 
+> [!info] Half of this changed on 2026-07-30
+> **Form 32 A and B are no longer scoped by `requestedRoleCodes`** — they are scoped by a new per-TOR `instructorType`, because both keys mapped to the single `IN` code and could never be separated. C and D still use `requestedRoleCodes` exactly as described above. `requestedRoleCodes` also remains load-bearing for assignment eligibility, so this item is still real. See [[Instructor Type - Per-Authority Form 32 Split]].
+>
+> There is now a frontend for the *instructor type* (the staff form's Instructor authorization card) — but still **none for `requestedRoleCodes` itself**, so "no frontend can change it afterwards" remains true for the roles.
+
 It is set **once**, at TOR creation, from `resolveDefaultRequestedRoleCodes(user)` (`staff-tor.service.ts:105`). **No frontend can change it afterwards.**
 
 **Impact:** you cannot change what an instructor is qualified *as*. If someone is meant to become an Examiner, or a role was wrong at creation, there is no way to correct it — and it silently governs both their Form 32 set and their assignment eligibility.
