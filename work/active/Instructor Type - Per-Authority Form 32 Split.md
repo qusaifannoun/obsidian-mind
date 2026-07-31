@@ -142,3 +142,14 @@ where it is *enforced* rather than merely displayed, so that code was removed ag
 - [[Loom]] — delivered the first version of this slice
 - [[Gotchas - Backend Schema & Data]] · [[Gotchas - Frontend]] · [[Gotchas - Tooling & Method]]
 - [[Index|Work Notes]]
+
+### Competencies
+
+- [[Debugging & Root Cause Analysis]] — two wrong diagnoses, both corrected by reading the
+  code rather than reasoning further; the actual cause was one line in a table everyone had
+  read past.
+- [[Systems Thinking]] — separating *which forms apply* (per authority) from *how many
+  instances* (per aircraft), and recognising the filter already existed and was enforced,
+  so the fix was vocabulary rather than machinery.
+- [[Code Quality]] — deleting a duplicated business rule fed from a different source rather
+  than extending it; 63 lines removed against 14 added.
