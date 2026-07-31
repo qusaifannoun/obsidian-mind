@@ -25,7 +25,7 @@ The **Updated Training & Validity** section of the [[Staff Management Subsystem 
 `OnlineCourse.title` → subject · `OnlineCourse.duration` → hours (confirmed as *hours*, not minutes: the certificate service reads the same field as `courseDurationHours`) · `completedAt` → accomplished · due date derived. Records carry `source` + `onlineCourseId` + `onlineEnrollmentId`; **the enrollment id dedupes**, so re-firing completion is a no-op.
 
 > [!note] The feature was a `return` statement
-> `applyOnlineCourseCompletion` was **already fired on every completion** from both the progress and exam services — and did `if (!courseCode) return;`. Completing a mandatory refresher filled its slot; completing anything else **silently did nothing**. No new hook was needed. See [[Patterns#A wired hook with an empty branch is where a feature is supposed to live (2026-07-12)]].
+> `applyOnlineCourseCompletion` was **already fired on every completion** from both the progress and exam services — and did `if (!courseCode) return;`. Completing a mandatory refresher filled its slot; completing anything else **silently did nothing**. No new hook was needed. See [[Patterns - Method & Conventions#A wired hook with an empty branch is where a feature is supposed to live (2026-07-12)]].
 
 ## Design decisions
 
@@ -39,7 +39,7 @@ The **Updated Training & Validity** section of the [[Staff Management Subsystem 
 
 **I framed the question badly, got a reasonable answer to the wrong question, and changed a Part-147 compliance number without checking it against real data.**
 
-The fix is not a revert — it's moving the rule. `calculateTrainingValidityHours` now computes the total **server-side** (approved + non-expired, across the catalog **and** the additional rows) and returns it as `totalDurationHours`. The FE displays it and never recomputes. See [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]] and [[Patterns#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
+The fix is not a revert — it's moving the rule. `calculateTrainingValidityHours` now computes the total **server-side** (approved + non-expired, across the catalog **and** the additional rows) and returns it as `totalDurationHours`. The FE displays it and never recomputes. See [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]] and [[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
 
 ## Aircraft qualification — wrong refresher date
 

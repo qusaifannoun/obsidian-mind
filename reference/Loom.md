@@ -108,4 +108,4 @@ The by-hand feature shipped and is verified on staging, but two spec gaps belong
 - [[TAT Platform]] — the repos this orchestrator operates on as stations
 - [[Key Decisions#2026-07-23 — Multi-agent delivery is an assembly line: parallel vertical slices, not role specialization]]
 - [[Refresher Date Override - SA-Only Absolute-Date Override]] — the by-hand version of the Slice 0 resolver
-- [[Patterns#The backend owns business rules; the frontend renders the answer (2026-07-12)]] — why a pure server-side resolver is the right first slice
+- [[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)]] — why a pure server-side resolver is the right first slice

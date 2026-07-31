@@ -34,7 +34,7 @@ The shared `RHFInput` components are **44px**. Adopting them — which the Zod+R
 
 **Option 2.** Shared-component consistency wins over per-document fidelity.
 
-The comment above is itself the argument: a bespoke style that must be *manually kept in sync* with a shared one is a drift bug waiting to happen — the same shape as [[Patterns#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]. A `size="compact"` variant would have preserved the look and kept the coupling.
+The comment above is itself the argument: a bespoke style that must be *manually kept in sync* with a shared one is a drift bug waiting to happen — the same shape as [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]. A `size="compact"` variant would have preserved the look and kept the coupling.
 
 Shipped in `2615d91` (`docInput` deleted from `Form32Editor`; the document now uses `InputField` / `DatePickerField` / `TextArea` / `Radio` at default sizes) and `50ae353` (`ControlledDatePicker` removed once nothing called it).
 

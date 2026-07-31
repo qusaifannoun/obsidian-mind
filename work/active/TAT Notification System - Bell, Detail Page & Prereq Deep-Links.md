@@ -58,6 +58,6 @@ Even after wiring `STAFF_MANAGEMENT_URL` + the repoint migration, staff-manageme
 - [[TAT-409 Staff Management Subsystem]] — parent epic; these notifications drive its TOR/form workflows
 - [[tat-prereq]] · [[tat-app-ws Backend]] — the two repos changed
 - [[TAT Platform]] — how the frontends (dashboard / portal / staff) map to base URLs
-- [[Patterns#No comments or ticket numbers in code (all TAT repos)]] — followed throughout
+- [[Patterns - Method & Conventions#No comments or ticket numbers in code (all TAT repos)]] — followed throughout
 - [[Gotchas]] — the destructive role-action seeder / re-seed hazard that motivated the migration script
 - [[Index|Work Notes]]

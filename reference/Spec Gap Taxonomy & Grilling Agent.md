@@ -47,5 +47,5 @@ The grilling agent sits in the middle: it catches conventional omissions outrigh
 
 - [[Loom]] — this note supplies the *complete ACs* that the orchestrator's "tests from ACs" stage depends on
 - [[Agent Handoff Protocol]] — same principle: a session ends in a written artifact, never in shared context
-- [[Patterns#Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)]]
+- [[Patterns - Method & Conventions#Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)]]
 - [[TAT Platform]] — the delivery this process feeds

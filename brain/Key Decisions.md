@@ -19,7 +19,7 @@ To let a Super Admin operate the Assessment TM section without waiting for the t
 
 ## 2026-07-16 — "Row actions = kebab only" is now a default, not a hard rule
 
-Qusai asked to replace the kebab (⋮) with **inline [[History Form Buttons Unified - InlineAction Primitive|InlineAction]] buttons** on the Initial-TOR-Documents list. The 2026-06-04 kebab-only rule still stands as the default, but **inline tone-coded buttons are an accepted alternative when he explicitly asks per surface** — don't auto-convert either way. See [[Patterns#Table row actions = kebab menu only]].
+Qusai asked to replace the kebab (⋮) with **inline [[History Form Buttons Unified - InlineAction Primitive|InlineAction]] buttons** on the Initial-TOR-Documents list. The 2026-06-04 kebab-only rule still stands as the default, but **inline tone-coded buttons are an accepted alternative when he explicitly asks per surface** — don't auto-convert either way. See [[Patterns - Frontend & UI#Table row actions = kebab menu only]].
 
 ## 2026-07-15 — Purchase-terms acknowledgment is a nudge, not provable consent
 
@@ -29,7 +29,7 @@ The [[tat-portal]] course-detail *Important Notes* (auto-close forfeiture, exam-
 
 Form 32 renders as the official **TAT FORM 032-A** and had a bespoke compact **38px** field style (`docInput`) to look like the paper document; the shared `RHFInput` fields are **44px**. Offered the choice between adding a `size="compact"` variant across the shared library (exact document fidelity, a size axis maintained forever) or letting the document take standard sizes, **Qusai chose standard sizes** — fewer moving parts, internally consistent with the app, at the cost of a chunkier-looking 032-A.
 
-The tell was in the code: `ControlledDatePicker` carried a comment whose only purpose was keeping the bespoke style *manually in sync* with the shared one — the same drift trap as [[Patterns#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]].
+The tell was in the code: `ControlledDatePicker` carried a comment whose only purpose was keeping the bespoke style *manually in sync* with the shared one — the same drift trap as [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]].
 
 **Precedent for every document-style form** ([[tat-prereq]] Form 285, TAT Form 031). Caveat: nobody has yet judged the visual result against the paper form. Full record: [[Form 32 Field Sizing - Shared Components Over Document Fidelity]].
 

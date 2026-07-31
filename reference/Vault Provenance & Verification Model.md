@@ -51,4 +51,4 @@ None of these are measured yet; all are computable from the git history:
 - [[Spec Gap Taxonomy & Grilling Agent]] — sibling design note; grilling produces ACs, this governs whether the vault's record of them stays true
 - [[Agent Handoff Protocol]] — the handoff rule this generalizes: verified must mean exercised, not built
 - [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]
-- [[Patterns#Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)]]
+- [[Patterns - Method & Conventions#Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)]]

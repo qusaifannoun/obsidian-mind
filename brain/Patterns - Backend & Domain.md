@@ -1,0 +1,74 @@
+---
+date: 2026-06-04
+description: "tat-app-ws service patterns and TAT domain modelling — staff-management wiring, section placement by data ownership, notifications, reject flows and server-generated form PDFs"
+tags:
+  - brain
+---
+
+# Patterns — Backend & Domain
+
+tat-app-ws service patterns and TAT domain modelling — staff-management wiring, section placement by data ownership, notifications, reject flows and server-generated form PDFs.
+
+Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
+
+## Staff Management is wired to real `/staff-management/*` APIs
+
+As of 2026-06-18, the [[TAT-409 Staff Management Subsystem|TAT-409]] FE dummies have been **replaced with the real backend** (staging Swagger): staff-management-login, TOR matrix/details/pending, tor-documents, Form 285, Form 32 (rebuilt schema-driven), profiles catalog + `profiles/me`, qualifications, assessments, deactivate. Read paths verified vs staging; write paths wired but largely unexercised. The "FE-first dummy-data layer" pattern below is now historical for this subsystem (History + Assessment *forms* remain dummy — no backend). Instructor self-service is wired but **backend-blocked**: the instructor role 403s on `profiles/me` / `tor-documents` / `qualifications` until granted those actions server-side. Rule going forward: **FE follows the backend contract; align the FE to a ticket once its backend is approved.**
+
+## Staff subsystem section placement: per-instructor lives on the profile (+read-only TOR mirror), per-license lives in the TOR (2026-07-09)
+
+Where a section renders in [[tat-prereq]] follows its **data ownership**, confirmed with the BA and grounded in the backend endpoints:
+
+- **Per-instructor / shared-across-TORs** → the section's home is the **profile** (`/staff/[id]`); each TOR shows a **read-only mirror** linking back. Applies to the **History Form** (one shared form, auto-created on first TOR — `historyFormService.ensureForUser`) and **Initial TOR Documents** (synced across the instructor's TORs). The route already reflected this: `/staff/[id]/history-form` is a **sibling** of `/staff/[id]/tor/[torId]`, not nested under it. Mirror = a compact card (History) or the full read-only grid (Documents) on the TOR detail; editing stays on the profile.
+- **Per-license / per-TOR** → the section **lives inside the TOR**, never aggregated on the profile. **Aircraft Qualifications** and **Assessments** are per-TOR on the backend (`GET /tors/:torId/aircraft-qualifications`, `/assessments`) — there is **no per-user list route**. The profile used to flatten them across all TORs into one list (mixing CARC/EASA/GCAA), which the BA flagged as confusing. Fix: removed the flattened profile cards + their `useStaffRecords` aggregating hooks; the TOR detail shows each TOR's own (via `TorQualifications` / new `TorAssessments`).
+
+Rule of thumb: **check whether the backend exposes the data per-user or per-TOR** — that dictates the home. A per-user aggregate that fans out across TORs and flattens is a smell for something that should live in the TOR. Context: [[Form 32 Rejection History & Round-Scoped Stamps]] neighbourhood (same 2026-07-09 session), [[Gotchas - TOR & Staff Management#tat-prereq staff self-profile — stale mapper, dead per-user record endpoints, and an unmapped-enum crash (2026-07-08)]].
+
+## History Form is now real + rendered as TAT Form 031 (2026-06-28)
+
+The History Form is no longer dummy (updates the note above). The whole TAT-417/418/419/421 + [[TAT-429 Sit-In Eligibility & Move Semantics|TAT-429]] backend shipped and the FE was wired + verified against staging across roles:
+
+- **One `HistoryFormView` (`/staff/[id]/history-form`) = the whole TAT Form 031 document.** Restructured from stacked cards into a single bordered document with centered `SectionBar`s, in the form's order: identity → Years of Experience → Part 66 → Type Training Course → Relevant Training History → Updated Training & Validity → Sit-ins & Successfully Assessed As → Special Notes → Certified by. Sections with **no backend** (License/Valid Until, Part 66, aircraft-qual editing, Certified-by) render as **disabled placeholders with a "pending backend" note** so the document is visually complete.
+- **Wired sub-resources** (all `/staff-management/profiles/:userId/history-form/*` + `/sit-ins/*`): basic info (TM approve / field-reject), mandatory training (record → submit → approve / field-reject the 3 fields accomplishedDate/durationHours/evidence), training history (add → approve / reject-with-reason, with a Due Date column), sit-in (evaluator submit → TM final assessment). Hooks/fetchers in `src/api/Forms/*`; query keys per entity.
+- **Gating is per-action, approximated by role** (the FE only has role codes, no action list): training history allows SA too (`isSuperAdmin || !isReviewer`); reviewer approve/reject shows for `isReviewer` on Pending items; the sit-in evaluator form shows only to the assigned `evaluatorUserId`.
+  - **Correction (2026-07-12): the claim here that "mandatory training is instructor-only — SA lacks `SM_SAVE_MANDATORY_TRAINING`" was WRONG.** SA *has* that RBAC action (`bootstrap.service.ts:559`) and *is* in `MANDATORY_TRAINING_PRIVILEGED_EDITOR_ROLES` = `[SA, AD, QM, TM]`. A privileged **save auto-approves** (`status = APPROVED`) and requires **no evidence**; **submit** is owner-only and explicitly *rejects* privileged editors, because they never need it. The FE had only ever built the instructor path, so SA couldn't record training at all (fixed `53c775f`). **Had I trusted this note instead of reading the code, I'd have "fixed" it by adding a permission that already existed.** See [[Gotchas - Tooling & Method#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]].
+- **404 = not-started**: the GET 404s until the form exists, so fetchers return an empty Draft / null on 404 (see [[Gotchas - Forms & Approval#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]).
+
+Reusable shape going forward: **a multi-section form that maps 1:1 to a paper form = one document component + a `SectionBar` primitive + per-section sub-components**, each wired to its own endpoint and gated by the actor who fills it.
+
+## Notifications: one action → target the right frontend by env-driven base URL (tat-app-ws)
+
+The TAT backend serves several frontends (admin **dashboard** [[tat-ws]], **online-courses** [[tat-portal]], **staff-management** [[tat-prereq]]). Notification deep-links are stored as relative paths in `seed_data/notification-settings.json` and the base host is resolved by `CommonService.resolveClientBaseUrl(context)` — so the *same* notification pipeline can point links at different apps. Pattern (2026-07-08, see [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]]):
+
+- **Add a client = add an env URL + a `resolveClientBaseUrl` branch.** New `staffManagementUrl` from `STAFF_MANAGEMENT_URL` (staging `staging.staff.tat147.com`, prod `staff.tat147.com`); the branch keys off `FrontendUrlContext.clientApp === 'staff-management'`. Env value carries the staging↔prod switch, exactly like `DASHBOARD_URL`. **Dashboard is the default** — untagged notifications don't move.
+- **Mark only the settings you want to move.** Each seed parameter can carry `client: "staff-management"`; the setting stores the **relative** URL + `client`, and `sendNotification` resolves the base per-client at **send time** via `resolveClientBaseUrl`. So changing a link's target = seed edit, not code.
+- **Resolve the base at send time, NOT seed time (corrected 2026-07-09).** The original impl baked the absolute URL into the stored setting at seed time — that was a bug: because re-seeding skips existing settings, setting `STAFF_MANAGEMENT_URL` after the first seed never took effect (see [[Gotchas - Backend Services & Environment#Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)]]). `bootstrap.service.ts` now stores `param.url` relative and lets the send-time resolver run. **General rule: resolve environment-dependent values at use time, never freeze them into a DB row on first write.**
+- **Deep-linking needs the id in `templateValues`.** A link like `.../tor/{{torId}}/form-285` only resolves if the notify function forwards `torId`. The form responses already carried `torId`/`userId` via `toDTO`, so it was just adding them to `templateValues` — check the response shape before assuming a placeholder is populated.
+- **Re-seed is destructive + skips existing settings** (see [[Gotchas]]) — so data changes to already-seeded envs need a **non-destructive migration** (`$set parameters` by setting `name`), not a reboot. Keep the seed JSON the single source of truth and have the migration derive from it.
+
+Frontend side: the backend pushes new notifications over **Socket.IO** (`emit("notification", ...)`, room = user `_id`, auth via `handshake.auth.Authorization` Bearer). Consume by connecting to the API **origin** (strip the `/api` REST prefix), then invalidate the inbox query + flash the bell on each event.
+
+## Multi-item reject flows: accumulate-and-send only when items share ONE parent status (tat-prereq / tat-app-ws)
+
+The "reject one item → the whole form rejects and the remaining Reject buttons vanish" bug is **specific to review surfaces where many fields share a single parent status**. Diagnose by asking *what status the reject button is gated on*, not *how many things can be rejected*.
+
+- **Shared parent status → needs the fix.** History-Form **basic-info** fields all live on the one `StaffHistoryForm.status`; the old per-field `rejectBasicInfoField` did `form.status = REJECTED` on the first reject, so the next reject threw `historyFormInvalidWorkflowTransition` and the FE (gated on `form.status === PENDING_APPROVAL`) hid every other field's button. Same shape as [[Form 32 Rejection History & Round-Scoped Stamps|Form 32]] sections. **Fix = accumulate-and-send:** stage rejections client-side (`pendingRejections` map) and POST them in **one** plural `rejectBasicInfoFields` call, so the parent flips to REJECTED exactly once, after the reviewer has picked everything.
+- **Per-item status → already safe, no fix.** Audited 2026-07-09: **Mandatory Training** (each `mandatoryTraining[]` slot has its own `status`; `rejectMandatoryTraining` guards on `slot.status`, and the dialog already sends multiple fields per course) and **Training History** (each `trainingHistory[]` record has its own `status`) reject **per sub-record** and never touch `form.status` — rejecting slot A leaves slot B `PENDING_APPROVAL`, so its FE button (gated on the *item's* status) stays. **Assessment** is approve-only (no reject flow at all). None needed the accumulate-and-send change.
+
+Rule: **before replicating a multi-reject fix, confirm the items actually share one status.** Independent per-row records with their own status are already correct — forcing accumulate-and-send onto them is wasted work. Related: [[Gotchas]].
+
+**Same mechanism drives auth links (reset-password / verify-email), but the per-client branch list is DUPLICATED per resolver (2026-07-08).** The client is detected from the **`x-client-app` request header** — every FE sets it (`tat-prereq` → `staff-management`, `tat-portal` → `online-courses`; `tat-ws`/website send nothing → default dashboard). But `CommonService` has a **separate resolver per link type** — `resolveClientBaseUrl`, `resolveResetPasswordUrl`, `resolveVerifyEmailUrl`, `resolveLoginUrl` — each with its **own** branch list. `resolveClientBaseUrl` handled `staff-management`, but `resolveResetPasswordUrl` only branched on `online-courses`, so staff forgot-password links fell through to the **dashboard** URL. Fix = add the `clientApp === 'staff-management'` branch to `resolveResetPasswordUrl` too (derives `${staffManagementUrl}/reset-password`). **Rule: adding/fixing a client means auditing ALL the resolvers, not just `resolveClientBaseUrl`.** Related auth fixes same day: reset-password FE calls **`PATCH /auth/reset-password/:token`** with `{ password }` (not `POST /auth/reset-password` → "Cannot POST"); the reset page's Email field was dead UI (token identifies the user); and **login forms must not enforce password strength/length** (`min(1)`, not `min(8)`) — that belongs on creation/reset, else admin-issued/legacy short passwords can't sign in.
+
+## Server-generated form PDFs — reuse the shared Puppeteer pipeline; aggregate cross-service data in the controller
+
+Exporting a TAT form as a PDF ([[Export History Form - TAT Form 031 PDF|Form 031]], [[Export Assessment Report - TAT Form 032 PDF|Form 032]], and the pre-existing Form 32/285) all use **one shared pipeline**: a pure `build<Form>PdfHtml(input)` util produces an HTML string → `generatePdfFromHtml(html, forPrint?, landscape?)` (HTML → Puppeteer → A4 PDF) → `s3Service.uploadFile(..., FileUploadCategory.<X>)` → `signFileKey` → return `{ downloadUrl }`. The FE fetcher hits `GET .../download` and does `window.open(url, '_blank', 'noopener,noreferrer')`. **Never hand-roll a second Puppeteer path** — extend the shared util instead (the `landscape` flag was added this way, default `false` so every existing caller stays portrait).
+
+HTML reproduction tips that worked: one bordered `<table>` **per section** (not one giant table) with a `<colgroup>` per section for column control; `table-layout: fixed` + `margin-bottom: -1px` to collapse the seams between section tables; checkboxes as `&#9746;`/`&#9744;`; embed images (logo, **signatures**) as base64 `data:` URIs *before* rendering (`s3Service.getFile` returns raw base64 — wrap it as `data:image/png;base64,…`, inferring MIME from the key extension). Match the official form's exact spelling, even typos ("ASSESSEMENT", "COMUNCATION", "REFFERENCE").
+
+**Cross-service aggregation goes in the controller, not the service.** The History-Form export needs data from four services (history-form + mandatory-training + training-history + sit-in). Putting all four injections into `StaffHistoryFormService` would create a **circular DI** (the mandatory/sit-in services already depend on it). Instead the **controller** — which already injects every service — fetches the sibling sections and passes them into `historyFormService.downloadPdf(actor, userId, sections)`, exactly the compose-in-controller idiom `getMyHistoryForm` already used. The service owns only the data it already owns (basic info, quals, audit log) plus S3/PDF.
+
+## Related
+
+- [[Patterns]] · [[Gotchas]] · [[Key Decisions]]
+- [[Staff Management Subsystem & TOR Model]] — the domain reference these patterns model
+- [[tat-app-ws Backend]] · [[TAT API & Auth Model]] — the service and contract they apply to

@@ -19,7 +19,7 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **Diagnosis trick that settled it in one query:** 46 `tor_sync_completed` audit rows (worker alive and running) + **every TOR still persisted as `draft`** ⇒ the writer never agreed the TOR was active, so the reader was the liar. Fixed by extracting `staff-tor-activation.util.ts` (`resolveTorStatusFromGates`) and having both callers use it (`57bb7a1c`).
 >
-> **This is the THIRD duplicated-rule bug this week** ([[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|the 35h badge]], [[#The 35h/2yr badge summed the wrong collection (2026-07-12)|the collection mismatch]], and this). See [[Patterns#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]].
+> **This is the THIRD duplicated-rule bug this week** ([[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|the 35h badge]], [[#The 35h/2yr badge summed the wrong collection (2026-07-12)|the collection mismatch]], and this). See [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]].
 
 ## An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)
 

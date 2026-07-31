@@ -19,7 +19,7 @@ The obvious read — "add a `<select>` to the toolbar" — was a trap. **`aircra
 
 So the two frontend-only paths both fail:
 - **Client-side filter** — impossible; the category is absent from the payload.
-- **A lone FE select** posting `aircraftCategory` — class-validator's whitelist drops the unknown param and the list never narrows. A **dead control** — the inverse of the [[Staff Management - Unreachable Backend Endpoints|dead-endpoint sweep]] (there: a working backend with no FE affordance; here: an FE affordance with no backend data). See [[Patterns#Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control]].
+- **A lone FE select** posting `aircraftCategory` — class-validator's whitelist drops the unknown param and the list never narrows. A **dead control** — the inverse of the [[Staff Management - Unreachable Backend Endpoints|dead-endpoint sweep]] (there: a working backend with no FE affordance; here: an FE affordance with no backend data). See [[Patterns - Architecture & Boundaries#Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control]].
 
 ## What shipped (full-stack)
 

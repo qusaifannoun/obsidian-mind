@@ -73,7 +73,7 @@ Activation needs an approved assessment **per aircraft type**. Nothing in the UI
 
 - [[TAT-409 Staff Management Subsystem]] · [[TAT-423 Assessment Report Rubric]] · [[TAT-429 Sit-In Eligibility & Move Semantics]]
 - [[Staff Management Subsystem & TOR Model]] — domain reference
-- [[Patterns#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]
+- [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]
 - [[Gotchas - TOR & Staff Management#The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)]]
 - [[tat-app-ws Backend]] · [[tat-prereq]]
 - [[Debugging & Root Cause Analysis]] · [[Systems Thinking]]

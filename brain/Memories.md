@@ -11,7 +11,11 @@ tags:
 Persistent context and knowledge retained across sessions. Each topic lives in its own note — follow the links.
 
 - [[Key Decisions]] — architectural and workflow decisions worth recalling
-- [[Patterns]] — recurring patterns and conventions discovered across work
+- [[Patterns]] — index of recurring patterns and conventions discovered across work; split into four domain notes on 2026-08-01, **add new entries to the domain note, not the index**
+  - [[Patterns - Method & Conventions]] — verification bias, spec-gap routing, ticket hygiene, propose-before-implementing, where a convention must live to be reachable
+  - [[Patterns - Architecture & Boundaries]] — backend owns business rules, one rule/one implementation, confirm the far side exists before wiring a control
+  - [[Patterns - Frontend & UI]] — forms, tables, uploads, auth gating, cache invalidation and layout across the four frontends
+  - [[Patterns - Backend & Domain]] — staff-management wiring, section placement by data ownership, notifications, reject flows, server-generated form PDFs
 - [[Gotchas]] — index of things that have bitten before and will bite again; split into six domain notes on 2026-07-28, **add new entries to the domain note, not the index**
   - [[Gotchas - Backend Schema & Data]] — Mongoose document/schema mechanics: enum defaults, index lifecycle, subdocument spreads, sequence allocation
   - [[Gotchas - Backend Services & Environment]] — seeding, notification plumbing, API contract shapes, which DB an environment actually points at

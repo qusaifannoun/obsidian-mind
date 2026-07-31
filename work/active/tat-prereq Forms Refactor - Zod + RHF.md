@@ -19,7 +19,7 @@ He was not wrong. Both offending files are **mine** (TAT-423 assessment rubric +
 
 ## The rule
 
-[[tat-prereq]] already has the full infrastructure — see [[Patterns#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]. `src/hooks/use-zod-form.ts` states it outright: *"All forms in this project must use this hook — never `useForm()` directly."*
+[[tat-prereq]] already has the full infrastructure — see [[Patterns - Frontend & UI#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]. `src/hooks/use-zod-form.ts` states it outright: *"All forms in this project must use this hook — never `useForm()` directly."*
 
 > [!warning] This initial scope was wrong — kept to show how the estimate moved
 > I believed only two files broke the rule, and that `HistoryFormView` / `SitInSection` complied. The repo-wide grep found **six** violators, including both of those. See [[Gotchas - Forms & Approval#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]].
@@ -114,5 +114,5 @@ This refactor rewrites `Form32Editor.tsx`, which is exactly where [[Form 32 Reje
 ## Related
 
 - [[TAT-409 Staff Management Subsystem]] · [[TAT-423 Assessment Report Rubric]] · [[tat-prereq]]
-- [[Patterns#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]
+- [[Patterns - Frontend & UI#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]
 - [[Code Quality]] — the whole note is a code-quality debt item

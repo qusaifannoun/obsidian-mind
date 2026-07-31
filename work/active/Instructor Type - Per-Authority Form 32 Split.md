@@ -79,7 +79,7 @@ Form 32 templates"*, which was false and is exactly what made the duplication lo
 backend was already sending.
 
 Removed. Both screens now render what the server sends: **63 lines deleted, 14 added**. See
-[[Patterns#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
+[[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)]].
 
 ## Three traps caught before shipping
 
