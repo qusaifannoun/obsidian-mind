@@ -37,7 +37,7 @@
  */
 
 import { readdirSync, readFileSync, statSync, type Dirent } from "node:fs";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { escapeRegex } from "./regex.ts";
 import {
 	extractFrontmatterField,
@@ -414,14 +414,24 @@ function findOversizedNotes(
 // ---------------------------------------------------------------------------
 // Meetings-inbox pressure. work/meetings/ is a staging inbox drained by
 // /om-intake — raw exports sitting there are unprocessed by definition.
+//
+// The folder's own README documents the drop-here workflow; it is scaffolding,
+// never an export. Counting it made the flag UNCLEARABLE — a fully drained
+// inbox still reported one ever-aging file, so the warning fired every session
+// and /om-intake could never satisfy it.
 // ---------------------------------------------------------------------------
 
 export const INBOX_PRESSURE_DAYS = 7;
+
+export function isInboxScaffolding(filename: string): boolean {
+	return filename.startsWith("README.") && filename.endsWith(".md");
+}
 
 function findInboxPressure(root: string, nowMs: number): InboxPressure | null {
 	let count = 0;
 	let oldestDays = 0;
 	for (const rel of walkMarkdown(root, "work/meetings")) {
+		if (isInboxScaffolding(basename(rel))) continue;
 		let mtimeMs: number;
 		try {
 			mtimeMs = statSync(join(root, rel)).mtimeMs;

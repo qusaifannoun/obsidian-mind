@@ -219,6 +219,42 @@ describe("scanActiveHygiene — detectors", () => {
 		assert.ok(report.inboxPressure!.oldestDays >= 40);
 	});
 
+	test("the inbox's own README is scaffolding, so a drained inbox is clear", () => {
+		const drained = mkdtempSync(join(tmpdir(), "active-hygiene-drained-"));
+		try {
+			mkdirSync(join(drained, "work/meetings"), { recursive: true });
+			const readme = join(drained, "work/meetings/README.md");
+			writeFileSync(readme, "Drop raw exports here, then run /om-intake\n");
+			const aged = new Date(NOW - 59 * 86_400_000);
+			utimesSync(readme, aged, aged);
+			assert.equal(scanActiveHygiene(drained, NOW, DEFAULTS).inboxPressure, null);
+		} finally {
+			rmSync(drained, { recursive: true, force: true });
+		}
+	});
+
+	test("a real export still registers, and the README does not age the count", () => {
+		const mixed = mkdtempSync(join(tmpdir(), "active-hygiene-mixed-"));
+		try {
+			mkdirSync(join(mixed, "work/meetings"), { recursive: true });
+			for (const [name, ageDays] of [
+				["README.md", 59],
+				["2026-06-02 Standup.md", 30],
+			] as const) {
+				const full = join(mixed, "work/meetings", name);
+				writeFileSync(full, "x");
+				const t = new Date(NOW - ageDays * DAY_MS);
+				utimesSync(full, t, t);
+			}
+			const report = scanActiveHygiene(mixed, NOW, DEFAULTS);
+			assert.ok(report.inboxPressure !== null);
+			assert.equal(report.inboxPressure!.count, 1);
+			assert.equal(report.inboxPressure!.oldestDays, 30);
+		} finally {
+			rmSync(mixed, { recursive: true, force: true });
+		}
+	});
+
 	test("missing folders produce an empty report, not errors", () => {
 		const empty = mkdtempSync(join(tmpdir(), "active-hygiene-empty-"));
 		try {
