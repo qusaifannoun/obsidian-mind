@@ -106,12 +106,25 @@ lint 0 errors · card confirmed in the browser.
   `MIGRATION_MONGO_URI`. Until it runs, existing TORs have no type and fall back to old
   behaviour. **That fallback is the only thing preventing every instructor losing both Form
   32s if the deploy precedes the backfill.**
+  > [!danger] Do not run it first (2026-08-01)
+  > It derives the type from `requestedRoleCodes`, which is **empty on every legacy TOR and
+  > backfilled by nothing** — so it writes `instructorType: NONE`, hiding 32A/32B and tripping
+  > the activation guard, i.e. it *causes* the loss the fallback was preventing. Backfill
+  > `requestedRoleCodes` first. See
+  > [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+- **32C/32D were left on `requestedRoleCodes` and are still wrong for legacy TORs** — the
+  gate there fails open on the empty field, so a plain instructor still sees Examiner and
+  Assessor forms. Root-caused 2026-08-01, unfixed, and it needs the same backfill.
 - **Nothing verified end to end.** No instructor created through the new path, no API call
   against a running server, no audit row ever written. Types, unit tests and rendering only.
 - **The activation guard is on `dev` and the BA has not reviewed it.** TORs that activate
   today will be held if an instructor's type is `NONE`.
-- **TAT-451 AC-07's Final TOR Certificate clause is not implementable** — TAT-450 is unbuilt.
-  Every other AC on both tickets is covered.
+- ~~**TAT-451 AC-07's Final TOR Certificate clause is not implementable** — TAT-450 is
+  unbuilt.~~ **Unblocked 2026-08-01** — the backend shipped TAT-450 in the 2026-07-28→31 drop
+  and the FE read path is built and verified
+  ([[TAT-450 TOR Certificate FE - Read Path Only]]). The clause is now implementable; whether
+  it *is* implemented has not been rechecked. Every other AC on both tickets was already
+  covered.
 - `provisionInstructorTors`' selection branch and the audit writes have **no tests** — both
   need mongo and the repo has no integration harness.
 - Setting an existing authority to `None` does **not** delete its TOR (it may hold Form 285,
@@ -122,6 +135,10 @@ lint 0 errors · card confirmed in the browser.
 - `nx lint` is broken repo-wide in `tat-app-ws` — backend lint has not run all session.
 
 ## Unblocks
+
+**TAT-454 shipped on it (2026-08-01)** — the FE now sends `courseMethod` on all three
+instructor pickers, verified end to end against staging:
+[[TAT-454 Instructor Assignment Filtering - courseMethod]]. TAT-453 still open.
 
 TAT-454 and TAT-453 both need exactly this theoretical/practical distinction for instructor
 assignment filtering, and were unimplementable without it.
@@ -137,6 +154,8 @@ where it is *enforced* rather than merely displayed, so that code was removed ag
 
 ## Related
 
+- [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]] — the follow-on: why
+  C/D are still wrong, and why this note's backfill must not run first
 - [[TAT-409 Staff Management Subsystem]] · [[Staff Management Subsystem & TOR Model]]
 - [[tat-app-ws Backend]] · [[tat-prereq]]
 - [[Loom]] — delivered the first version of this slice

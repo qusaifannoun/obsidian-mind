@@ -165,6 +165,43 @@ Related: [[TAT-423 Assessment Report Rubric]] (the assessment feature) · [[Hist
 
 ---
 
+---
+
+## 🟢 New gaps — found while building the TOR certificate FE (2026-08-01)
+
+**Ticket:** TAT-450 · **Source:** the 2026-07-28→31 backend drop · Detail in
+[[TAT-450 TOR Certificate FE - Read Path Only]].
+
+### 9. No `tor-certificate` `FileUploadCategory` — signatures land in the wrong folder
+**Severity:** Medium
+
+The certificate's signature upload has no category of its own, so the FE currently uploads
+under **`tor-documents`**. Same shape as the History Form's missing category. Add
+`tor-certificate` to `FileUploadCategory`; the FE switches the moment it exists.
+
+### 10. QM save **and** approve are both gated on `SM_VIEW_PENDING_TORS`
+**Severity:** Medium · **Needs a BA/backend call, not an FE workaround**
+
+A **view** permission gating an **approve**. Any role granted the pending-TORs worklist for
+read access silently acquires certificate write + approval rights. Needs its own
+`SM_*_CERTIFICATE` actions, matching how the other forms separate save from approve.
+
+### 11. `GET …/tors/:torId/certificate` creates a draft shell as a side effect
+**Severity:** Low (by design?) — **but confirm it's intended**
+
+A read endpoint that writes. Combined with `dev` being the only database, browsing a TOR
+seeds `tor_certificate` rows. Consistent with the `ensureForUser` lazy-create idiom, so this
+may be deliberate — worth confirming rather than assuming.
+
+### 12. Unconfirmed: does certificate approval gate TOR `ACTIVE`, and what happens to already-ACTIVE TORs?
+**Severity:** Medium · **Blocks the Form 285/32 lock, deliberately not built**
+
+`tor_certificate` now seeds `mandatory: true` for CARC/EASA/GCAA. If a mandatory form is
+missing on TORs that are **already** ACTIVE, either they get held on the next sync or the
+gate ignores it — the answer changes both the FE lock and the activation rules.
+
+---
+
 ## 🟡 Auto-behaviour / enrichment
 
 ### 6. Auto-update TOR indicators

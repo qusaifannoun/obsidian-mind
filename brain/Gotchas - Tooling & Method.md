@@ -8,6 +8,13 @@ tags:
 # Gotchas - Tooling & Method
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)
+
+> [!danger] It showed **1 request of 11**. Believing it would have meant reporting a feature as not firing when it was firing correctly eleven times.
+> Verifying [[TAT-454 Instructor Assignment Filtering - courseMethod|TAT-454]] against staging, the extension's network capture surfaced a single call while the page was actually issuing eleven — the cross-origin ones were missing. `performance.getEntriesByType('resource')` sees them all, from inside the page, with URLs and timings intact.
+>
+> **The dangerous direction is the one this fails in: absence.** A tool that under-reports produces *negative* evidence — "the FE isn't sending it" — which is exactly the conclusion that ends an investigation early and sends you to rewrite working code. **A capture tool showing fewer calls than the feature must make is a tool failure until proven otherwise**; cross-check with an in-page source before concluding a request wasn't made. Persisted React Query keys are the second such source — they show what the *query layer* believes it sent, independent of any network panel.
+
 ## A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)
 
 > [!danger] codex followed `AGENTS.md`'s "run lint and build before you finish" and got `sh: next: command not found`, exit 127

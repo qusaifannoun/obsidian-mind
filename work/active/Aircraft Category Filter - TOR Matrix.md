@@ -44,7 +44,7 @@ This is the [[Patterns|"move filter into fetcher params when the backend support
 ## Open
 
 - [ ] **Not browser/staging-verified.** Pick **B1** → list narrows to staff holding a B1 qualification; **B2** likewise.
-- [ ] Confirm class-validator's whitelist **accepts** the new `aircraftCategory` param at runtime (didn't 400/strip it).
+- [ ] Confirm class-validator's whitelist **accepts** the new `aircraftCategory` param at runtime (didn't 400/strip it). **Partially answered 2026-08-01 by a sibling param, not by this one:** a declared `@IsEnum` query param does reach the handler — [[TAT-454 Instructor Assignment Filtering - courseMethod|`courseMethod`]] returned 200 on six staging calls. It also sharpened the risk into **two distinct failure modes**: an *undeclared* param is silently **dropped** (the dead-control case), while a *declared* param sent in the wrong shape (`_id` instead of the enum name) **400s**. `aircraftCategory` itself is still unexercised on staging.
 - [ ] Confirm **category ∧ aircraft-type intersect** correctly with real data (staff with B1 on one type, B2 on another).
 
 ## Related

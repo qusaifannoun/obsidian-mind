@@ -11,6 +11,20 @@ project: tat-app-ws
 
 # Sequential User Number - Atomic Allocation & Backfill
 
+> [!warning] The field was renamed to `staffNumber` — every `userNumber` below is the old name (2026-08-01)
+> Surfaced while building [[TAT-450 TOR Certificate FE - Read Path Only]]: the certificate's
+> **Authorization Number renders `—`**, sourced from **`staffNumber`**, and that backfill is
+> **unrun**. This note's `userNumber` names — the schema field, the `counters._id`, the
+> `userNumber_unique` index, the migration — have **not** been re-verified under the new name.
+>
+> **Unresolved contradiction, do not act on either half yet.** This note records the backfill
+> as *applied to `tat-dev` on 2026-07-28* (40 users, `001..040`, verified by re-reading the
+> collection); the 2026-08-01 evidence says the `staffNumber` backfill is *unrun*. The
+> reconciliation that fits both — **`userNumber` was backfilled, then the field was renamed in
+> the 2026-07-28→31 backend drop, leaving the renamed field unpopulated** — is **(inferred)**
+> and unverified. Settle it by reading the current `user.schema.ts` and the `counters`
+> collection before trusting anything below.
+
 ## Context
 
 Users needed a human-readable sequential identifier (`001`, `002`, …) alongside their ObjectId. The first implementation added a `userNumber` string to `User` and a `pre("save")` hook that derived the next value by scanning for the current maximum:

@@ -16,6 +16,8 @@ Split into domain notes on 2026-08-01, when the single file reached 46KB. Substa
 
 _How work gets done in the TAT repos — verification bias, spec-gap routing, ticket hygiene, the propose-before-implementing rule, and where a convention has to live to be reachable._
 
+- [[Patterns - Method & Conventions#`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)|`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)]]
+- [[Patterns - Method & Conventions#An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)|An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)]]
 - [[Patterns - Method & Conventions#Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)|Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)]]
 - [[Patterns - Method & Conventions#Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)|Route each spec-gap kind to the stage that catches it cheapest (2026-07-23)]]
 - [[Patterns - Method & Conventions#TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)|TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)]]
@@ -31,6 +33,7 @@ _Where logic belongs — the backend owns business rules and the frontend render
 
 - [[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)|The backend owns business rules; the frontend renders the answer (2026-07-12)]]
 - [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)|One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]
+- [[Patterns - Architecture & Boundaries#A guard that fails open on absent data is disabled by the data, silently (2026-08-01)|A guard that fails open on absent data is disabled by the data, silently (2026-08-01)]]
 - [[Patterns - Architecture & Boundaries#Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control|Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control]]
 - [[Patterns - Architecture & Boundaries#Confirm the config/URL exists before wiring a cross-app link (tat-prereq)|Confirm the config/URL exists before wiring a cross-app link (tat-prereq)]]
 

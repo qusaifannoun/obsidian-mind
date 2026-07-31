@@ -31,7 +31,8 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 _tat-app-ws service-layer and environment traps — seeding, notification plumbing, API contract shapes, and which database an environment actually points at._
 
-- [[Gotchas - Backend Services & Environment#`dev` and `staging` are the same database in this project — not two environments (2026-07-28)|`dev` and `staging` are the same database in this project — not two environments (2026-07-28)]]
+- [[Gotchas - Backend Services & Environment#`dev` and `staging` are the same database in this project — not two environments (2026-07-28)|`dev` and `staging` are the same database in this project — not two environments (2026-07-28)]] — plus the 2026-08-01 corollary: a GET can lazy-create, so browsing seeds rows
+- [[Gotchas - Backend Services & Environment#Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)|Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)]]
 - [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]
 - [[Gotchas - Backend Services & Environment#A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)|A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)]]
 - [[Gotchas - Backend Services & Environment#Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)|Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)]]
@@ -46,6 +47,7 @@ _tat-app-ws service-layer and environment traps — seeding, notification plumbi
 
 _TOR activation, sit-in eligibility, staff profile and qualification traps in the staff-management subsystem._
 
+- [[Gotchas - TOR & Staff Management#Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)|Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)]]
 - [[Gotchas - TOR & Staff Management#The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)|The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)]]
 - [[Gotchas - TOR & Staff Management#An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)|An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)]]
 - [[Gotchas - TOR & Staff Management#The Assessment Report is NOT a TOR form — one hardcoded "missing" row hid two outstanding assessments (2026-07-12)|The Assessment Report is NOT a TOR form — one hardcoded "missing" row hid two outstanding assessments (2026-07-12)]]
@@ -66,7 +68,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 - [[Gotchas - Forms & Approval#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)|A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]]
 - [[Gotchas - Forms & Approval#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)|History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]
 - [[Gotchas - Forms & Approval#Form 32 assessment Signature is a FILE key, not text (2026-07-05)|Form 32 assessment Signature is a FILE key, not text (2026-07-05)]]
-- [[Gotchas - Forms & Approval#Form 32 forms are license-scoped, not role-scoped — shows all 4 A/B/C/D (2026-07-05)|Form 32 forms are license-scoped, not role-scoped — shows all 4 A/B/C/D (2026-07-05)]]
+- [[Gotchas - Forms & Approval#~~Form 32 forms are license-scoped, not role-scoped — shows all 4 A-B-C-D~~ — the gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)|~~Form 32 forms are license-scoped, not role-scoped~~ — the role gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)]]
 - [[Gotchas - Forms & Approval#History Form: eligibility needs THREE approvals (2026-07-05)|History Form: eligibility needs THREE approvals (2026-07-05)]]
 - [[Gotchas - Forms & Approval#History Form spec-vs-impl divergences: training-history approval + FE 2-year window (2026-07-05)|History Form spec-vs-impl divergences: training-history approval + FE 2-year window (2026-07-05)]]
 - [[Gotchas - Forms & Approval#Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)|Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)]]
@@ -76,6 +78,8 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal and tat-ws — Next.js, MUI, React Query, uploads and layout._
 
+- [[Gotchas - Frontend#Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)|Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)]]
+- [[Gotchas - Frontend#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)|tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
 - [[Gotchas - Frontend#A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)|A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)]]
 - [[Gotchas - Frontend#Card-morph slider: keep the OUTGOING card full-screen until the new one covers it|Card-morph slider: keep the OUTGOING card full-screen until the new one covers it]]
 - [[Gotchas - Frontend#`router.refresh()` does NOT invalidate the React Query cache (tat-portal)|`router.refresh()` does NOT invalidate the React Query cache (tat-portal)]]
@@ -97,6 +101,8 @@ _Component and framework traps across tat-prereq, tat-portal and tat-ws — Next
 
 _Toolchain and working-method traps — vault tooling, lint and IDE behaviour, and recurring reasoning failures._
 
+- [[Gotchas - Tooling & Method#The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)|The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)]]
+- [[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)|A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]]
 - [[Gotchas - Tooling & Method#Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)|Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)]]
 - [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)|"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]
 - [[Gotchas - Tooling & Method#Scoping debt from the files you happen to be looking at under-counts it (2026-07-14)|Scoping debt from the files you happen to be looking at under-counts it (2026-07-14)]]

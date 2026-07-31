@@ -8,6 +8,16 @@ tags:
 # Gotchas - TOR & Staff Management
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)
+
+> [!danger] Running `2026-07-30-backfill-tor-instructor-type.js` on legacy TORs would **hide the two Form 32s the instructor needs** while leaving the two they shouldn't see.
+> The instructor-type backfill derives its value from `requestedRoleCodes`. On a legacy TOR that array is empty, so `resolveType([])` returns **`NONE`** and the migration writes `instructorType: NONE` — a value it is fully confident in. `FORM_32_KEYS_BY_INSTRUCTOR_TYPE[NONE]` is `[]`, so **32A/32B vanish**, while 32C/32D stay visible through the [[Gotchas - Forms & Approval#~~Form 32 forms are license-scoped, not role-scoped — shows all 4 A-B-C-D~~ — the gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)|`requestedRoleCodes` fail-open]]. It also trips the activation guard that holds TORs whose type is `NONE`.
+>
+> **The general trap: a derivation over an un-backfilled field doesn't fail, it succeeds wrongly.** An empty array is a legitimate input to `resolveType`, so nothing errors, nothing logs, and the dry run reports a clean write count. The ordering dependency is invisible in either script read alone — it only exists in the gap between them.
+>
+> **Rule: before running a backfill, ask what its *inputs* were backfilled from.** Here: `requestedRoleCodes` FIRST, then instructor type. And prefer a migration that **skips** a document whose derivation input is absent over one that writes the derivation's zero-value. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]] and [[Instructor Type - Per-Authority Form 32 Split]].
+
 ## The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)
 
 > [!danger] The TOR details page showed **Active with no creation/expiry date**. Not a display bug — the TOR was never activated, and the badge was lying.

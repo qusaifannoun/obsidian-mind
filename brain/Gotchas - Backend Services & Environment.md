@@ -14,6 +14,15 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 > The `tat-development.oemqsva.mongodb.net` cluster holds exactly one application database: **`tat-dev`** (the others are `questionbank`, `admin`, `local`). The `dev` branch, `api-dev.tat147.com`, and "staging" all point at it. So a migration run against `tat-dev` **is** the staging migration — there is no second run pending.
 >
 > Verify with a `listDatabases` call before reasoning about environment ordering; it is one read-only query and it settles the question. As of 2026-07-28 there is **no production environment at all** (Qusai) — `dev` is the only one. Context: [[Sequential User Number - Atomic Allocation & Backfill]].
+>
+> **Corollary (2026-08-01): investigation is not read-only here.** `GET …/tors/:torId/certificate` **creates a draft shell as a side effect** — a read endpoint that writes. With one database serving every environment, *merely browsing a TOR seeds `tor_certificate` rows in the only real data store*. Before poking an unfamiliar GET on this project, assume it may be a lazy-create (`ensureForUser` is the established idiom — the History Form does the same) and check the service, not the verb. See [[TAT-450 TOR Certificate FE - Read Path Only]].
+
+## Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)
+
+> [!danger] Reusing the value the way the neighbouring form does is a **400**
+> `courseMethod` on the instructor-eligibility DTO is `@IsEnum(TrainingTypesEnums)` — it wants the literal string `"Theoretical"` or `"Practical"`. But a **course** carries `courseMethod` as `{ _id, name }`, and the **course forms submit the `_id`**. So the obvious move — copy what the form next door sends — fails validation.
+>
+> **The general shape: one field name, two projections.** The relational shape (`{_id, name}`) and the enum shape (`"Theoretical"`) are the same concept at different layers, and nothing in the type of the object in hand tells you which the endpoint wants. **Read the DTO decorator before reusing a value across endpoints**, especially when the field name matches exactly — the matching name is what makes the wrong shape feel safe. Companion to the class-validator whitelist question in [[Aircraft Category Filter - TOR Matrix]] (an unknown param is silently *dropped*; a known param of the wrong shape *400s* — two different failure modes for the same mistake). See [[TAT-454 Instructor Assignment Filtering - courseMethod]].
 
 ## Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)
 

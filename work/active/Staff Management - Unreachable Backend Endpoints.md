@@ -41,6 +41,8 @@ Method: extract every `@Get/@Post/@Patch/@Delete` from `staff-management.control
 > [!info] Half of this changed on 2026-07-30
 > **Form 32 A and B are no longer scoped by `requestedRoleCodes`** — they are scoped by a new per-TOR `instructorType`, because both keys mapped to the single `IN` code and could never be separated. C and D still use `requestedRoleCodes` exactly as described above. `requestedRoleCodes` also remains load-bearing for assignment eligibility, so this item is still real. See [[Instructor Type - Per-Authority Form 32 Split]].
 >
+> **Sharper as of 2026-08-01: C and D use it only when it is non-empty.** The filter fails open — empty `requestedRoleCodes` returns *every* form — and no migration backfills the field, so on every legacy TOR the C/D scoping is inert and all four forms show. That makes "frozen at creation" worse than a missing editor: for pre-TAT-448 TORs the value was never *set* at creation either, and there is no path to correct it. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+>
 > There is now a frontend for the *instructor type* (the staff form's Instructor authorization card) — but still **none for `requestedRoleCodes` itself**, so "no frontend can change it afterwards" remains true for the roles.
 
 It is set **once**, at TOR creation, from `resolveDefaultRequestedRoleCodes(user)` (`staff-tor.service.ts:105`). **No frontend can change it afterwards.**

@@ -64,10 +64,16 @@ Method reminder (reinforces the [[Gotchas - Backend Services & Environment#Staff
 > [!danger] Backend validates `assessment.signatureKey` as an evidence file (`bucket/…` + allowed ext)
 > The FE rendered Signature as a free-text input; typing anything → save 400s with `"Invalid file type. Supported: PDF, DOC, DOCX, JPG, JPEG, PNG."` (`assertValidEvidenceFileKey`). Fixed: the FE now uploads a signature file (category `tor-form-32`) and stores the returned key. If a backend field is named `*Key`, assume it's an uploaded file, not text.
 
-## Form 32 forms are license-scoped, not role-scoped — shows all 4 A/B/C/D (2026-07-05)
+## ~~Form 32 forms are license-scoped, not role-scoped — shows all 4 A-B-C-D~~ — the gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)
 
-> [!warning] Every TOR shows Form 32 A/B/C/D regardless of the person's role → violates TAT-415 AC-02
-> `createFormInstances` attaches a form for **every template matching the `licenseId`**; the Form 32 A/B/C/D templates are seeded per authority (CARC/EASA/GCAA) with **no role field**. So an Instructor's TOR shows Examiner (C) + Assessor (D) forms. AC-415-02 says the form type is "selected based on the role (multi-select)." The "requested role" concept doesn't exist in the impl. See [[TAT-409 Ticket Groups & Inspection Map]].
+> [!success] Do not repeat the original claim. Role scoping **exists and is enforced in four paths**. The symptom is real; the cause is stale data.
+> `formKeyMatchesRequestedRoles` filters Form 32 templates by the TOR's `requestedRoleCodes` (`32C → EXAMINER`, `32D → PRACTICAL_ASSESSOR`) — applied on TOR details, the TOR matrix, form provisioning, and a `ForbiddenException` on direct fetch. 32A/32B moved off it onto the per-TOR `instructorType` in TAT-451 (see [[Instructor Type - Per-Authority Form 32 Split]]).
+>
+> **Why all four still show:** the gate **fails open** — it returns `true` for every form when `requestedRoleCodes` is empty, and that branch is pinned by its own spec (`"returns everything when nothing is configured"` expects 4). TORs created before the field existed have it empty and **nothing ever backfills it**, so every pre-TAT-448 TOR shows A/B/C/D while new ones filter correctly.
+>
+> **The observation that separates data from logic:** a newly created user's TOR filters correctly; a legacy user's doesn't. **Same code, opposite outcome ⇒ stop reading the function and go look at the row.** Three code-level hypotheses (gate missing / mapping wrong / filter not applied) were each checked and eliminated first — all three were false. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+>
+> Original (now stale) claim, kept for the record: *"`createFormInstances` attaches a form for every template matching the `licenseId`; the templates are seeded per authority with no role field. The 'requested role' concept doesn't exist in the impl."* The seeding half is still true — **the templates carry no role**; the scoping lives on the TOR, which is exactly why empty TOR data disables it. See [[TAT-409 Ticket Groups & Inspection Map]].
 
 ## History Form: eligibility needs THREE approvals (2026-07-05)
 

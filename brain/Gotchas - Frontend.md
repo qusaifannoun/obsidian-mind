@@ -8,6 +8,20 @@ tags:
 # Gotchas - Frontend
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)
+
+> [!warning] Adding a param to `getInstructorQueryConfig` filters the normal pickers and does **nothing** to Bulk Edit
+> Bulk Edit runs `preloadAll`, so its lists come from **`getAllInstructorQueryConfigs`** — a separate config builder. Patch only the singular one and the feature **looks shipped**: the page renders, the lists populate, no error anywhere, and the rows are simply unfiltered.
+>
+> **The trap is that the failure is invisible by construction** — an unfiltered list is a *superset*, which reads as working data rather than a bug. Whenever a request-shaping change lands, **grep for every builder of that query config**, not the one the feature under test calls. Found while wiring [[TAT-454 Instructor Assignment Filtering - courseMethod|TAT-454's `courseMethod`]]; the fix was verified by reading all three pickers' persisted React Query keys, which is what a superset symptom forces you to do.
+
+## tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)
+
+> [!warning] The key's second element is the **kind**, not the id
+> Real keys are `[Form32, 'schema' | 'list' | 'instance', torId, …]`. An invalidation written as `[Form32, torId]` **never matches a single entry** — React Query prefix-matching compares element by element, so `torId` in position 1 fails against `'schema'`. Nothing throws; the mutation succeeds, the cache keeps the stale value, and the UI is simply out of date until a refetch happens for some other reason.
+>
+> **Rule: copy the key from the query that produced it, never reconstruct it from memory.** A key mismatch is the one React Query error with no runtime signal at all. See [[TAT-450 TOR Certificate FE - Read Path Only]].
+
 ## A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)
 
 > [!danger] An instructor editing their own profile would have cleared `instructorType` on every one of their TORs, having never seen the control that sets it

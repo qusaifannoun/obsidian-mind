@@ -37,6 +37,19 @@ Three duplicated-rule bugs in one week, all with the same shape: **each copy is 
 
 **Smell to grep for:** the same set of boolean gates `&&`-ed together in more than one file. And when a read path and a write path both decide the same thing, the **writer is the source of truth** — reads should report the persisted value, not recompute it.
 
+## A guard that fails open on absent data is disabled by the data, silently (2026-08-01)
+
+`formKeyMatchesRequestedRoles` scopes Form 32 templates to a TOR's `requestedRoleCodes` — and returns `true` for **every** form when that array is empty. The intent is benign (don't hide everything from an unconfigured TOR) and the branch is pinned by its own test. The effect is that **any row missing the field turns the guard off entirely**, with no error, no log, and a passing test suite. Legacy TORs predate the field, nothing backfills it, so the rule looked enforced for months while being inert for most of the data.
+
+**The rule:** a permission or visibility guard must decide from the data it has, not concede when data is absent. When "absent" genuinely can't be treated as "deny", make the concession **narrow and loud** — scope it to the specific keys it's meant to protect (not every template), and pair it with a backfill that removes the absent case, shipped in the same change as the guard. A fail-open branch with no backfill behind it is a permanent hole, not a transitional one.
+
+**Two properties make this class hard to see:**
+
+1. **It reads as defensive.** `if (!x?.length) return true` looks like graceful degradation, which is why it survives review — the reviewer evaluates the branch, not the population of rows that hit it.
+2. **The bug's distribution is by record age, not by code path.** New records behave correctly, so every fresh test fixture and every newly created user passes. The tell is a **discriminating contrast** — same code, opposite outcome on an old row vs a new one — which points at data and away from logic in one observation. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+
+Companion failure at the other end of the same subsystem: a guard that read `undefined` because the query feeding it selected the wrong fields, and so returned `true` for every document forever ([[Gotchas - Backend Schema & Data]]). **Both are the same shape — the guard never saw its input and defaulted to permissive.**
+
 ## Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control
 
 Before adding any filter control, trace the field to its source. A `<select>` is trivial to render, but if the field it filters on isn't in the response payload **and** isn't an accepted query param, the control is dead two ways over: you can't filter client-side (data absent) and a param the query DTO doesn't declare gets silently dropped by class-validator's whitelist. This is the inverse of the [[Staff Management - Unreachable Backend Endpoints|dead-endpoint]] class — there a working backend had no FE affordance; here an FE affordance has no backend data.
