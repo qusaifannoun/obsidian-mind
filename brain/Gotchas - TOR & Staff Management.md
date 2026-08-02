@@ -9,6 +9,17 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)
+
+> [!danger] The same unmigrated field now gates **which Form 32s an instructor sees** *and* **who can be assigned as an assessor**. Its schema default is `NONE`, and its backfill has still never run.
+> `@Prop({ type: String, enum: InstructorType, default: InstructorType.NONE })` on `staff-tor.schema.ts:52`. TAT-448 introduced it for the [[Instructor Type - Per-Authority Form 32 Split|32A/32B split]]; TAT-453 then keyed assessor eligibility off it (`instructorType: { $in: [PRACTICAL, BOTH] }` in `staff-assessment.service.ts`). Neither ticket mentions the other.
+>
+> **The generalisable part: an unbackfilled field's blast radius grows silently.** Each new consumer inherits the whole legacy-data problem, and nothing in adding the second one surfaces that the first is still unmigrated. **Before keying a rule off a field, check whether that field is actually populated in the database you're shipping to** — the schema tells you it exists, not that it has values. The backfill's status lives on [[Instructor Type - Per-Authority Form 32 Split]], and it is **blocked behind a `requestedRoleCodes` backfill first** (see the ordering trap below).
+>
+> **Do not confuse this with the Form 32 C/D fail-open.** That is a *different* unbackfilled field — `requestedRoleCodes` ([[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]]). Two unbackfilled fields, from the same ticket pair, entangled by the ordering trap: 32A/32B ride on `instructorType`, 32C/32D on `requestedRoleCodes`.
+>
+> **How it will present in assessor eligibility:** three independent legacy conditions each collapse the pool to empty — `instructorType: NONE`, null `refresherExpiresAt`, missing `aircraftCategory` — and a pre-existing `else` branch substitutes privileged roles, so **the picker looks like a working list of admins**, not a broken one. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
+
 ## Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)
 
 > [!danger] Running `2026-07-30-backfill-tor-instructor-type.js` on legacy TORs would **hide the two Form 32s the instructor needs** while leaving the two they shouldn't see.

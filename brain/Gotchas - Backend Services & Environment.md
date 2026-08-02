@@ -8,6 +8,19 @@ tags:
 # Gotchas - Backend Services & Environment
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)
+
+> [!warning] Surfacing `staffNumber` on two screens looked like two backend changes. It was **one** — and knowing which one cost a single read per path.
+> [[tat-app-ws Backend]] serializes users two different ways, and they have **opposite defaults**:
+>
+> - **`sanitizeUser` is a deny-list** — it strips `password`, `__v`, `resetPassToken`, `emailToken` and passes everything else through. `/user/details/:id` uses it, and `getMyProfile` spreads two objects that already carry the field. **New schema fields appear on these paths with no code change at all.**
+> - **`StaffCatalogItemDTO` is an allow-list** — a field that isn't mapped doesn't exist to the client. `listStaffProfiles` needed an explicit addition.
+>
+> **The rule: check the serializer, not the screen count.** "Two surfaces need this field" says nothing about how many changes it takes — the answer is per-path and depends entirely on which strategy that path uses. Assuming symmetry doubles the estimate; assuming a deny-list everywhere ships a permanently empty column.
+>
+> **The security half is the same fact read the other way.** A deny-list means every field added to the schema is public until someone remembers to strip it — the sanitizer is a list of what's secret, and it is only correct on the day it was written. When adding a sensitive field, the deny-list is part of the change's blast radius; nothing will fail if you forget. See [[TAT-449 Staff Number Display - Unpadded staffNumber]].
+
 ## `dev` and `staging` are the same database in this project — not two environments (2026-07-28)
 
 > [!warning] The vault says "staging deploys from `dev`". That describes the **branch**, not the data store — and reading it as two databases produced three confidently wrong warnings in a row

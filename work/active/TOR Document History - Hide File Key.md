@@ -4,7 +4,7 @@ description: "Removed the raw S3 filename from each TOR-document history-log ent
 tags:
   - work-note
   - project/tat
-status: active
+status: backlog
 quarter: Q3-2026
 project: tat-prereq
 ---

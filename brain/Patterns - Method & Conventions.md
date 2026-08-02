@@ -11,6 +11,24 @@ How work gets done in the TAT repos — verification bias, spec-gap routing, tic
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)
+
+**Twice now, two *approved* TAT tickets have required opposite behaviour of the same code.** Approval in this project is a per-ticket act: someone reads one story and says yes. **Nothing at any point compares a ticket against the tickets it overlaps**, so a contradiction is not merely possible — it is unopposed.
+
+| | Contradiction | How it surfaced | Cost |
+|---|---|---|---|
+| **TAT-424 ↔ TAT-429** | 424's AC-09 applied the Active-TOR rule globally; 429's AC-03 requires no TOR condition | **By its symptom, months later** — an empty dropdown nobody could explain | A circular dependency that made instructor onboarding **impossible since TAT-421 shipped** |
+| **TAT-450 ↔ TAT-455** | 450's AC-45 releases the certificate on QM approval; 455's AC-02/03 keep it unpublished until an SA publishes | **By reading both specs against the code**, before it could produce anything | One BA question and a Jira edit |
+
+**The rule: when a ticket touches a surface another ticket already specified, read the other ticket — approval says nothing about whether they agree.** The tell for the expensive version is a lone "Approved" comment and no cross-reference; TAT-424 and TAT-429 each carried exactly one, 13 days apart.
+
+**Two corollaries earned the hard way:**
+
+- **The code is evidence about which spec is right, not the answer.** In TAT-450/455 the implementation already followed TAT-455 — and that was correct — but *"the code does X"* is a reason to ask the BA, never a reason to skip asking. In TAT-424/429 the code followed the **over-reaching** ticket, and matching it would have preserved the deadlock.
+- **A contradiction is resolved in Jira or it isn't resolved.** Until AC-45 is actually edited, **QA testing that story literally files a defect against correct behaviour**. Bring the replacement wording to the ruling so the fix is one paste, not a second conversation.
+
+Sibling of [[Patterns - Method & Conventions#An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)]] — both say written project artefacts describe an intention, and only code and data describe reality. Records: [[TAT-450 AC-45 Superseded by TAT-455 - Certificate Not Auto-Released]] · [[TAT-429 Sit-In Eligibility & Move Semantics]].
+
 ## An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)
 
 A backend handoff doc states what the frontend *should* be doing as if it already is. **Both** guides in the 2026-07-28→31 drop asserted FE behaviour that did not exist — TAT-454's said to *"keep sending `courseMethod`"*, a param the frontend **had never sent**. Taken at face value, the work looks done and gets skipped.
@@ -72,7 +90,7 @@ When Qusai asks *"what can we do"*, *"what is the fix"*, *"can we…"*, or other
 
 ## Git workflow — commit to `dev` (TAT repos)
 
-The TAT repos ([[tat-prereq]], [[tat-app-ws Backend]], et al.) use **`dev`** as the shared integration branch — **commit directly to `dev`**, no feature branches, no PRs (corrected 2026-07-09; the note previously said `main`, but all real work — this session and prior — lands on `dev`, and staging deploys from it). When work is done on a throwaway branch, fast-forward `dev` to it and delete the branch. **Push to `origin/dev` when asked** — Qusai directs pushes explicitly ("push", "commit and push"); don't push on your own. **Never add a `Co-Authored-By` trailer, a "Generated with Claude Code" line, or any other Claude attribution** — commits must read as authored solely by Qusai (corrected 2026-07-28; this line previously said the opposite. The global `~/.claude/CLAUDE.md` hard rule forbids attribution and explicitly overrides any convention, and older commits in the TAT repos still carry the trailer — that history is what made the old instruction look right). Keep commits focused — **leave Qusai's own uncommitted edits out** (he often has in-progress polish in the same files; stage only the files for the task at hand). Note: `origin/dev` sometimes already contains a just-committed SHA (a push returns "Everything up-to-date") — verify with `git branch -r --contains <sha>` rather than assuming the push failed.
+The TAT repos ([[tat-prereq]], [[tat-app-ws Backend]], et al.) use **`dev`** as the shared integration branch — **commit directly to `dev`**, no feature branches, no PRs (corrected 2026-07-09; the note previously said `main`, but all real work — this session and prior — lands on `dev`, and staging deploys from it). When work is done on a throwaway branch, fast-forward `dev` to it and delete the branch. **Push to `origin/dev` when asked** — Qusai directs pushes explicitly ("push", "commit and push"); don't push on your own. **Never add a `Co-Authored-By` trailer, a "Generated with Claude Code" line, or any other Claude attribution** — commits must read as authored solely by Qusai (corrected 2026-07-28; this line previously said the opposite. The global `~/.claude/CLAUDE.md` hard rule forbids attribution and explicitly overrides any convention, and older commits in the TAT repos still carry the trailer — that history is what made the old instruction look right). Keep commits focused — **leave Qusai's own uncommitted edits out** (he often has in-progress polish in the same files; stage only the files for the task at hand). Note: `origin/dev` sometimes already contains a just-committed SHA (a push returns "Everything up-to-date") — verify with `git branch -r --contains <sha>` rather than assuming the push failed. **This is stronger than it looks and now has a documented instance with no explanation** — see [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]]. Verify remote state before writing "unpushed" into a note; never infer it.
 
 ## A convention that lives only in a docstring is unreachable — write it where startup reads (2026-07-14)
 

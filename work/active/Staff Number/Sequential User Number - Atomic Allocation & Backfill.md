@@ -17,13 +17,22 @@ project: tat-app-ws
 > **unrun**. This note's `userNumber` names — the schema field, the `counters._id`, the
 > `userNumber_unique` index, the migration — have **not** been re-verified under the new name.
 >
-> **Unresolved contradiction, do not act on either half yet.** This note records the backfill
-> as *applied to `tat-dev` on 2026-07-28* (40 users, `001..040`, verified by re-reading the
-> collection); the 2026-08-01 evidence says the `staffNumber` backfill is *unrun*. The
-> reconciliation that fits both — **`userNumber` was backfilled, then the field was renamed in
-> the 2026-07-28→31 backend drop, leaving the renamed field unpopulated** — is **(inferred)**
-> and unverified. Settle it by reading the current `user.schema.ts` and the `counters`
-> collection before trusting anything below.
+> **Contradiction largely settled 2026-08-02 — this note's "applied" state does NOT describe
+> the live `staffNumber` field.** Staging returns `staffNumber` as the **number `3`**, while
+> **all three writers of that field produce a zero-padded string** (schema `type: String`,
+> the `pre("save")` allocator's `String(seq).padStart(4, "0")`, and the migration's own
+> `format()` helper). **No current writer could have produced the live value**, so the
+> backfill has not run under this name — evidence and reasoning in
+> [[TAT-449 Staff Number Display - Unpadded staffNumber]].
+>
+> The rename reconciliation below is now the **best-supported** reading rather than a guess,
+> but it is still **(inferred)** — and the **pad widths also disagree**: this note records
+> 3-wide `001..040`, the current allocator pads to **4**. **Where the live `3` came from is
+> unidentified.**
+>
+> **Treat everything below as describing the pre-rename `userNumber` implementation**, not
+> the field in production today. The verification table and the `[x]` action items were true
+> of `userNumber` on 2026-07-28 and have **not** been re-confirmed under the new name.
 
 ## Context
 
@@ -103,7 +112,8 @@ Verified:
 - [x] **No production environment exists yet** (Qusai, 2026-07-28) — `dev` is the only one. So the migration is complete everywhere it applies; there is no second environment pending. Whenever production is stood up, it will need the backfill run against it **before** the schema code reaches it, or its first users get numbered out of signup order.
 - [ ] Confirm `immutable` actually strips the field: attempt to change `userNumber` through an admin update and verify it is silently ignored rather than applied.
 - [ ] Decide whether the 3-wide pad is the long-term format. Past 999 the string simply widens to `"1000"` — correct, but no longer fixed-width for display.
-- [ ] Nothing reads `userNumber` yet — it reaches responses via `IUser extends User` but no frontend surfaces it. Confirm with the BA where it should be displayed.
+- [x] ~~Nothing reads `userNumber` yet — it reaches responses via `IUser extends User` but no frontend surfaces it. Confirm with the BA where it should be displayed.~~ **Built 2026-08-02** — TAT-449 already specified both surfaces, so no BA call was needed: Manage Staff column + profile field. See [[TAT-449 Staff Number Display - Unpadded staffNumber]].
+- [ ] **Identify the fourth writer.** The live value is an unpadded number that none of the schema, the allocator, or the migration could have written. A path that sets this field outside the allocator also bypasses the counter and the partial unique index — settle it before the `dev` DB clear.
 
 ## Related
 

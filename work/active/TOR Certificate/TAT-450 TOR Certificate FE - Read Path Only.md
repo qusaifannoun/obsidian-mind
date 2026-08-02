@@ -40,7 +40,22 @@ Page rendered from the **real** response, not a fixture: auto fields populated, 
 `staffNumber` backfill showing through, not an FE mapping bug. See
 [[Sequential User Number - Atomic Allocation & Backfill]].
 
+> [!warning] Refined 2026-08-02 — the field is populated, so "unrun backfill" is not the whole reason
+> `staffNumber` on staging holds the **number `3`**, not nothing
+> ([[TAT-449 Staff Number Display - Unpadded staffNumber]]). The backfill is still unrun
+> under that name, but a blank Authorization Number **on a certificate** is therefore not
+> fully explained by an absent value — it may be the certificate's own mapping, or the
+> `available: false` draft state. **Unresolved**; the reading below overstates its certainty.
+
 ## Still open
+
+> [!warning] **AC-45 is superseded** — do not implement it (2026-08-02)
+> This ticket's **AC-45 bullet 2** requires QM approval to *"make the finalized certificate
+> available to the instructor"*. That contradicts TAT-455 AC-02/AC-03, and the **BA ruled
+> TAT-455 correct**. The certificate stays unpublished until a Super Admin publishes it.
+> **AC-45 has not been edited in Jira**, so QA testing this story literally will file a false
+> defect. Full record:
+> [[TAT-450 AC-45 Superseded by TAT-455 - Certificate Not Auto-Released]].
 
 > [!danger] The write path is **entirely unexercised**
 > No signature upload, no submit, no QM save, no approve has ever run. The
@@ -48,9 +63,11 @@ Page rendered from the **real** response, not a fixture: auto fields populated, 
 > rendered**. No error path tested. Unblocking this needs **a TOR that has reached the
 > certificate phase** — none exists yet.
 
-- **`staffNumber` backfill still unrun**, so Authorization Number is blank for every existing
-  instructor regardless of FE correctness.
-- **`staffNumber` is not displayed** on `StaffProfileView` or my-profile.
+- **`staffNumber` backfill still unrun** under that name — but the field is **not empty**, it
+  holds an unpadded `3`, so this no longer fully explains a blank Authorization Number. See
+  the callout above and [[TAT-449 Staff Number Display - Unpadded staffNumber]].
+- ~~**`staffNumber` is not displayed** on `StaffProfileView` or my-profile.~~ **Built
+  2026-08-02** (TAT-449, `ab8481f`) — profile field + Manage Staff column.
 - **Form 285/32 lock when `available === true`: deliberately NOT built.** Two unknowns first —
   whether certificate approval **gates TOR ACTIVE**, and what happens to **already-ACTIVE
   TORs** now that `tor_certificate` seeds `mandatory: true` for CARC/EASA/GCAA. A mandatory
@@ -71,6 +88,9 @@ Page rendered from the **real** response, not a fixture: auto fields populated, 
 
 ## Related
 
+- [[TAT-455 Final TOR Certificate - SA Publish Gate]] — the publish state built on top of this
+  read path; **it is blocked by the unexercised write path above**, since no certificate has
+  ever reached `APPROVED` for a publish to act on
 - [[TAT-454 Instructor Assignment Filtering - courseMethod]] — same backend drop, same guide problem
 - [[Instructor Type - Per-Authority Form 32 Split]] — TAT-451 AC-07 was blocked on this
 - [[Sequential User Number - Atomic Allocation & Backfill]] — the `staffNumber` backfill behind the blank field

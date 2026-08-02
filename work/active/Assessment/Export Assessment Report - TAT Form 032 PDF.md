@@ -4,7 +4,7 @@ description: "Full-stack landscape PDF export of the Assessment Report (TAT Form
 tags:
   - work-note
   - project/tat
-status: active
+status: backlog
 quarter: Q3-2026
 project: tat-app-ws
 ---

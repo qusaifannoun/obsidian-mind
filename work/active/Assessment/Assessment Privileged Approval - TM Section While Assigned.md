@@ -4,7 +4,7 @@ description: "Privileged SA/TM can now see + operate the Assessment TM section (
 tags:
   - work-note
   - project/tat
-status: active
+status: backlog
 quarter: Q3-2026
 project: tat-prereq
 ---

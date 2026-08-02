@@ -18,6 +18,14 @@ split **32A/32B** by the new per-TOR `instructorType` and left **32C/32D** on
 
 **Root-cause only — no code written, nothing fixed.**
 
+> [!info] Two unbackfilled fields, not one (2026-08-02)
+> This note's field is **`requestedRoleCodes`** (32C/32D). Its sibling is **`instructorType`**
+> (32A/32B), whose migration exists but has never run — and which TAT-453 has now made
+> load-bearing in **assessor eligibility** too
+> ([[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]]). They are entangled
+> by the ordering trap: **`requestedRoleCodes` must be backfilled first**, because the
+> `instructorType` migration derives from it. Easy to conflate; they fail differently.
+
 ## Root cause — stale data, not broken logic
 
 Three things everyone suspects are all fine:
@@ -91,6 +99,44 @@ either (see [[Staff Management - Unreachable Backend Endpoints#2. An instructor'
 > look independently safe are order-dependent because one derives its input from the other's
 > unwritten field.
 
+## The gate also covers the Final TOR Certificate (2026-08-02)
+
+`FORM_32_ROLE_BY_KEY` maps **five** keys, not four:
+
+```ts
+export const FORM_32_ROLE_BY_KEY = {
+  [FORM_32A]: INSTRUCTOR,  [FORM_32B]: INSTRUCTOR,
+  [FORM_32C]: EXAMINER,    [FORM_32D]: PRACTICAL_ASSESSOR,
+  [TOR_CERTIFICATE]: INSTRUCTOR,        // <-- easily missed
+};
+const STAFF_ASSIGNMENT_ROLES = new Set([INSTRUCTOR, EXAMINER, PRACTICAL_ASSESSOR]);
+```
+
+So closing the fail-open would **also hide the Final TOR Certificate** on any TOR with empty
+`requestedRoleCodes` — the artifact [[TAT-450 TOR Certificate FE - Read Path Only]] and
+[[TAT-455 Final TOR Certificate - SA Publish Gate]] are built around.
+
+The branch is narrower than it looks in the other direction: the following line,
+`if (!requiredRole) return true`, already means *"this template isn't role-scoped → allow"*,
+so the empty-array check affects **only** those five keys. Removing it is surgical by
+construction — every non-Form-32 template is untouched.
+
+**`resolveDefaultRequestedRoleCodes` can legitimately return `[]`** — for any user whose
+primary and secondary roles contain none of the three assignment roles. Reachable for a QM or
+TM who also instructs. That is the case to close at *write* before closing the *read* gate.
+
+> [!info] Decision — deferred (Qusai, 2026-08-02)
+> **Leave the fail-open as is.** Ship a fix or hand it to Dawahreh once QA flags it. The dev
+> DB will be cleared, which makes the symptom vanish on fresh data since new TORs populate
+> `requestedRoleCodes` at creation.
+>
+> Recommended but **not** adopted: do it during the clear — the only window where closing it
+> costs nothing. After the clear the symptom disappears on its own and the guard looks
+> correct, until production data reintroduces the empty case with real users.
+
+**Browser, staging 2026-08-02:** the TOR details page for plain instructor "Tor Instructor
+Dev" still lists Form 32A, 32B **and 32C** — the fail-open, unchanged.
+
 ## Still open
 
 - **Needed: `scripts/migrations/2026-08-01-backfill-tor-requested-role-codes.js`** — join
@@ -98,9 +144,11 @@ either (see [[Staff Management - Unreachable Backend Endpoints#2. An instructor'
   (primary + secondary roles filtered to `INSTRUCTOR`/`EXAMINER`/`PRACTICAL_ASSESSOR`), set
   only where missing/empty, dry-run by default like the others. **Not written.**
 - **UNKNOWN: how many TORs are affected.** A dry run answers this; no DB query was run.
-- **Open decision — close the fail-open for Form 32 keys at all?** Doing it *before* the
-  backfill would strip all four forms from every legacy TOR. Sensible only after the data is
-  clean, and arguably never for non-Form-32 templates.
+- ~~**Open decision — close the fail-open for Form 32 keys at all?**~~ **Decided 2026-08-02:
+  deferred, leave as is** until QA flags it — see [[#The gate also covers the Final TOR
+  Certificate (2026-08-02)]]. The "arguably never for non-Form-32 templates" caveat is now
+  answered: `if (!requiredRole) return true` already covers them, so the empty-array branch
+  was only ever load-bearing for the five mapped keys.
 - The ordering trap above blocks running the TAT-451 backfill, which was already listed as
   never-run in [[Instructor Type - Per-Authority Form 32 Split#Still open]].
 

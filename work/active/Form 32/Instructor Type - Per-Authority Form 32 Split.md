@@ -112,6 +112,12 @@ lint 0 errors · card confirmed in the browser.
   > the activation guard, i.e. it *causes* the loss the fallback was preventing. Backfill
   > `requestedRoleCodes` first. See
   > [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+  > [!danger] Escalated 2026-08-02 — this backfill now gates a **second** subsystem
+  > TAT-453 keyed **assessor eligibility** off the same `instructorType`
+  > (`{ $in: [PRACTICAL, BOTH] }`), so an unrun backfill no longer only affects Form 32
+  > visibility — it also **empties the assessor pool**, where a fallback `else` disguises the
+  > emptiness as a list of admins. The blast radius grew without either ticket referencing
+  > the other. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
 - **32C/32D were left on `requestedRoleCodes` and are still wrong for legacy TORs** — the
   gate there fails open on the empty field, so a plain instructor still sees Examiner and
   Assessor forms. Root-caused 2026-08-01, unfixed, and it needs the same backfill.

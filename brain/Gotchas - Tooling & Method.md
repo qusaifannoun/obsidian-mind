@@ -8,6 +8,25 @@ tags:
 # Gotchas - Tooling & Method
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)
+
+> [!warning] `4d993461` is labelled **TAT-435** (Pending TORs Page, *already Passed QA*) and contains **TAT-453's** assessor-eligibility filter.
+> Qusai's call on the day: **not worth chasing.** Recorded for the consequence rather than the incident — **git history cannot be searched by ticket number to find work in these repos.** `git log --grep=TAT-453` finds nothing; the code is real and shipped.
+>
+> Two things this breaks, both quietly: **"has this ticket shipped?"** cannot be answered from the log, and a **ticket already marked Passed QA can acquire new, untested code** under its label after the fact — the QA stamp then covers a commit that didn't exist when QA ran.
+>
+> **Rule: locate work by the code it touches, not the ticket it claims.** Grep for the symbol, service, or predicate. Sibling of [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]] and of [[Patterns - Method & Conventions#TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)]] — in this project, ticket metadata is a weak index into reality in **both** directions. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
+
+## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)
+
+> [!bug] **Unexplained.** `251dde6` ([[TAT-455 Final TOR Certificate - SA Publish Gate]], [[tat-prereq]]) was committed to `dev` and never pushed — yet it is on `origin/dev`, and `git reflog show origin/dev` records the update as **"update by push"**.
+> Checked and ruled out: **no post-commit hook exists in either repo.** No push command was issued in the session. The mechanism is genuinely unknown — an editor integration, a background sync, or a daemon are all candidates and none is confirmed.
+>
+> **Why this matters beyond one commit.** Every work note in this vault records whether a SHA is pushed, and [[Patterns - Method & Conventions#Git workflow — commit to `dev` (TAT repos)|the git convention]] is explicitly *"push only when Qusai asks"*. If commits can reach the shared branch unattended, then **"committed locally, unpushed" is an unverified claim, not a fact** — and an unpushed-therefore-private assumption is how unreviewed work reaches a branch staging deploys from.
+>
+> **Rule until explained: verify remote state, never infer it.** `git branch -r --contains <sha>` before writing "unpushed" into a note. This upgrades the existing softer observation on the same line of the git-workflow pattern — that a push can return "Everything up-to-date" because the SHA is already there — from a curiosity to something to actively check.
+
 ## The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)
 
 > [!danger] It showed **1 request of 11**. Believing it would have meant reporting a feature as not firing when it was firing correctly eleven times.

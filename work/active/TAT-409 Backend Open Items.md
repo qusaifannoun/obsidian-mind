@@ -234,3 +234,14 @@ This is inverted from convention (`401` = unauthenticated/expired, `403` = authe
 - [[Staff Management Subsystem & TOR Model]] — the TOR/forms data model
 - [[TAT API & Auth Model]] — auth/contract reference
 - [[tat-app-ws Backend]] — target repo
+
+## 🟢 New gap — found while verifying TAT-453 (2026-08-02)
+
+### Dead `staffAssessmentAssessorRequired` message + an unspecified refresher rule
+**Source:** code read of `4d993461` · **Feature:** [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice|assessor eligibility]] · **Severity:** Low · **Handoff to Hamza**
+
+1. **`ErrorMessages.staffAssessmentAssessorRequired` was added and is referenced nowhere**, while `assessorUserId` remains `@IsOptional()`. Either the required-assessor rule was intended and never wired, or the message is leftover — the two states are indistinguishable from the code, which is why it needs an author answer rather than a guess.
+2. **The valid-refresher condition is enforced but appears in no Jira requirement.** Scope beyond the AC. **QA will test against a requirement that doesn't mention it**, so an eligible-looking instructor being excluded will read as a bug.
+3. **The commit is labelled TAT-435** (Pending TORs Page, *already Passed QA*) **but contains TAT-453's code** — so a Passed-QA ticket acquired untested code after its stamp. Qusai's call 2026-08-02: not worth chasing, recorded only.
+
+**Blocked on data, not code:** the filter keys on `instructorType`, whose backfill has never run — see [[Gotchas - TOR & Staff Management#`instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)]].

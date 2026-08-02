@@ -48,6 +48,14 @@ Staff creation auto-provisions three **DRAFT** TORs (CARC/EASA/GCAA) with `aircr
 
 Both tickets carry exactly one comment — a lone "Approved" from the BA, 13 days apart. **Nobody noticed they conflict.**
 
+> [!info] Not a one-off — it happened again (2026-08-02)
+> TAT-450 AC-45 and TAT-455 AC-02/AC-03 contradict on whether QM approval releases the Final
+> TOR Certificate. Caught **by reading both specs against the code** rather than by a symptom
+> months later, so the cost was one BA question instead of an impossible onboarding path. The
+> generalisation is recorded as
+> [[Patterns - Method & Conventions#An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)|a pattern]];
+> the ruling is [[TAT-450 AC-45 Superseded by TAT-455 - Certificate Not Auto-Released]].
+
 - **TAT-429 AC-03** defines the list as: *has not completed required sit-ins* + *is not yet assigned to the course*. No TOR condition. Its story sentence even says "instructors who **still require Sit-In completion**" — who by definition cannot have an Active TOR.
 - **TAT-424 AC-09** sweepingly applies the Active-TOR rule to "Course instructor assignment", and **AC-08** forbids any role from overriding it.
 

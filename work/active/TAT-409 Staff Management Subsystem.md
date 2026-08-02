@@ -107,6 +107,7 @@ Spec: `https://staging.api.tat147.com/api/docs` (JSON at `/api/docs-json`). Stra
 
 ## Related
 
+- [[TAT-409 Delivery Log]] — the per-ticket delivery timeline for this epic (28 shipped slices), split out of [[Index|work/Index]] on 2026-08-02
 - [[Staff Management Subsystem & TOR Model]] — full domain reference (TOR lifecycle, forms, training, eligibility)
 - [[TAT Platform]] · [[tat-ws]] · [[tat-app-ws Backend]] · [[TAT API & Auth Model]]
 - Adjacent: [[TAT-428 Edit Issued Certificates]] · [[TAT Certificates - Open Items]]

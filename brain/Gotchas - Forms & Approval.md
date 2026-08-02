@@ -8,6 +8,18 @@ tags:
 # Gotchas - Forms & Approval
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)
+
+> [!danger] `GET …/certificate` returns 403 for **"not published yet"** and 403 for **"not your certificate"**. Same status, same endpoint, **no error code anywhere in the response.**
+> The Final TOR Certificate publish gate ([[TAT-455 Final TOR Certificate - SA Publish Gate]]) needs the instructor to see *"Pending publication"* on the first and a genuine error on the second. With nothing but the status to go on, `isTorCertificateNotPublished` discriminates on the **exact message string** — `torCertificateNotPublished` vs `torCertificateNotAuthorized`.
+>
+> **The failure mode is silent and delayed.** Backend copy is not a contract and nobody treats it as one; the day someone rewords the message, the instructor stops seeing "Pending publication" and gets a generic load error instead. Nothing throws, no test breaks, and the FE looks untouched — the regression lands in a repo nobody edited.
+>
+> **Rule: a status code that carries two meanings needs a machine-readable discriminator from the backend, and that is a backend ask, not an FE workaround.** Requested a code from Hamza; not yet provided. Until it exists the string match is load-bearing and should be flagged as such wherever it lives.
+>
+> Sibling of [[Gotchas - Forms & Approval#The same state has two names — backend serializes `PENDING_PIC` as `'pending'`, the FE expects `'pending_pic'` (2026-07-15)]] — both are the FE depending on an incidental serialization detail the backend never promised to keep.
+
 ## "Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)
 
 > [!warning] An Approved **Form 32** was still editable by the owning instructor — they could reopen and resubmit it — while **Form 285** and the **Assessment** report had locked on approval all along.
@@ -72,6 +84,10 @@ Method reminder (reinforces the [[Gotchas - Backend Services & Environment#Staff
 > **Why all four still show:** the gate **fails open** — it returns `true` for every form when `requestedRoleCodes` is empty, and that branch is pinned by its own spec (`"returns everything when nothing is configured"` expects 4). TORs created before the field existed have it empty and **nothing ever backfills it**, so every pre-TAT-448 TOR shows A/B/C/D while new ones filter correctly.
 >
 > **The observation that separates data from logic:** a newly created user's TOR filters correctly; a legacy user's doesn't. **Same code, opposite outcome ⇒ stop reading the function and go look at the row.** Three code-level hypotheses (gate missing / mapping wrong / filter not applied) were each checked and eliminated first — all three were false. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]].
+>
+> **Before you close it — it also gates the Final TOR Certificate (2026-08-02).** `FORM_32_ROLE_BY_KEY` maps **five** keys, not four: `TOR_CERTIFICATE → INSTRUCTOR` sits in the same map as 32A/32B/32C/32D. So "close the fail-open" is **not** a Form-32-only change — on any TOR with empty `requestedRoleCodes` it would also hide the Final TOR Certificate, the very artifact [[TAT-450 TOR Certificate FE - Read Path Only]] and [[TAT-455 Final TOR Certificate - SA Publish Gate]] are built around. The branch is simultaneously **narrower** than it looks: the next line, `if (!requiredRole) return true`, already expresses *"this template isn't role-scoped → allow"*, so the empty-array check has no effect on any other template. Its entire reach is those five keys — the ones where scoping actually matters.
+>
+> **Whoever takes the fix: guard at *write* before closing the *read* gate.** `resolveDefaultRequestedRoleCodes` returns `[]` for any user whose primary and secondary roles contain none of `INSTRUCTOR`/`EXAMINER`/`PRACTICAL_ASSESSOR` — reachable for a QM or TM who also instructs. Make empty impossible at TOR creation first, then delete the branch, then **flip the pinning spec** (`it("returns everything when nothing is configured")`) — that green test is why the fail-open read as intentional for a month. **Deferred by Qusai 2026-08-02:** leave as is; ship a fix or hand to Hamza once QA flags it.
 >
 > Original (now stale) claim, kept for the record: *"`createFormInstances` attaches a form for every template matching the `licenseId`; the templates are seeded per authority with no role field. The 'requested role' concept doesn't exist in the impl."* The seeding half is still true — **the templates carry no role**; the scoping lives on the TOR, which is exactly why empty TOR data disables it. See [[TAT-409 Ticket Groups & Inspection Map]].
 

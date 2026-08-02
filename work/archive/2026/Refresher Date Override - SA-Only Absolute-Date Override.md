@@ -21,7 +21,7 @@ The BA reframed a "make the period configurable" ask mid-grill. The 2-year manda
 Scope is locked to the **7 mandatory training courses only** (`StaffHistoryMandatoryTraining`). The override sets the stored date on those slots — mirroring the existing aircraft-qualification refresher override precedent — and does **not** touch the 2-year period constant itself.
 
 > [!abstract] Ticket
-> [TAT-447](https://cryptonic-art.atlassian.net/browse/TAT-447) — created, written in the team's Current/Desired/Requirements format, assigned to [[Dania]]. Backend + FE shipped.
+> [TAT-447](https://cryptonic-art.atlassian.net/browse/TAT-447) — created, written in the team's Current/Desired/Requirements format, assigned to Dania. Backend + FE shipped.
 
 ## Decisions (resolved in the grill)
 

@@ -25,6 +25,33 @@ If a number or date encodes a **rule** — a compliance total, a validity window
 
 **Why this is a rule and not a preference:** a duplicated business rule doesn't merely drift — it can be computing something else entirely while looking completely plausible. Both of the worst bugs of the week were duplicated-rule bugs (see [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]). A number that comes off the API can be wrong once; a number the FE derives can be wrong *differently* from the one eligibility actually uses, and nothing will ever reconcile them.
 
+## A fallback branch turns an empty filtered pool into a plausible wrong answer (2026-08-02)
+
+The companion to the fail-open guard below, and **the more dangerous of the two**, because it removes the symptom.
+
+A filter narrows a pool; a fallback `else` fills the pool when it comes back empty. Each is reasonable alone. Together they mean **a filter that matches nothing produces a full, plausible-looking list** — and the one signal that something is wrong, the empty state, never renders.
+
+[[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice|TAT-453]]'s assessor picker: three independent legacy-data conditions each collapse the eligible pool to zero (`instructorType: NONE`, null `refresherExpiresAt`, missing `aircraftCategory`), after which a pre-existing `else` substitutes privileged roles. **The picker doesn't look broken — it looks like a working list containing only admins.** Nobody files a bug against a dropdown that has options in it.
+
+**Why this beats a plain empty list for badness:** an empty list is at least *reported*. [[TAT-429 Sit-In Eligibility & Move Semantics|TAT-429]]'s circular dependency showed as an empty dropdown, which read as "nobody qualifies" — misleading, but it prompted an investigation. A fallback-filled list prompts nothing, and the wrong data flows downstream as if it were correct.
+
+**Rules:**
+- A fallback must be **distinguishable from a match**. If the code can substitute a different population, the response should say so — a flag, a reason, anything the caller can branch on — rather than returning the substitute as though the filter chose it.
+- **Never let a fallback cover for absent data.** A fallback for *"this rule genuinely has no candidates"* is a product decision; a fallback that also silently absorbs *"the field this rule reads was never backfilled"* is a bug hider. Those are different conditions and the code usually cannot tell them apart — which is the argument for making the empty case loud instead of filled.
+- When reviewing a new filter, **ask what happens when it matches nothing**, and check the answer against the *current* database rather than the schema.
+
+## The control renders from the server's capability flag, never from a client-side role check (2026-08-02)
+
+The corollary of the section above, for **actions** rather than numbers. If the backend decides who may do a thing, the button that does it must render off a **capability flag the backend already returns** — not off a role the FE re-derives from the session.
+
+[[TAT-455 Final TOR Certificate - SA Publish Gate|TAT-455]]'s publish/unpublish control is gated purely on `canPublish` / `canUnpublish` from the certificate DTO. The FE never asks "is this user an SA?", so **the button cannot disagree with the server**: if the backend's gate changes shape — a new role, an extra state, a permission split — the control follows automatically, because it was never encoding the rule in the first place.
+
+**A client-side role check is a fork of the permission rule**, and inherits every property of the section above: individually plausible, free to drift, and wrong in the direction that matters. The two failure modes it produces are both bad and only one is visible — a button that renders and then 403s (annoying, discoverable), and a button that **doesn't render for someone who is allowed to act** (invisible, and indistinguishable from the feature not existing).
+
+**Smell to grep for:** `role === 'SUPERADMIN'` (or any role literal) anywhere near an action control. If the endpoint enforces it, the response should carry it — and if the response doesn't carry it, **that is a backend ask**, not a licence to re-derive it.
+
+Same family as [[Patterns - Architecture & Boundaries#Confirm the backend can filter before wiring a frontend filter — an FE select for data the backend doesn't expose is a dead control|the dead-control rule]]: both say the frontend's job is to render an answer the backend already computed, and that a missing field in the payload is a contract gap to raise rather than to work around.
+
 ## One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)
 
 The pattern above is the FE-vs-BE case. The **general** rule is stronger, because the third instance this week was entirely inside the backend:

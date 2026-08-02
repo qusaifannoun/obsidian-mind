@@ -4,7 +4,7 @@ description: "tat-portal course-detail purchase now opens an Important-Notes ack
 tags:
   - work-note
   - project/tat
-status: active
+status: backlog
 quarter: Q3-2026
 project: tat-portal
 ---

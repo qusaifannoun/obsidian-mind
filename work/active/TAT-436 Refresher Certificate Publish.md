@@ -4,7 +4,7 @@ description: "TAT-436 — control certificate visibility for refresher courses: 
 tags:
   - work-note
   - project/tat
-status: active
+status: backlog
 quarter: Q3-2026
 project: tat-ws
 ticket: TAT-436
@@ -55,6 +55,7 @@ Two files, both tsc-clean and lint-clean on my changes:
 
 ## Related
 - [[TAT-428 Edit Issued Certificates]] — the cert surface this extends (view/edit issued online-course certs)
+- [[TAT-455 Final TOR Certificate - SA Publish Gate]] — the same SA publish-gate concept applied to the **TOR** certificate in [[tat-prereq]] (2026-08-02); different subsystem, same "approved ≠ visible" split
 - [[TAT-409 Staff Management Subsystem]] · [[Staff Management Subsystem & TOR Model]] — the epic + domain (refresher-cert publish is a TOR-model requirement)
 - [[tat-ws]] · [[tat-app-ws Backend]] · [[TAT API & Auth Model]]
 - Competencies: [[Systems Thinking]] — traced the full publish contract across schema/DTO/service/visibility before writing FE · [[Debugging & Root Cause Analysis]] — caught the stale `certificates` row type (objects, not strings) from backend source · [[Code Quality]] — reused the existing cell/toast patterns, renamed the hook to dodge the publish-name collision
