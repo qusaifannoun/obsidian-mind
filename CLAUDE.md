@@ -7,7 +7,7 @@ Personal Obsidian vault -- an external brain for work notes, decisions, performa
 This vault has [obsidian-skills](https://github.com/kepano/obsidian-skills) installed in `.claude/skills/`. Follow these skill conventions:
 
 - **obsidian-markdown**: Obsidian-flavored markdown -- wikilinks, embeds, callouts, properties. See `references/` for callout types, embed syntax, and property specs. Always prefer `[[wikilinks]]` over markdown links.
-- **obsidian-cli**: CLI commands for vault operations when Obsidian is running. See CLI section below.
+- **obsidian-cli**: CLI commands for vault operations when Obsidian is running. Load the skill before running vault commands.
 - **json-canvas**: Create `.canvas` files with nodes, edges, and visual layouts. See `references/EXAMPLES.md`.
 - **obsidian-bases**: Create `.base` files with views, filters, and formulas. Bases core plugin is enabled. See `references/FUNCTIONS_REFERENCE.md`.
 - **defuddle**: Extract clean markdown from web pages via `defuddle parse <url> --md`.
@@ -52,25 +52,6 @@ Defined in `.claude/commands/`. Claude Code auto-surfaces every command with its
 | `.claude/agents/` | Subagents | See subagents table below |
 | `.claude/scripts/` | Hook scripts | `session-start.ts`, `classify-message.ts`, `validate-write.ts`, `pre-compact.ts`, `stop-checklist.ts`, `charcount.ts` |
 | `.claude/skills/` | Obsidian + QMD skills | Loaded automatically via Skill tool |
-
-## Obsidian CLI
-
-When Obsidian is running, prefer CLI over raw filesystem — it provides vault-aware search, backlink discovery, and property management. **On macOS, open Obsidian before invoking the CLI**: the first `obsidian` call launches the Electron app (visible window flash) if no instance is running; subsequent calls forward args silently. In non-interactive contexts where you can't guarantee Obsidian is open (background hooks, automation), prefer filesystem reads instead.
-
-```bash
-obsidian read file="Note Name"                    # Read a note
-obsidian create name="Name" content="..." silent   # Create without opening
-obsidian append file="Name" content="..."          # Append to note
-obsidian search query="text" limit=10              # Vault-aware search
-obsidian backlinks file="Name"                     # Discover connections
-obsidian tags sort=count counts                    # List all tags
-obsidian tasks daily todo                          # Open tasks
-obsidian daily:read                                # Today's daily note
-obsidian property:set name="status" value="done" file="Name"
-obsidian orphans                                   # Unlinked notes
-```
-
-`file=` resolves like a wikilink (by name). `path=` for exact path from root. Use `silent` to prevent files from opening. Run `obsidian help` for full reference.
 
 ## Session Workflow
 
@@ -322,19 +303,7 @@ When capturing data from Slack, DMs, or meetings:
 
 ## Subagents
 
-Specialized agents in `.claude/agents/` for heavy operations. They run in isolated context windows.
-
-| Agent | Purpose | Invoked by |
-|-------|---------|------------|
-| `brag-spotter` | Finds uncaptured wins and competency gaps | `/om-wrap-up`, `/om-weekly` |
-| `context-loader` | Loads all vault context about a person, project, or concept | Direct |
-| `cross-linker` | Finds missing wikilinks, orphans, broken backlinks | `/om-vault-audit` |
-| `people-profiler` | Bulk creates/updates person notes from Slack profiles | `/om-incident-capture` |
-| `review-prep` | Aggregates all performance evidence for a review period | `/om-review-brief` |
-| `slack-archaeologist` | Full Slack reconstruction -- every message, thread, profile | `/om-incident-capture` |
-| `vault-librarian` | Deep vault maintenance -- orphans, broken links, stale notes | `/om-vault-audit` |
-| `review-fact-checker` | Verifies every claim in a review draft against vault sources | `/om-self-review`, `/om-review-peer` |
-| `vault-migrator` | Classifies, transforms, and migrates content from a source vault | `/om-vault-upgrade` |
+Specialized agents in `.claude/agents/` for heavy operations. They run in isolated context windows. Claude Code auto-surfaces every agent with its description — **that injected list is the live catalog**. Do not maintain an agent table here (it drifts; the injected list can't — see Write-Correctness law 6). **Agents without that injection (Codex, Gemini, Cursor): read the frontmatter in `.claude/agents/`.**
 
 ## Hooks
 
