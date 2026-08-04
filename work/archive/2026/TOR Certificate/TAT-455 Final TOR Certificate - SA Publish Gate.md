@@ -4,7 +4,7 @@ description: "Instructor visibility of an approved Final TOR Certificate became 
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ticket: TAT-455

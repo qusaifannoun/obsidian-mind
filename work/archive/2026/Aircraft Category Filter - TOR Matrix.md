@@ -4,7 +4,7 @@ description: "TOR Matrix B1/B2 filter couldn't be FE-only — aircraftCategory l
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ---

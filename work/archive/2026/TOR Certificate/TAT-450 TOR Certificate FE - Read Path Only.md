@@ -4,7 +4,7 @@ description: "TOR certificate frontend built against the new backend endpoint; r
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ticket: TAT-450

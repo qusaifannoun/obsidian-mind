@@ -12,7 +12,7 @@ Central map of content. All work notes and decisions link back here. For quick n
 
 **Folder structure**: `active/` = current projects, `archive/` = completed (by year), `incidents/` = incident docs, `1-1/` = meetings.
 
-Multi-note workstreams inside `active/` are grouped into topic folders — currently `Assessment/`, `Form 32/`, `History Form/`, `Staff Number/`, `TOR Certificate/`. Grouping is the lifecycle axis only: wikilinks resolve by name across folders, so a move never breaks a link, QMD, or the graph. The archive mirrors the grouping when a cluster is archived.
+Multi-note workstreams inside `active/` are grouped into topic folders — currently `Assessment/`, `Form 32/`, `History Form/`, `TOR Certificate/`, each now holding only its backlog and decision notes. Grouping is the lifecycle axis only: wikilinks resolve by name across folders, so a move never breaks a link, QMD, or the graph. The archive mirrors the grouping — `archive/2026/` carries the same five folder names after the 2026-08-04 QA handoff.
 
 ## Incidents
 
@@ -22,10 +22,7 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
 
 ## Active Projects
 
-- [[TAT-409 Staff Management Subsystem]] — **new** internal subsystem (instructors + TORs) on an SSO subdomain; 21-ticket epic. Domain: [[Staff Management Subsystem & TOR Model]]. **History Form slice (417/418/419/420/421/429) wired to the real backend + verified across roles, rendered as the single-document TAT Form 031 (2026-06-28).**
-  - **[[TAT-409 Delivery Log]] — the per-ticket delivery timeline (28 shipped slices) moved here 2026-08-02** when this index crossed 25KB. New TAT-409 slice entries go there, not here.
-- [[TAT-434 Email Verification]] — done, committed `533bf70`, Passed Code Review. **Status conflict (2026-08-02):** the note itself still lists *"Manual check in running dev server, then move toward Code Review"* as an open item, so note and index disagree on whether Code Review happened. Left `active` pending your read
-- [[Sequential User Number - Atomic Allocation & Backfill]] — [[tat-app-ws Backend]]: a max-scan `userNumber` allocator produced duplicates **three independent ways** (read-then-write race; the `BaseSchema` soft-delete plugin hiding the highest holder so their number got reused; and lexicographic `String` sort putting `"999"` above `"1000"`, which breaks the sequence permanently at 1000 users). Replaced with an atomic `$inc` counter + a **partial** unique index (plain `unique` can't build — every legacy user is a duplicate `null`), and locked the field write-once (`immutable`, removed from `AdminUserDTO`/`ExtSignUpDTO` where a client could set it and silently stall the counter). Backfill migration **applied to `tat-dev` (2026-07-28)** — 40 users hold `001..040` in signup order, counter at `40`, index in place, verified by re-reading the collection. **`dev` is wired to the staging DB and the cluster holds only one app database, so this *was* the staging migration** — and it landed before the code was pushed. **Still unexercised: the allocator itself has never run** (the backfill was a raw-driver bulk write and bypassed `pre("save")` entirely). **Correction (2026-08-02): all of the above describes the pre-rename `userNumber` field, not the live `staffNumber`** — staging holds an unpadded `3` that none of the three padding writers could have produced, so the backfill has **not** run under the new name and the value's source is unidentified ([[TAT-449 Staff Number Display - Unpadded staffNumber]])
+**Empty as of 2026-08-04** — the whole board was handed to QA and archived. Nothing is in flight. See **Backlog** below for what is real but parked, and [[North Star]] for where focus goes next.
 
 ## Backlog
 
@@ -54,6 +51,24 @@ _Reclassified from `active` on 2026-08-02 (dormant 2+ weeks, all shipped-but-unv
 All archived to `work/archive/2026/`.
 
 ### Q3 2026
+
+**Handed to QA and archived 2026-08-04** — 22 notes moved out of `active/` in one pass. `completed` here means *delivery left my hands*, **not verified**: every note keeps its `## Still open` section verbatim, and the items below outlive the archive.
+
+- `TOR Certificate/` — [[TAT-450 TOR Certificate FE - Read Path Only]] · [[TAT-455 Final TOR Certificate - SA Publish Gate]]. **Write path and publish round-trip have never run** — no staging certificate has ever reached `APPROVED`
+- `Form 32/` — [[Form 32 Approved Lock - Owner Read-Only]] · [[Form 32 Rejection History & Round-Scoped Stamps]] · [[Instructor Type - Per-Authority Form 32 Split]]. **The TAT-451 `instructorType` backfill migration has still never run**, and must not run before `requestedRoleCodes` is backfilled
+- `Assessment/` — [[TAT-423 Assessment Report Rubric]] · [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]]. TAT-453's Jira status is still *"Ready for Dev"* while the work is complete
+- `History Form/` — [[Export History Form - TAT Form 031 PDF]] · [[History Form - Training & Validity Records]]. The 031 export has **never been run against a live DB record**
+- `Staff Number/` — [[Sequential User Number - Atomic Allocation & Backfill]] · [[TAT-449 Staff Number Display - Unpadded staffNumber]]. Staging holds an unpadded `3` **no known writer could have produced**; the backfill has not run under the `staffNumber` name
+- Loose slices — [[TAT-429 Sit-In Eligibility & Move Semantics]] · [[TAT-432 Staff Profile]] · [[TAT-434 Email Verification]] · [[TAT-454 Instructor Assignment Filtering - courseMethod]] · [[Aircraft Category Filter - TOR Matrix]] · [[Aircraft Qualification Approval Invisible - Status String Mismatch]] · [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] · [[Stale Sit-In Index & Orphaned Instructor Enrollments]] · [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]] · [[TOR Activation - Details Endpoint Lied About ACTIVE]] · [[tat-prereq Forms Refactor - Zod + RHF]]
+  - **[[TAT-434 Email Verification]] settles the 2026-08-02 status conflict** — the index's *"Passed Code Review"* reading was the correct one
+  - Per-ticket delivery detail for the TAT-409 slices lives in [[TAT-409 Delivery Log]]
+
+**Archived the same day by decision, not by delivery** — these three never went to QA and `completed` does **not** describe them. Archived on Qusai's explicit call (2026-08-04) to clear the board; their open items are live and belong to whoever picks the subsystem back up:
+
+- [[TAT-409 Staff Management Subsystem]] — the 21-ticket epic tracker, **Parked in Jira**. Open children include **TAT-430**, the subsystem shell everything else sits on. Per-ticket history stays in [[TAT-409 Delivery Log]]
+- [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]] — **root cause only, no code written.** The fix was deferred on 2026-08-02 until QA flags the symptom; the `requestedRoleCodes` backfill script is still unwritten and gates the [[Instructor Type - Per-Authority Form 32 Split|instructorType]] migration
+- [[Staff Management - Unreachable Backend Endpoints]] — the 108-route sweep. Its 7 open items are **BA questions, not deliverables**: nobody can pause a TOR, and an instructor's requested roles are frozen at creation
+
 - [[Refresher Date Override - SA-Only Absolute-Date Override]] — TAT-447, **shipped + verified end-to-end on staging (2026-07-23)**: SA-only absolute-date override replacing the computed mandatory-training refresher date at **two scopes** — per-instructor slot ([[tat-prereq]]) + course fleet stamp ([[tat-ws]]); last-write-wins, a real completion wipes it. SA confirmed to hold the `SM_OVERRIDE_MANDATORY_TRAINING_REFRESHER` grant (overrides took effect, not 403). tat-prereq `9ff648b`+`1771a68` · tat-ws `e2ee0e0`+`82b0273`. Two resolver-level spec gaps (precedence ordering, revert path) lifted onto [[Loom]] Slice 0
 - [[Form 32 PIC Bugs & Cross-Frontend Auth Fixes]] — Form 32 PIC save clobber (`0969d044`) + create-401 seed gap, signature-draw reuse, and a cross-repo auth bundle (reset endpoint, login min, `x-client-app` routing); all pushed to `dev` (2026-07-08)
 - [[Staff Self-Service Polish - Nationality, Password, Profile Data]] — QA batch: nationality dropdown, national-ID validation, self-service change-password, `profiles/me` full-mapping fix, per-TOR quals/assessments aggregation, DOB format, Form 285 title dropdown, Manage Staff eye icon; shipped `dev` + verified on staging (`c267616`/`4a17423`/`af17500`, 2026-07-08)

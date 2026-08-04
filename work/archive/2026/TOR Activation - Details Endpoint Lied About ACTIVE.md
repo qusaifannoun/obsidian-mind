@@ -4,7 +4,7 @@ description: "The TOR details endpoint reported ACTIVE while checking only 3 of 
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ---

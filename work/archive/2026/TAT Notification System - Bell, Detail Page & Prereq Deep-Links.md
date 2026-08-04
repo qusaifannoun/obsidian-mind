@@ -4,7 +4,7 @@ description: "Notification system for tat-prereq — navbar bell with real-time 
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ---

@@ -4,7 +4,7 @@ description: "TAT-453 needed no frontend work — the real finding is that the u
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ticket: TAT-453

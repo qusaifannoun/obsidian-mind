@@ -4,7 +4,7 @@ description: "Progress tracker for TAT-432 Staff Profile Management — FE in ta
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q2-2026
 project: tat-prereq
 ticket: TAT-432

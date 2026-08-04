@@ -4,7 +4,7 @@ description: "Fix Form 32 rejection accumulation (round-scoped field stamps via 
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ---

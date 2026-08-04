@@ -4,7 +4,7 @@ description: "The backend's new instructor-eligibility filter was inert because 
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-ws
 ticket: TAT-454

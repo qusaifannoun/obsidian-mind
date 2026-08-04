@@ -4,7 +4,7 @@ description: "Form 32C/32D visible to plain instructors: the role gate fails ope
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ticket: TAT-451

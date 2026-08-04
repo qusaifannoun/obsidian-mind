@@ -4,7 +4,7 @@ description: "Additional training records in Updated Training & Validity — man
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ---

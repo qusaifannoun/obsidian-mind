@@ -4,7 +4,7 @@ description: "The Zod+RHF rule lived only in a hook docstring, so it was unreach
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-prereq
 ---

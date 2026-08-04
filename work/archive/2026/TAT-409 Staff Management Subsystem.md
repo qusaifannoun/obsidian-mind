@@ -4,7 +4,7 @@ description: "Epic tracker for TAT-409 — a new internal Staff Management subsy
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q2-2026
 project: tat-prereq
 ticket: TAT-409

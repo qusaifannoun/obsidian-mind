@@ -4,7 +4,7 @@ description: "The History Form had no export/print; added a full-stack server-ge
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ---

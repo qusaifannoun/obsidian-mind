@@ -4,7 +4,7 @@ description: "Sweep of all 108 staff-management endpoints against every frontend
 tags:
   - work-note
   - project/tat
-status: active
+status: completed
 quarter: Q3-2026
 project: tat-app-ws
 ---
