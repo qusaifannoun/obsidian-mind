@@ -114,6 +114,7 @@ The status column is the real value: the onboarding progression was previously *
 
 ## Related
 
+- [[Sit-In Privileged Override - Genesis Evaluator Gap]] — **the second edge of this same cycle (2026-08-12).** Removing the Active-TOR gate freed *who can be added*; the evaluator is still picked from the course's schedule instructors, so a scope with no qualified instructor yet re-forms the identical deadlock
 - [[TAT-409 Staff Management Subsystem]] · [[Staff Management Subsystem & TOR Model]]
 - [[Stale Sit-In Index & Orphaned Instructor Enrollments]] — the other sit-in bug, same week, same seam
 - [[History Form Audit Log]] — where `SIT_IN_MOVED` lands

@@ -86,6 +86,13 @@ Page rendered from the **real** response, not a fixture: auto fields populated, 
 > **merely browsing a TOR seeds certificate rows** in the one real database. Investigation is
 > not read-only on this setup.
 
+> [!danger] Why the write path has never run — root cause found 2026-08-12
+> Not a data gap. **No TOR had ever reached `ACTIVE`**: a fixed BullMQ `jobId` outlived its
+> completed job, so every TOR re-sync was discarded and returned as success — see
+> [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]] (`9896faa3`, pushed, **unverified**).
+> An earlier reading blamed the certificate availability gate; that gate is display-only
+> ([[Final TOR Certificate Never Available - Unfiltered Mandatory Templates|corrected]]).
+
 ## Related
 
 - [[TAT-455 Final TOR Certificate - SA Publish Gate]] — the publish state built on top of this

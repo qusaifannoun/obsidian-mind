@@ -35,6 +35,7 @@ Not browser-verified.
 
 ## Related
 
+- [[Sit-In Privileged Override - Genesis Evaluator Gap]] — the same status-gated-not-role-gated fix applied to the sit-in final assessment (2026-08-12); the open guardrail question above recurs there, harder, because the sit-in feeds a regulatory PDF
 - [[TAT-423 Assessment Report Rubric]] — the assessment model + the assessor/TM split
 - [[Export Assessment Report - TAT Form 032 PDF]] — the TM comment this made reachable
 - [[Key Decisions]] · [[tat-app-ws Backend]] · [[tat-prereq]]

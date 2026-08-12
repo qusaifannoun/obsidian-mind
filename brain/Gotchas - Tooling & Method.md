@@ -18,10 +18,29 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **Rule: locate work by the code it touches, not the ticket it claims.** Grep for the symbol, service, or predicate. Sibling of [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]] and of [[Patterns - Method & Conventions#TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)]] — in this project, ticket metadata is a weak index into reality in **both** directions. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
 
-## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)
+## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)
 
-> [!bug] **Unexplained.** `251dde6` ([[TAT-455 Final TOR Certificate - SA Publish Gate]], [[tat-prereq]]) was committed to `dev` and never pushed — yet it is on `origin/dev`, and `git reflog show origin/dev` records the update as **"update by push"**.
-> Checked and ruled out: **no post-commit hook exists in either repo.** No push command was issued in the session. The mechanism is genuinely unknown — an editor integration, a background sync, or a daemon are all candidates and none is confirmed.
+> [!bug] **Second confirmed instance, 2026-08-12 — and this time it also reached `main`.** `e8883c3` ([[Sit-In Privileged Override - Genesis Evaluator Gap]], [[tat-prereq]]) was committed to `dev` with no push issued. `git ls-remote origin` — querying GitHub itself, not a cached remote-tracking ref — returned it on **both** `refs/heads/dev` **and** `refs/heads/main`:
+>
+> ```
+> e8883c35ec1a767cc434bd859e9598c5c8dfdeca	refs/heads/dev
+> e8883c35ec1a767cc434bd859e9598c5c8dfdeca	refs/heads/main
+> ```
+>
+> **The HEAD reflog captured the mechanism this time** (read bottom-up) — a branch dance nobody in the session performed:
+>
+> ```
+> e8883c3 HEAD@{0}: checkout: moving from main to dev
+> e8883c3 HEAD@{1}: merge dev: Fast-forward
+> ea43544 HEAD@{2}: checkout: moving from dev to main
+> e8883c3 HEAD@{3}: commit: allow a privileged user to fill the sit-in...
+> ```
+>
+> So something checked out `main`, fast-forwarded it onto `dev`, checked `dev` back out, and pushed both. **Ruled out again, and more thoroughly: no git hooks** (`.git/hooks` has only samples), and **husky is inert** — `core.hooksPath = .husky/_`, but every file there is the stock `. "$(dirname "$0")/h"` stub and `.husky/` contains no user hooks for it to dispatch to. Remaining candidates: a VS Code Git integration / extension with auto-sync, or another agent session operating on the same working copy. Still unconfirmed.
+>
+> **What escalated:** the 2026-08-02 instance touched only the integration branch. This one advanced **`main`, the default branch**, with no review — and `main` and `dev` are now the same SHA.
+
+> [!bug] Original instance (2026-08-02) — `251dde6` ([[TAT-455 Final TOR Certificate - SA Publish Gate]]) was committed to `dev` and never pushed, yet landed on `origin/dev`, with `git reflog show origin/dev` recording **"update by push"**. Mechanism unknown at the time.
 >
 > **Why this matters beyond one commit.** Every work note in this vault records whether a SHA is pushed, and [[Patterns - Method & Conventions#Git workflow — commit to `dev` (TAT repos)|the git convention]] is explicitly *"push only when Qusai asks"*. If commits can reach the shared branch unattended, then **"committed locally, unpushed" is an unverified claim, not a fact** — and an unpushed-therefore-private assumption is how unreviewed work reaches a branch staging deploys from.
 >

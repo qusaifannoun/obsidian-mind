@@ -98,7 +98,16 @@ the instructor can still sign their own certificate before it is approved.
 > **"update by push"**. Mechanism unknown. Until it is explained, **treat "local only" claims
 > in this environment as unreliable** — the assumption that an uncommitted-to-remote SHA is
 > private is not currently safe.
-> See [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]].
+> See [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)]].
+
+> [!danger] Why the publish round-trip has never run — root cause found 2026-08-12
+> **No TOR had ever reached `ACTIVE`**, because a fixed BullMQ `jobId` outlived its completed
+> job and every TOR re-sync was silently discarded — see
+> [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]] (`9896faa3`, pushed, **unverified**).
+> An earlier reading blamed the certificate availability gate; that gate drives only the
+> "Not available yet" banner and is **not** what blocked activation
+> ([[Final TOR Certificate Never Available - Unfiltered Mandatory Templates|corrected]]).
+> Nothing here is testable until the queue fix is deployed and the stale Redis keys flushed.
 
 ## Related
 

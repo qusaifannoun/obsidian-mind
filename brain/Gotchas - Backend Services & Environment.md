@@ -9,6 +9,19 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)
+
+> [!danger] `queue.add()` with a custom `jobId` that already exists in Redis — **in any retained state, including completed** — creates nothing, runs nothing, and **resolves as though it succeeded**.
+> `addStandardJob-9.lua:89` short-circuits to `handleDuplicatedJob`, which emits a `duplicated` event and `return jobId`. So the caller's `.then()` fires and logs success; `.catch` never runs. **The drop is invisible and looks like a queue.**
+>
+> The TOR sync paired a fixed `jobId: \`tor-sync-${torId}\`` with `removeOnComplete: { age: 24h }` and `removeOnFail: { age: 7d }`, so **the key outlived the job**. One early sync ran while the TOR was incomplete, persisted `draft`, completed — and every approval for the next 24 hours enqueued a job Redis threw away. Result: 40 TORs across 18 staff, **0 active**, for weeks. See [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]].
+>
+> **The rule: a fixed `jobId` is a lock on that id for as long as the key is retained, not just while the job runs.** If you dedupe by id, the retention window must be shorter than the interval between legitimate re-enqueues — in practice `removeOnComplete: true`. Retention for forensics and dedupe by id are mutually exclusive; pick one.
+>
+> **The tell is a silent no-op with healthy logs.** Worker alive, completions recorded, triggers firing, nothing happening. When a queued side effect stops occurring but nothing errors, check whether the job was ever *created*, not whether it *ran*.
+>
+> Generalises past BullMQ: any idempotency key that outlives its operation converts "run once per event" into "run once, ever, per key".
+
 ## A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)
 
 > [!warning] Surfacing `staffNumber` on two screens looked like two backend changes. It was **one** — and knowing which one cost a single read per path.

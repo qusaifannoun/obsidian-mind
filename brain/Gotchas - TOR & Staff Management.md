@@ -29,6 +29,17 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **Rule: before running a backfill, ask what its *inputs* were backfilled from.** Here: `requestedRoleCodes` FIRST, then instructor type. And prefer a migration that **skips** a document whose derivation input is absent over one that writes the derivation's zero-value. See [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]] and [[Instructor Type - Per-Authority Form 32 Split]].
 
+## A THIRD copy of the TOR activation rule survived the 2026-07-12 consolidation — it makes the certificate banner permanent (2026-08-12)
+
+> [!danger] `assertCertificatePhaseAvailable` requires an `APPROVED` form for **every mandatory template on the licence, queried raw** — no role, instructor-type, or authority filtering. The *"Not available yet"* banner therefore never clears for any instructor who isn't all four roles.
+> 32A/32B/32C/32D are all seeded `mandatory: true`. An Instructor who isn't also an Examiner and a Practical Assessor has no 32C/32D instances, so `byTemplate.get(id)` → `undefined` → `form?.workflowStage === APPROVED` → **false, permanently**. A missing form is indistinguishable from a rejected one.
+>
+> **Corrected same day — the blast radius was much smaller than first recorded.** This entry originally said the certificate could never leave `Draft` and **no TOR could ever reach `ACTIVE`**. Wrong: the flag drives only the banner and `isInstructorFormsLocked`, every write path is ungated, and the certificate was signed and approved on staging with the banner still showing. The real activation blocker was [[TOR Sync Never Re-Ran - Stale BullMQ Job Id|a stale BullMQ job id]]. Lesson: [[Patterns - Method & Conventions#Grep the call sites before reasoning from a flag's name (2026-08-12)]].
+>
+> **The lesson is about the fix below, not the bug.** The 2026-07-12 entry found this rule written twice, extracted `staff-tor-activation.util.ts`, and converged *both known callers*. This was a **third** caller nobody enumerated. **Extracting a shared helper does not retire the forks you didn't go looking for** — after consolidating, grep for the *question* (here: "which templates are mandatory for this TOR"), not for the helper name, because the fork by definition doesn't call it.
+>
+> Suspect this class whenever a screen shows everything green and the derived status disagrees. See [[Final TOR Certificate Never Available - Unfiltered Mandatory Templates]] and [[Patterns - Architecture & Boundaries#A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)]].
+
 ## The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)
 
 > [!danger] The TOR details page showed **Active with no creation/expiry date**. Not a display bug — the TOR was never activated, and the badge was lying.

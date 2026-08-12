@@ -69,7 +69,7 @@ Consolidated output of the full [[TAT-409 Ticket Groups & Inspection Map|group-b
 | M7 | 429 AC-03 | **Eligible-instructor list under-checks "already assigned"** (only excludes INSTRUCTOR enrollment rows, not the schedule subsystem); **instructors with no history form silently dropped.** | `tat-app-ws` | `enrollment.service.ts:1264-1274`. |
 | M8 | 431 (Manage Staff) | **No pagination** — fetcher hardcodes `limit:1000, skip:0`, no UI pager. Won't scale. | `tat-prereq` | `fetchers.ts:63`. |
 | M9 | 430 AC-07/08 | **Role enforcement is client-side only** — `proxy.ts` gates on token presence, not role; route guards run in React. Relies on backend for real authz. | `tat-prereq` | `proxy.ts:25`. |
-| M10 | 421 AC-09 | **Sit-in `assessorSignatureKey` not validated as an evidence file** (plain string; Form 32 validates). | `tat-app-ws` | `staff-sit-in.service.ts:256-267`. |
+| M10 | 421 AC-09 | ~~**Sit-in `assessorSignatureKey` not validated as an evidence file** (plain string; Form 32 validates).~~ **NOT A GAP — corrected 2026-08-12.** `assertStaffEvidenceFileKey(assessorSignatureKey, [TOR_ASSESSMENT, TOR_DOCUMENTS])` runs before save. | `tat-app-ws` | `staff-sit-in.service.ts:387`. Re-read for [[Sit-In Privileged Override - Genesis Evaluator Gap]]. |
 | M11 | 412/413 uploads · history | **Staff-history uploads reuse TOR `FileUploadCategory`** (`TorDocuments`/`TorAssessment`) — wrong S3 folder; no history-form category exists. | `tat-prereq` | `useForms.ts:172,227,303`; `uploadFileKey.ts` has TOR categories only. |
 | M12 | 415 AC-12 (FE) | **AD mis-bucketed** in the History Form FE — falls into the instructor branch (no FE privileged auto-approve path). | `tat-prereq` | `HistoryFormView.tsx` reviewer set excludes AD. |
 

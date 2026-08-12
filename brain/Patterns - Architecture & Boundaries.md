@@ -25,6 +25,43 @@ If a number or date encodes a **rule** — a compliance total, a validity window
 
 **Why this is a rule and not a preference:** a duplicated business rule doesn't merely drift — it can be computing something else entirely while looking completely plausible. Both of the worst bugs of the week were duplicated-rule bugs (see [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]). A number that comes off the API can be wrong once; a number the FE derives can be wrong *differently* from the one eligibility actually uses, and nothing will ever reconcile them.
 
+## A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)
+
+The ordinary duplicated-rule bug has two implementations of one calculation. This is worse: the fork isn't in the *calculation*, it's in **which rows the calculation runs over**.
+
+`assertCertificatePhaseAvailable` and the sync processor both ask "which mandatory forms must be approved for this TOR". The processor filters by licence authority, requested roles, and instructor type first. The certificate service queried `{ licenseId, mandatory: true }` raw — so templates that legitimately have no form instance (32C/32D for a plain Instructor) counted as unapproved forever. **Absence and rejection were indistinguishable**, and the gate could never open. See [[Final TOR Certificate Never Available - Unfiltered Mandatory Templates]].
+
+*(Scope note: that gate turned out to drive a banner, not activation — so this pattern is about the duplicated applicability rule, not about the consequence I first attributed to it.)*
+
+**Why this evades the usual defences:** a duplicated formula shows up when you grep the formula. A duplicated *applicability rule* is just a database query with a narrower `where` clause — it shares no identifier with the correct version, so it never appears in a search for the helper, and it reads as perfectly reasonable in isolation.
+
+**Rules:**
+- After extracting a shared helper, **grep for the question, not the helper.** Enumerate every place that answers "which X apply here" and check each one calls it. The 2026-07-12 consolidation converged the two callers it knew about; this third one survived untouched for a month.
+- **A scoping filter is part of the rule, not preamble to it.** If applicability is computed anywhere other than the shared helper, push it *into* the helper so there is one answer.
+- **Treat "absent" as its own state.** `form?.workflowStage === APPROVED` silently equates *never created* with *rejected*. Where absence is legitimate, the query must exclude it rather than the predicate failing it — otherwise correct data reads as incomplete work.
+
+## A bootstrap escape hatch must not depend on the machinery it escapes (2026-08-12)
+
+Breaking a circular dependency at one edge does not break the cycle — **check every edge for the same assumption.** [[TAT-429 Sit-In Eligibility & Move Semantics|TAT-429]] removed the Active-TOR gate from *who can be added* to a sit-in, but the *evaluator* is still picked from the course's schedule instructors, so a scope with no qualified instructor yet re-forms the identical deadlock one edge around. See [[Sit-In Privileged Override - Genesis Evaluator Gap]].
+
+**Genesis states recur per scope, not once at seed.** The first instructor for a new authority, aircraft type, or course re-enters the same unbootstrappable state as the very first instructor in the system. Any rule of the form *"X requires an already-qualified Y"* needs an answer for the case where no Y exists yet — and that case arrives repeatedly, not once.
+
+**The escape hatch is therefore unconditional.** The tempting design is to expose the privileged override *only when no eligible actor exists* — which makes the hatch depend on the exact eligibility calculation it exists to escape. When that calculation is wrong (and here it has been wrong repeatedly: the TAT-429 cycle, the `requestedRoleCodes` fail-open, the `aircraftTypeIds` claim), the hatch disappears precisely when it is needed, and silently. **Gate the override on role, never on the computed state it rescues.**
+
+Sibling of the fail-open guard below: both are about a computed condition quietly deciding whether a safety net exists.
+
+## Gate privileged access on role, not on workflow stage — the third instance (2026-08-12)
+
+Three times now a privileged user has been locked out of a form by a **status** check that was never meant to express permission:
+
+- **Assessment TM section** — rendered only when `status !== 'assigned'`, so an SA saw nothing on an Assigned assessment ([[Assessment Privileged Approval - TM Section While Assigned]], 2026-07-16).
+- **Sit-in final assessment** — `canAssess = isReviewer && status === 'PendingReview'`, so an SA could not act before an evaluator submitted ([[Sit-In Privileged Override - Genesis Evaluator Gap]], 2026-08-12).
+- **Form 32 approve** — the mirror image: the *backend* privileged editor existed while the FE and role algebra made it unreachable ([[Gotchas - Forms & Approval#Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)]]).
+
+**The tell: a two-role sequential workflow whose UI gates on stage.** Stage answers *"has the previous actor finished?"*; it does not answer *"is this actor allowed?"* Conflating them means the privileged role — whose entire purpose is to act out of sequence — is the one role the gate excludes. When writing a stage gate, write `stage-reached || isPrivileged`, and check both call sites: wiring one page and not the other reproduces the partial-coverage trap.
+
+**Check the backend before building the FE affordance.** In the sit-in case the backend already implemented the whole override, and the API mirror type already declared the fields — the FE simply never sent them. Cost of not checking: a feature assumed missing for weeks that was two lines of payload away.
+
 ## A fallback branch turns an empty filtered pool into a plausible wrong answer (2026-08-02)
 
 The companion to the fail-open guard below, and **the more dangerous of the two**, because it removes the symptom.

@@ -22,7 +22,14 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
 
 ## Active Projects
 
-**Empty as of 2026-08-04** — the whole board was handed to QA and archived. Nothing is in flight. See **Backlog** below for what is real but parked, and [[North Star]] for where focus goes next.
+_The board was empty from 2026-08-04 (whole board handed to QA and archived) until 2026-08-12._
+
+- `TOR Certificate/` — [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]] — [[tat-app-ws Backend]] `9896faa3`: a fixed BullMQ `jobId` outlived its completed job, so every TOR re-sync for 24h was silently discarded and returned as success. **Why 40 TORs across 18 staff showed 0 active.** Pushed, **unverified** — needs a deploy plus a Redis flush
+- `TOR Certificate/` — [[Final TOR Certificate - Form 020 Alignment & Export]] — Course Rating/T1/T2 moved off the aircraft rows to the certificate per TAT Form 020, plus the missing PDF export (`ecaf1316` + `948e1515`, `e25bbbe` + `086d00b`). **The PDF has never been rendered**
+- `TOR Certificate/` — [[Final TOR Certificate Never Available - Unfiltered Mandatory Templates]] — the unfiltered mandatory-template gate (`b6d866f9`). **Corrected: display-only** — it drives the "Not available yet" banner, not activation
+- `History Form/` — [[Sit-In Privileged Override - Genesis Evaluator Gap]] — [[tat-prereq]] `e8883c3`: a privileged user can now fill the sit-in final assessment at any pre-approval stage, so an instructor with no eligible evaluator is no longer unbootstrappable. **A second circular dependency, one edge around from [[TAT-429 Sit-In Eligibility & Move Semantics|TAT-429]]**, and it recurs per new authority / aircraft type / course. Committed, **not browser-verified**; two named follow-ups open
+
+See **Backlog** below for what is real but parked, and [[North Star]] for where focus goes next.
 
 ## Backlog
 

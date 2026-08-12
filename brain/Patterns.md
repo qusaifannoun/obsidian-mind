@@ -17,6 +17,7 @@ Split into domain notes on 2026-08-01, when the single file reached 46KB. Substa
 _How work gets done in the TAT repos — verification bias, spec-gap routing, ticket hygiene, the propose-before-implementing rule, and where a convention has to live to be reachable._
 
 - [[Patterns - Method & Conventions#`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)|`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)]]
+- [[Patterns - Method & Conventions#Grep the call sites before reasoning from a flag's name (2026-08-12)|Grep the call sites before reasoning from a flag's name (2026-08-12)]]
 - [[Patterns - Method & Conventions#An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)|An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)]]
 - [[Patterns - Method & Conventions#An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)|An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)]]
 - [[Patterns - Method & Conventions#Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)|Vault-state drift is asymmetric — bias every doubt toward NOT-DONE (2026-07-23)]]
@@ -33,6 +34,9 @@ _How work gets done in the TAT repos — verification bias, spec-gap routing, ti
 _Where logic belongs — the backend owns business rules and the frontend renders them, one rule means one implementation, and confirm the far side exists before wiring a control to it._
 
 - [[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)|The backend owns business rules; the frontend renders the answer (2026-07-12)]]
+- [[Patterns - Architecture & Boundaries#A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)|A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)]]
+- [[Patterns - Architecture & Boundaries#A bootstrap escape hatch must not depend on the machinery it escapes (2026-08-12)|A bootstrap escape hatch must not depend on the machinery it escapes (2026-08-12)]]
+- [[Patterns - Architecture & Boundaries#Gate privileged access on role, not on workflow stage — the third instance (2026-08-12)|Gate privileged access on role, not on workflow stage — the third instance (2026-08-12)]]
 - [[Patterns - Architecture & Boundaries#A fallback branch turns an empty filtered pool into a plausible wrong answer (2026-08-02)|A fallback branch turns an empty filtered pool into a plausible wrong answer (2026-08-02)]]
 - [[Patterns - Architecture & Boundaries#The control renders from the server's capability flag, never from a client-side role check (2026-08-02)|The control renders from the server's capability flag, never from a client-side role check (2026-08-02)]]
 - [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)|One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]
