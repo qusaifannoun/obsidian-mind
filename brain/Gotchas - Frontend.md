@@ -8,6 +8,28 @@ tags:
 # Gotchas - Frontend
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## `httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)
+
+> [!warning] Logout couldn't delete a cookie it was no longer allowed to see — and only for sessions that had lived long enough to refresh
+> tat-ws writes all auth cookies through **`js-cookie`**, which uses `document.cookie` and therefore *physically cannot* set `httpOnly`. Exactly one line disagreed: `middleware.ts` re-set `accessToken` with `httpOnly: true` on the **token-refresh path**. Once that flag lands, client JS can no longer read, overwrite **or delete** that cookie — so `clearAllTokens()`'s `Cookies.remove('accessToken')` silently did nothing, middleware still saw a valid token at `/login`, and bounced the user to `/dashboard`. Logout appeared to do nothing at all.
+>
+> **The reason it hid for so long is that it is condition-dependent:** fresh login → logout works perfectly. Login, then sit until the access token expires and middleware refreshes it → logout is broken. Any bug gated on "has a refresh happened yet" will pass every quick manual test.
+>
+> **Rule: cookie *flags* are part of the contract, not a per-write detail.** A cookie written from two places (server middleware and client JS) must agree on `httpOnly`, `domain`, `path` and `sameSite`, because the *clearing* code only ever runs from one side. `grep -rn httpOnly` across the app whenever a cookie won't die.
+>
+> Resolved by dropping the flag — tat-ws tokens are JS-readable by design ([[TAT API & Auth Model#Cookie storage (tat-ws)]]). Real httpOnly would need server-side writes plus a logout route handler. Related smell in the same function: `clearAllTokens` passes `domain: window.location.hostname` to `Cookies.remove` for cookies that were set **host-only**, which only works because of the no-options fallback right after it. See [[tat-ws Sign-Out 404]].
+
+## A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)
+
+> [!danger] One line produced two unrelated-looking symptoms, and the second one is the dangerous half
+> tat-ws's only "Sign out" control was `<Link href="/signin">`. There is no `/signin` — login is `/login` — so Next fell through to `not-found.tsx` and rendered a 404. That part is loud and gets reported. **The quiet part: a `<Link>` only navigates**, so `usePostLogout` was never called and the logout request, `clearAllTokens()`, `updateCachedToken(null)`, the React Query cache clear and the cross-tab broadcast never ran. The user saw a 404 and assumed a routing bug; the actual exposure was a session that stayed fully authenticated.
+>
+> **When a control's job is to *do* something, a wrong `href` doesn't degrade it — it replaces the behaviour entirely.** A broken `href` on a nav link costs you a page. A broken `href` on an *action* costs you the action, silently, and the 404 is the only thing that surfaces. Audit any "Sign out / Delete / Disconnect" rendered as an anchor.
+>
+> **Second trap, same fix:** `usePostLogout` accepted `mutationArgs: { onSuccess }` and **never passed it to `useMutation`**. The other logout button (`Logout.tsx`) was dutifully passing a callback with `router.push('/login')` + `clearAllTokens()` that could never fire. An accepted-but-unwired param is worse than a missing one — the call site reads as correct, typechecks, and is dead. **If a hook takes a callback, grep that it reaches the config object.**
+>
+> Both entry points to logout were broken, for different reasons, at the same time. See [[tat-ws Sign-Out 404]].
+
 ## Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)
 
 > [!warning] Adding a param to `getInstructorQueryConfig` filters the normal pickers and does **nothing** to Bulk Edit

@@ -28,6 +28,17 @@ The contract that [[tat-app-ws Backend]] exposes and that [[tat-portal]], [[tat-
 > [!warning] Never desync token + state
 > In `tat-portal`, always use the atomic auth thunks (`loginSuccess` / `logout`) — never `saveTokens` + `dispatch(setUser)` separately. This caused subtle logged-in/out mismatches. See `tat-portal/ARCHITECTURE.md §4`.
 
+## Cookie storage (tat-ws)
+
+_As of 2026-08-19._ tat-ws **dual-writes** tokens: `localforage` (via `utilities/storage.ts`) for client reads, and cookies (via `js-cookie`) so `middleware.ts` can read them server-side. `syncTokensWithCookies` / `storeTokens` keep the two in step.
+
+> [!warning] Auth cookies here are JS-readable, and that is the current deliberate posture
+> `js-cookie` writes through `document.cookie`, so it **cannot** set `httpOnly` — `accessToken`, `refreshToken`, `role`, `roleId`, `userId`, `roleCode` are all readable by any script on the page. A genuine httpOnly posture would need server-side cookie writes plus a logout route handler; on 2026-08-19 that was considered and **explicitly not taken**, so the one middleware line that disagreed was removed instead.
+>
+> The cost of the disagreement was concrete: a lone `httpOnly: true` on the middleware refresh path made the cookie undeletable by `clearAllTokens()`, silently breaking logout for any session that had refreshed. See [[Gotchas - Frontend#`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)]] and [[tat-ws Sign-Out 404]].
+
+**Logout** is `usePostLogout` — `POST /auth/logout` → `clearAllTokens()` → `updateCachedToken(null)` → full React Query cache clear → cross-tab broadcast → `window.location.href = '/login'`. It is the single logout path; route any new sign-out control through it rather than navigating.
+
 ## Payments — CCAvenue
 
 - `POST /online-courses/orders/checkout` → `{ orderId, encRequest, accessCode, paymentUrl }`.
@@ -82,4 +93,5 @@ The editor routes by its `courseType` prop (`'online'` → online endpoint). Usi
 
 - [[TAT Platform]] — system overview
 - [[tat-app-ws Backend]] — where this contract is implemented
+- [[tat-ws Sign-Out 404]] — the 2026-08-19 logout bug that pinned down the tat-ws cookie posture
 - Authoritative detail for the storefront side: `tat-portal/ARCHITECTURE.md` §4–§6

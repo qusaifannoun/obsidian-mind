@@ -71,6 +71,21 @@ The [[TAT-409 Staff Management Subsystem|History Form]] (TAT-417/418/419) backen
 
 Method reminder (reinforces the [[Gotchas - Backend Services & Environment#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)|TAT-432 lesson]]): **a privileged login is a different code path** — verify staff-management write flows as the *actual* role that performs them (instructor records, TM reviews), not just as SA.
 
+## Edit and Delete gates are not the same gate — an `approved` additional-training row is editable but not removable (2026-08-23)
+
+The History Form's Updated Training & Validity rows made this look like one permission and it is two, pulling in opposite directions:
+
+| | Remove | Edit |
+|---|---|---|
+| `approved` row | **blocked** | **allowed** — with a new certificate |
+| online-source row | blocked for everyone | allowed for **privileged only** |
+
+`canManage && !isOnline && status !== 'approved'` versus `canManage && (isPrivileged || !isOnline)`. Copying the Remove gate onto an Edit button — the obvious move, they sit in the same cell — hides the edit path on exactly the rows that need it most, because a wrong `approved` record is the one you cannot fix by deleting and re-adding.
+
+The non-privileged edit rules are stricter than the create rules, too: a certificate key is **always** required, and on an `approved` row it must be a **different** key (`evidenceChanged`) or the request 400s. The edit then resets `approved`/`rejected` → `PENDING_APPROVAL` and appends a `SUBMITTED` entry to `reviewHistory`. Privileged edits skip all of it and land straight at `APPROVED`.
+
+**Read the service, not the request shape.** The curl for this endpoint is a flat six-field body that reveals none of the above — `staff-history-mandatory-training.service.ts:252` does. Fourth write path to confirm the [[#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)|privileged-vs-instructor split]]. Captured in [[Additional Training Edit - History Form Row Action]].
+
 ## Form 32 assessment Signature is a FILE key, not text (2026-07-05)
 
 > [!danger] Backend validates `assessment.signatureKey` as an evidence file (`bucket/…` + allowed ext)

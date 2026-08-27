@@ -56,6 +56,7 @@ The next refresher falls due **one month before expiry** — the same rule manda
 
 ## Related
 
+- [[Additional Training Edit - History Form Row Action]] — the Edit action these records never had (2026-08-23)
 - [[Refresher Date Override - SA-Only Absolute-Date Override]] — SA-only override of the computed refresher date on these mandatory-training slots (design, 2026-07-19)
 - [[TAT-409 Staff Management Subsystem]] · [[Staff Management Subsystem & TOR Model]]
 - [[TAT-423 Assessment Report Rubric]] — the other half of this session

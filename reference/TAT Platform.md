@@ -48,12 +48,15 @@ graph TD
 - **Has repo-local notes:** `tat-ws` (`obsidian/` folder).
 - **Weakly documented (Nx boilerplate only):** `tat-website`, `tat-app-ws` — highest risk when making changes blind.
 
-> [!note] Repo-local `obsidian/` vs this vault
-> `tat-portal/obsidian/` and `tat-ws/obsidian/` are *handoff docs that live with the code* (architecture, patterns, execution plans). This vault (`tat-mind`) is your *personal brain* — decisions, progress, wins, people. Reference repo docs from here; don't duplicate them.
+- **Machine-mapped (all five code repos, 2026-08-13):** every repo now has a generated graph at `<repo>/graphify-out/` — see [[TAT Code Knowledge Graph]]. This closes the "changing things blind" gap above for `tat-website` and `tat-app-ws`, which have no hand-written architecture docs.
+
+> [!note] Three documentation layers, kept apart
+> `tat-portal/obsidian/` and `tat-ws/obsidian/` are *handoff docs that live with the code* (architecture, patterns, execution plans). `<repo>/graphify-out/obsidian/` is *generated* — machine-derived structure, rebuilt on demand, never hand-edited. This vault (`tat-mind`) is your *personal brain* — decisions, progress, wins, people. Reference the other two from here; don't duplicate or merge them.
 
 ## Related
 
 - [[TAT API & Auth Model]] — the shared contract every frontend depends on
+- [[TAT Code Knowledge Graph]] — generated per-repo structure map; use it before opening files
 - [[Loom]] — design-stage multi-agent pipeline that drives these repos as stations
 - [[North Star]] — current focus
 - Active work: see [[Index|Work Notes]]

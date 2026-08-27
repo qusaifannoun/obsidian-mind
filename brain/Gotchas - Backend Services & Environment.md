@@ -9,6 +9,23 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)
+
+> [!danger] `updateAdditionalTraining` writes all three evidence fields whenever the key is present — the two it wasn't given become `null`.
+> ```ts
+> if (nextEvidenceKey) {
+>   record.evidenceFileKey = nextEvidenceKey;
+>   record.evidenceFileType = dto.evidenceFileType?.trim() ?? null;
+>   record.evidenceFileSize = dto.evidenceFileSize ?? null;
+> }
+> ```
+
+`staff-history-mandatory-training.service.ts:252` (History Form additional training). Send `{ evidenceFileKey }` alone — the obvious way to say "the certificate is unchanged" — and the file's type and size are **silently wiped** while the key survives. The record still points at a real file; the metadata describing it is gone.
+
+The trap is baked into the FE type: `AdditionalTrainingItem` carries `evidenceFileKey` but **not** `evidenceFileType`/`evidenceFileSize`, so a caller wanting to resend the existing key *cannot* resend faithful metadata — it doesn't have it. [[Additional Training Edit - History Form Row Action]] sidesteps this by always uploading a fresh file on a non-privileged edit, which is a workaround, not a fix.
+
+**Rule: a partial write that keys off one field but assigns a group rewrites the whole group.** Check what a `if (x) { … }` block assigns, not just what it reads. See also [[Gotchas - Backend Schema & Data]] for the sibling trap where spreading a Mongoose subdocument drops nested arrays.
+
 ## BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)
 
 > [!danger] `queue.add()` with a custom `jobId` that already exists in Redis — **in any retained state, including completed** — creates nothing, runs nothing, and **resolves as though it succeeded**.
