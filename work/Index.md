@@ -24,6 +24,7 @@ Incident docs live in `work/incidents/`. See `Incidents.base` for overview.
 
 _The board was empty from 2026-08-04 (whole board handed to QA and archived) until 2026-08-12._
 
+- [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]] — [[tat-app-ws Backend]] `bad7584f` + [[tat-prereq]] `dcacb9a`, both on `origin/dev`: `StaffTor.aircraftTypeIds` carried `ref: " TrainingTypes"` (leading space, unregistered name), so populate threw `MissingSchemaError` and `/staff-management/tor-matrix` 500'd for any result set holding a TOR. **A missing `isError` branch rendered the crash as "No staff match your search or filter."** Backend fix **unverified — staging still runs the old code**
 - `TOR Certificate/` — [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]] — [[tat-app-ws Backend]] `9896faa3`: a fixed BullMQ `jobId` outlived its completed job, so every TOR re-sync for 24h was silently discarded and returned as success. **Why 40 TORs across 18 staff showed 0 active.** Pushed, **unverified** — needs a deploy plus a Redis flush
 - `TOR Certificate/` — [[Final TOR Certificate - Form 020 Alignment & Export]] — Course Rating/T1/T2 moved off the aircraft rows to the certificate per TAT Form 020, plus the missing PDF export (`ecaf1316` + `948e1515`, `e25bbbe` + `086d00b`). **The PDF has never been rendered**
 - `TOR Certificate/` — [[Final TOR Certificate Never Available - Unfiltered Mandatory Templates]] — the unfiltered mandatory-template gate (`b6d866f9`). **Corrected: display-only** — it drives the "Not available yet" banner, not activation

@@ -8,6 +8,17 @@ tags:
 # Gotchas - Frontend
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)
+
+> [!danger] `const { data, isLoading } = useQuery(...)` then `const rows = data?.rows ?? []` — a 500, a 403, a network drop and a genuinely empty result all render the same reassuring "No results" message.
+> [[tat-prereq]]'s `TorMatrixView` did exactly this. The TOR Matrix was 500ing on every load and the page said **"No staff match your search or filter."** The stat cards showed an `EMPTY_SUMMARY` of zeros, which reads as real data. Nothing reached the console, because React Query swallows the rejection into `error` and nobody read it.
+>
+> **The cost is diagnostic, not cosmetic.** A whole session went into static tracing across the frontend and backend — permissions, DTO validation, query scoping, adapter null-safety — all of it ruled out one hypothesis at a time, because the one artifact that knew the answer was being discarded. **Adding the error branch produced the root cause on the first render**: the server's `MissingSchemaError` message appeared on screen immediately.
+>
+> **So when a list screen shows nothing, check `isError` handling before forming any theory about the data.** If the component cannot distinguish failure from emptiness, you have no evidence yet — you are guessing, and the screen is actively arguing for the wrong answer.
+>
+> `formatApiError` (`src/lib/format-api-error.ts`) already existed for this and handles both Nest shapes (`message: string` and the class-validator `string[]`). Use it rather than rendering a generic "something went wrong" — the *server's own message* is the thing worth showing. Fix: [[tat-prereq]] `dcacb9a`. Context: [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]].
+
 ## `httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)
 
 > [!warning] Logout couldn't delete a cookie it was no longer allowed to see — and only for sessions that had lived long enough to refresh

@@ -8,6 +8,17 @@ tags:
 # Gotchas - Backend Schema & Data
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+## A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)
+
+> [!danger] `ref: " TrainingTypes"` — a leading space, and a model name registered under no spelling. Nothing complains at boot, at build, or under `tsc`.
+> `StaffTor.aircraftTypeIds` carried this for months. It is **not** a type error (a `ref` is just a string), Nest boots fine, and `nx run api:build` is green. Mongoose only resolves the name when `.populate()` actually has documents to hydrate — so the failure is `MissingSchemaError`, thrown at request time, deep inside a handler.
+>
+> **The detonation is data-dependent, which is what makes it read as "no data" instead of "broken".** `GET /staff-management/tor-matrix` 500'd for any result set containing at least one TOR, but returned **200** for a query matching only staff with zero TORs. Narrowing the search *fixed* it. That inversion — the filtered query works and the unfiltered one dies — is the signature of a per-row throw, and it is the fastest way to localise one from outside the server.
+>
+> **Separating a throw from a timeout, from the browser:** `performance.getEntriesByType('resource')` gave 178–292 ms for the failures. A serialized N+1 dying under load looks like seconds; ~200 ms is an exception. That one number eliminated the whole performance hypothesis before any code was read.
+>
+> **Use the class, never the string.** `ref: AircraftTrainingTypes.name` cannot drift or acquire whitespace; `ref: "AircraftTrainingTypes"` can. The neighbouring `phase.schema.ts:20` already did it correctly — the repo idiom was right and this one site had wandered off it. A schema test asserting every registered `ref` resolves to a registered model turns this class of bug into a boot failure. Fix: [[tat-app-ws Backend]] `bad7584f`. Context: [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]].
+
 ## A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)
 
 > [!danger] `const max = await Model.findOne({}).sort({ seq: -1 }); next = parseInt(max.seq) + 1` — looks obviously correct, is wrong three separate ways, and passes every single-user test

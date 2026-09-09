@@ -18,7 +18,7 @@ A living document of goals, aspirations, and current focus areas. Both you and C
 _What am I working toward right now?_
 
 - Building across the [[TAT Platform]] — an aviation e-learning product spanning 6 repos (backend + 4 frontends + this vault).
-- **One thing back in flight as of 2026-08-12** — [[Sit-In Privileged Override - Genesis Evaluator Gap]], the first `status: active` note since the board emptied. Not a QA return and not a new assignment: a second circular dependency found by questioning the sit-in override on staging. The wider board is still parked.
+- **Two things in flight as of 2026-09-09** — [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]] (a schema-`ref` typo that 500'd the TOR Matrix for months, fixed in both repos and pushed, **unverified until staging deploys**), and [[Sit-In Privileged Override - Genesis Evaluator Gap]], the first `status: active` note since the board emptied. Not a QA return and not a new assignment: a second circular dependency found by questioning the sit-in override on staging. The wider board is still parked.
 - _The board went to QA on 2026-08-04_ — 22 archived as delivered, 3 archived by decision, and `work/active/` held no `status: active` note for the first time since 2026-06-02. What comes back from QA, and what gets picked up next, is still **not yet decided**.
 - **Primary repo remains [[tat-prereq]]** — the Staff Management subsystem (instructors + TORs), scaffolded 2026-06-04 mirroring [[tat-portal]], built out through [[TAT-409 Staff Management Subsystem|TAT-409]] and now handed over in full.
 - Prior focus: [[tat-portal]] (the student storefront), kickoff in [[TAT Portal Onboarding]].
