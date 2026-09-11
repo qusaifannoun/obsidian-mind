@@ -9,6 +9,17 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)
+
+> [!danger] `localhost:4200` was talking to `https://api.tat147.com` — production, not staging. Nothing in the UI says so.
+> Found by reading a request URL while debugging the question bank: `https://api.tat147.com/api/question-bank?page=2&limit=10`. [[tat-ws]]'s `.env` carries three `NEXT_PUBLIC_API_URL` lines with two commented out, so which environment a local session talks to is decided by whichever line is uncommented — and it survives in the working copy until someone notices.
+>
+> **The address bar is not the environment.** `localhost` reads as safe and is the reason nobody checks. Every mutation from that session — approve, publish, delete, bulk upload — would have written to production with no confirmation step and no visual difference.
+>
+> **Before debugging anything against a local frontend, read the `.env` and say which backend it hits.** If it is production, restrict to GETs. The question-bank pagination work on 2026-09-10 was verified against prod data for exactly this reason ([[Question Bank Bulk Upload - A Feature That Only Reported Success]]) — read-only paging only, deliberately.
+>
+> Related shape: [[Gotchas - Backend Services & Environment]] already records that an environment's *database* is not what its name implies. This is the same failure one layer up — the *client* is not what its hostname implies.
+
 ## A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)
 
 > [!warning] `4d993461` is labelled **TAT-435** (Pending TORs Page, *already Passed QA*) and contains **TAT-453's** assessor-eligibility filter.
@@ -18,7 +29,13 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **Rule: locate work by the code it touches, not the ticket it claims.** Grep for the symbol, service, or predicate. Sibling of [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]] and of [[Patterns - Method & Conventions#TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)]] — in this project, ticket metadata is a weak index into reality in **both** directions. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
 
-## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)
+## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12 and 2026-09-09/10)
+
+> [!bug] **Third instance, 2026-09-09/10 — now the default assumption, not the anomaly.** Sixteen commits across [[tat-app-ws Backend]], [[tat-ws]] and [[tat-prereq]] in one session. **Every one reached `origin` without a push being issued**, and `e101633` landed on **`main`** as well as `dev`. All three repos ended the session at `ahead of origin/dev: 0`.
+>
+> Two `git push origin dev` calls that session returned **"Everything up-to-date"** — the SHA was already on the remote before the push ran. Treat that message as evidence the commit has *already* shipped, not that the push was a no-op.
+>
+> **Consequence for how work is committed here.** Committing is now effectively publishing. Deciding to "commit but not push" so an unverified change can be reviewed first **does not work in these repos** — on 2026-09-10 an unverified backend fix (`7a047332`, the TON refresh) was deliberately held back from pushing and reached `origin/dev` anyway. If a change must not ship, it must not be committed.
 
 > [!bug] **Second confirmed instance, 2026-08-12 — and this time it also reached `main`.** `e8883c3` ([[Sit-In Privileged Override - Genesis Evaluator Gap]], [[tat-prereq]]) was committed to `dev` with no push issued. `git ls-remote origin` — querying GitHub itself, not a cached remote-tracking ref — returned it on **both** `refs/heads/dev` **and** `refs/heads/main`:
 >

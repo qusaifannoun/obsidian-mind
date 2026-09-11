@@ -86,6 +86,8 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal and tat-ws — Next.js, MUI, React Query, uploads and layout._
 
+- [[Gotchas - Frontend#A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)|A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)]]
+- [[Gotchas - Frontend#A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)|A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)]]
 - [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)|A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
 - [[Gotchas - Frontend#`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)|`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)]]
 - [[Gotchas - Frontend#A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)|A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)]]
@@ -112,8 +114,9 @@ _Component and framework traps across tat-prereq, tat-portal and tat-ws — Next
 
 _Toolchain and working-method traps — vault tooling, lint and IDE behaviour, and recurring reasoning failures._
 
+- [[Gotchas - Tooling & Method#A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)|A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)]]
 - [[Gotchas - Tooling & Method#A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)|A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)]]
-- [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)|A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]]
+- [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12 and 2026-09-09/10)|A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]]
 - [[Gotchas - Tooling & Method#The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)|The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)]]
 - [[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)|A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]]
 - [[Gotchas - Tooling & Method#Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)|Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)]]

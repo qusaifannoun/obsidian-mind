@@ -11,6 +11,29 @@ How work gets done in the TAT repos — verification bias, spec-gap routing, tic
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## A screen that cannot fail is a screen that cannot be debugged (2026-09-10)
+
+Three times in one week, on three independent surfaces, a server-side failure rendered as *success* or *no results*:
+
+| Surface | What the user saw | What was happening |
+|---|---|---|
+| TOR Matrix | "No staff match your search or filter." | `MissingSchemaError`, HTTP 500 |
+| Bulk upload | "Questions uploaded successfully" | `{ inserted: 0 }` |
+| Question bank list | an empty table | a 500, or a filter matching nothing |
+
+Same root cause each time: the component read `data` and `isLoading` and **never `isError`**, so React Query's `error` was discarded before anything could render it. The response shape `{ inserted: 0, errors: [] }` does the same job server-side — technically truthful, indistinguishable from success.
+
+**The cost is diagnostic, not cosmetic.** Each of these consumed a full static trace across both repos — permissions, DTOs, query scoping, adapter null-safety — ruling out hypotheses one at a time, because the one artifact that knew the answer was being thrown away. In two of the three cases, **building the error state produced the root cause on the first render**: the TOR Matrix printed its Mongoose message immediately, and the bulk-upload toast surfaced "reviewer not found" the moment it stopped claiming success.
+
+**So: when a list shows nothing, verify the component can distinguish failure from emptiness before forming any theory about the data.** Until it can, there is no evidence — and the screen is actively arguing for the wrong answer.
+
+Two concrete rules this yields:
+
+- **Destructure `isError` wherever `data` is destructured**, and render the server's own message ([[tat-prereq]] has `formatApiError`, [[tat-ws]] has `extractApiError` — both already handle the two Nest shapes). A generic "something went wrong" throws away the same information the missing branch did.
+- **A count-returning endpoint must be read, not assumed.** `toast.success` after a mutation that reports `inserted` is a lie waiting to happen; branch on the number.
+
+Evidence: [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]], [[Question Bank Bulk Upload - A Feature That Only Reported Success]], [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]].
+
 ## Grep the call sites before reasoning from a flag's name (2026-08-12)
 
 I read `mandatory: true` on the TOR certificate template, saw `formsStatus` require every form approved, and concluded the certificate gate made activation impossible for every TOR. **Wrong.** `assertCertificatePhaseAvailable` is consumed in two places, neither a write path — it drives a banner. Signing and approval were ungated the whole time, and Qusai proved it by approving the certificate while the banner still said "Not available yet".

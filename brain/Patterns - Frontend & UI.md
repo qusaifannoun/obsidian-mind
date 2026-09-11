@@ -11,6 +11,18 @@ Component and UI conventions across tat-prereq, tat-portal, tat-ws and tat-websi
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## Third-party UI libraries: stylesheet in `global.scss`, behaviour via the library's own global default (tat-ws, 2026-09-10)
+
+Two rules, both learned from [[tat-ws Tooltips Unstyled]], where ~44 tooltips across 33 files were unstyled and uncopyable.
+
+**A vendor stylesheet belongs at the global entry point, never in a component.** [[tat-ws]] imports third-party CSS in `apps/tat-ws/src/styles/global.scss` — `react-phone-input-2` established this, and `tippy.js` + `react-tooltip` now follow it. A CSS import inside a component is scoped to that route's chunk in the App Router, which looks like a working import and is not one.
+
+Put those imports **between `@tailwind components` and `@tailwind utilities`**, not at the bottom of the file. Vendor rules and Tailwind utilities collide at equal (single-class) specificity, so whichever is emitted later wins — vendor CSS at the bottom silently overrides every `bg-*`/`text-*` utility applied to that library's elements.
+
+**Configure a library once, not at N call sites.** When a library exposes a global default, set it in one place rather than editing every usage: `tippy.setDefaultProps({...})` in a null-rendering `'use client'` component mounted from the root layout — the shape `CrossTabSyncProvider` already uses. This covers call sites that don't exist yet, which per-call-site props never do.
+
+The corollary is a selection criterion: **a library with no global-default mechanism pushes the same config onto every future call site.** `react-tooltip` has none, so its `clickable` prop has to be repeated and will be missed. Worth weighing when the repo already has another library that does the same job — [[tat-ws]] carries three tooltip libraries, and the two without global config are the ones that drifted.
+
 ## All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)
 
 [[tat-prereq]] has the infrastructure and most forms follow it. **My TAT-423/Form-32 code did not**, and Qusai caught it.

@@ -8,6 +8,27 @@ tags:
 # Gotchas - Frontend
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)
+
+> [!danger] `import 'tippy.js/dist/tippy.css'` sitting in a component is **not** an app-wide import. In the Next.js App Router it is bundled into that route's CSS chunk, so the library is themed on that one route and renders as bare unstyled text on every other.
+> [[tat-ws]] had exactly this. `tippy.css` was imported inside two `MiniCalendar` components and nowhere else, so ~38 `<Tippy>` instances across 27 files showed naked strings with no background. `react-tooltip`'s stylesheet (6 usages) was imported **nowhere in the repo at all**.
+>
+> **What made it read as random rather than broken:** MUI's `Tooltip` styles itself. [[tat-ws]] runs three tooltip libraries side by side — `@mui/material`, `react-tooltip` and `@tippyjs/react` — so the same screen could show one perfectly styled tooltip beside a naked one, purely by which library that call site happened to use. That defeats "is the CSS loaded?" as a first question, because the obvious answer on screen is "yes, sometimes".
+>
+> **So when a third-party UI library renders unstyled, grep for its stylesheet across the whole repo before theorizing** — and check whether the import you find is at the global entry point or buried in a component. A component-level import looks correct in review and is invisible in a build.
+>
+> Fix: hoist to `src/styles/global.scss`, where `react-phone-input-2/lib/style.css` already established the idiom. **Placement inside that file is load-bearing** — put vendor CSS between `@tailwind components` and `@tailwind utilities`, not at the bottom. `.tippy-box` sets `background-color` at single-class specificity, so vendor CSS emitted *after* `@tailwind utilities` beats Tailwind on source order and silently kills every `bg-*` class applied to a tooltip (here: `bg-red-600` on `QuestionDropdown`'s disabled state, `bg-customColorSeven` on the material cards). Verify by grepping the built chunk, not the source: `grep -c 'tippy-box' .next/static/css/app/layout.css`. Context: [[tat-ws Tooltips Unstyled]].
+
+## A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)
+
+> [!warning] Tippy dismisses on pointer-leave unless `interactive` is set, and `react-tooltip` does the same unless `clickable` is set. Both default to off. A tooltip showing truncated text — a file name, a course name, a full question — is then **unreadable by copy**: reaching for it dismisses it.
+> In [[tat-ws]], 2 of ~38 Tippy instances set `interactive`, and 0 of 6 `react-tooltip` usages set `clickable`. Every truncated-text tooltip in the app was look-only.
+>
+> **Tippy has a global default; react-tooltip does not.** `tippy.setDefaultProps({ interactive: true, interactiveBorder: 10 })` called once from a client component mounted in the root layout covers all 27 files — no per-call-site edit, and no future call site missing it. `react-tooltip` has no equivalent, so `clickable` has to go on each usage and will be forgotten on the next one.
+>
+> Note the second-order effect before reaching for the global switch: it makes *every* tooltip interactive, including plain icon labels ("Edit Chapter", "Clear all filters") that have nothing worth copying and now linger before closing. Context: [[tat-ws Tooltips Unstyled]].
+
 ## A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)
 
 > [!danger] `const { data, isLoading } = useQuery(...)` then `const rows = data?.rows ?? []` — a 500, a 403, a network drop and a genuinely empty result all render the same reassuring "No results" message.

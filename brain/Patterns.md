@@ -17,6 +17,7 @@ Split into domain notes on 2026-08-01, when the single file reached 46KB. Substa
 _How work gets done in the TAT repos — verification bias, spec-gap routing, ticket hygiene, the propose-before-implementing rule, and where a convention has to live to be reachable._
 
 - [[Patterns - Method & Conventions#`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)|`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)]]
+- [[Patterns - Method & Conventions#A screen that cannot fail is a screen that cannot be debugged (2026-09-10)|A screen that cannot fail is a screen that cannot be debugged (2026-09-10)]]
 - [[Patterns - Method & Conventions#Grep the call sites before reasoning from a flag's name (2026-08-12)|Grep the call sites before reasoning from a flag's name (2026-08-12)]]
 - [[Patterns - Method & Conventions#An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)|An "Approved" stamp is not a consistency check — approved tickets contradict each other (2026-08-02)]]
 - [[Patterns - Method & Conventions#An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)|An integration guide describes the FE the backend imagined — verify against the code (2026-08-01)]]
@@ -48,6 +49,7 @@ _Where logic belongs — the backend owns business rules and the frontend render
 
 _Component and UI conventions across tat-prereq, tat-portal, tat-ws and tat-website — forms, tables, uploads, auth gating, cache invalidation and layout._
 
+- [[Patterns - Frontend & UI#Third-party UI libraries: stylesheet in `global.scss`, behaviour via the library's own global default (tat-ws, 2026-09-10)|Third-party UI libraries: stylesheet in `global.scss`, behaviour via the library's own global default (tat-ws, 2026-09-10)]]
 - [[Patterns - Frontend & UI#All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)|All tat-prereq forms must use Zod + react-hook-form — I violated this repeatedly (2026-07-12)]]
 - [[Patterns - Frontend & UI#FE-first dummy-data layer (tat-prereq)|FE-first dummy-data layer (tat-prereq)]]
 - [[Patterns - Frontend & UI#Dev auth bypass (tat-prereq)|Dev auth bypass (tat-prereq)]]
