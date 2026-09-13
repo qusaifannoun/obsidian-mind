@@ -32,6 +32,7 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 _tat-app-ws service-layer and environment traps — seeding, notification plumbing, API contract shapes, and which database an environment actually points at._
 
+- [[Gotchas - Backend Services & Environment#`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)|`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)]]
 - [[Gotchas - Backend Services & Environment#`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)|`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)]]
 - [[Gotchas - Backend Services & Environment#BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)|BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)]]
 - [[Gotchas - Backend Services & Environment#A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)|A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)]]

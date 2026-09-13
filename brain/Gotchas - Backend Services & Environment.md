@@ -9,6 +9,13 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)
+
+> [!warning] Admins and training managers get a 403 from the endpoint that carries the trainee schedule
+> `getMyCourseById` throws `FORBIDDEN` ("User is not enrolled in this course or assigned as an instructor") unless the caller has an `ENROLLED`/`PENDING` enrollment **or** a `schedule` row as `instructorId`. The route's `@Roles(...SystemRolesCodes)` lists every role, which makes it look staff-callable — the gate lives in the service, not the decorator.
+>
+> The obvious staff substitute, `GET /schedule/course/:courseId`, is **not the same data**: no `dayNumber`, no `examiner`, no fallback to the `CourseSchedule` template. For the same view as trainees, go through `CourseService.getCourseSchedules()` — now exposed to staff as `GET /courses/:id/schedule` (`9e5bd7e7`, undeployed as of 2026-09-13). Source: [[Course Details Show Schedule]].
+
 ## `evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)
 
 > [!danger] `updateAdditionalTraining` writes all three evidence fields whenever the key is present — the two it wasn't given become `null`.
