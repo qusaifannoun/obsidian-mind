@@ -87,7 +87,7 @@ NX   Successfully ran target build for project tat-ws
 - **Three tooltip libraries for one job remains unaddressed.** No shared wrapper exists, so the next tooltip inherits whichever library its author picks and this class of bug can recur. Consolidation was neither proposed nor scoped — see [[Patterns - Architecture & Boundaries]].
 - Noticed, not fixed: `QuestionDropdown` still hand-rolls the disabled-button tooltip workaround (wrapper `<span>` + `pointerEvents: 'none'`) that MUI's `Tooltip` does natively.
 - Pre-existing and untouched: `npm install` reports **120 vulnerabilities (5 low, 24 moderate, 82 high, 9 critical)**. `audit fix --force` pulls breaking majors.
-- Commits are **local only on `dev`** — but see [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)|the standing warning that "local only" is not a safe claim in this repo]]. Confirm before assuming it hasn't shipped.
+- Commits are **local only on `dev`** — but see [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)|the standing warning that "local only" is not a safe claim in this repo]]. Confirm before assuming it hasn't shipped.
 - The repo's checked-out branch moved from `dev` to `main` partway through the session (both were at the identical commit `14e8e2a9`, so the merge was a clean fast-forward). Worth knowing something else is moving `tat-ws` branches.
 
 ## Related

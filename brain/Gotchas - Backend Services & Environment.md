@@ -11,6 +11,13 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## `Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)
+
+> [!warning] Two `createdBy` fields, two different people
+> Every scheduled period of a course carries `createdBy` = the user who ran the scheduling. `Course.createdBy` is set once, in `create` (`course.service.ts:817`), and **neither `GET /courses/:id` nor `/courses/all` returns it** — so the only `createdBy` visible from the API on a course's data is the wrong one. Mistaking the scheduler for the creator nearly ruled out the real cause of a missing invigilator.
+>
+> **Rule: when a filter excludes "the course creator", read `courses.createdBy` in the database** — the API cannot answer it. Source: [[Compose Exam Invigilators - Course Creator Silently Excluded]].
+
 ## A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)
 
 > [!warning] `Schedule` rows store `date` + `period`; `CourseSchedule` stores periods under `dayNumber`. Nothing links them directly.

@@ -98,7 +98,7 @@ the instructor can still sign their own certificate before it is approved.
 > **"update by push"**. Mechanism unknown. Until it is explained, **treat "local only" claims
 > in this environment as unreliable** — the assumption that an uncommitted-to-remote SHA is
 > private is not currently safe.
-> See [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)]].
+> See [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)]].
 
 > [!danger] Why the publish round-trip has never run — root cause found 2026-08-12
 > **No TOR had ever reached `ACTIVE`**, because a fixed BullMQ `jobId` outlived its completed

@@ -29,7 +29,9 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 >
 > **Rule: locate work by the code it touches, not the ticket it claims.** Grep for the symbol, service, or predicate. Sibling of [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]] and of [[Patterns - Method & Conventions#TAT bugs often live in a Word doc, not Jira — never back-fill a ticket number (2026-07-16)]] — in this project, ticket metadata is a weak index into reality in **both** directions. See [[TAT-453 Assessor Eligibility - instructorType Load-Bearing Twice]].
 
-## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12 and 2026-09-09/10)
+## A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)
+
+> [!bug] **Fourth instance, 2026-09-15 — caught in the act.** [[tat-app-ws Backend]] `ea388a80` ([[Compose Exam Invigilators - Course Creator Silently Excluded]]) showed **no** remote branch in `git branch -r --contains` straight after commit; minutes later, after a `git fetch`, it was on `origin/dev` **and** `origin/master`. Earlier the same day every commit in [[tat-app-ws Backend]] and [[tat-ws]] had done the same — including `main`/`master` — and production (`api.tat147.com`) was already serving that session's compose-exam changes. **Nobody ran a push.** The mechanism is still unidentified; the user was asked to check for an auto-pushing client, IDE sync or hook.
 
 > [!bug] **Third instance, 2026-09-09/10 — now the default assumption, not the anomaly.** Sixteen commits across [[tat-app-ws Backend]], [[tat-ws]] and [[tat-prereq]] in one session. **Every one reached `origin` without a push being issued**, and `e101633` landed on **`main`** as well as `dev`. All three repos ended the session at `ahead of origin/dev: 0`.
 >

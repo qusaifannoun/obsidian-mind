@@ -53,7 +53,7 @@ Decision taken: **tat-ws auth tokens stay JS-readable.** A real httpOnly posture
 
 - **Nothing was run in a browser.** The whole fix is typecheck-only — `tsc --noEmit` clean, sole error a pre-existing missing `@testing-library/react` in `specs/index.spec.tsx`. Per [[Patterns - Method & Conventions]] this is built, **not verified**.
 - Needs both paths walked manually: fresh login → sign out, and login → wait for a token refresh → sign out.
-- Commit is **local only on `dev`** — but see [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred + escalated 2026-08-12)|the standing warning that "local only" is not a safe claim in this repo]]. Confirm before assuming it hasn't shipped.
+- Commit is **local only on `dev`** — but see [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)|the standing warning that "local only" is not a safe claim in this repo]]. Confirm before assuming it hasn't shipped.
 - Noticed, not fixed: `clearAllTokens` passes `domain: window.location.hostname` to `Cookies.remove` for cookies set **host-only** — only works because of the no-options fallback immediately after.
 - Noticed, not fixed: `routes.private.notification` is `/notification`; the real route is `/notifications`.
 
