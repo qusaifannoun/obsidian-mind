@@ -104,7 +104,7 @@ Page rendered from the **real** response, not a fixture: auto fields populated, 
 - [[TAT-409 Backend Open Items]] — where the FileUploadCategory + permission gaps are handed back
 - [[Staff Management - Unreachable Backend Endpoints]] · [[Staff Management Subsystem & TOR Model]]
 - [[tat-prereq]] · [[tat-app-ws Backend]] · [[TAT-409 Staff Management Subsystem]]
-- [[Gotchas - Frontend#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
+- [[Gotchas - Frontend Data & API Contracts#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
 - [[Index|Work Notes]]
 
 ### Competencies

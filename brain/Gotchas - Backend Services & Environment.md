@@ -1,6 +1,6 @@
 ---
 date: 2026-07-28
-description: "tat-app-ws service-layer and environment traps — seeding, notification plumbing, API contract shapes, and which database an environment actually points at"
+description: "tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at"
 tags:
   - brain
 ---
@@ -9,12 +9,23 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
+
+## A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)
+
+> [!warning] `Schedule` rows store `date` + `period`; `CourseSchedule` stores periods under `dayNumber`. Nothing links them directly.
+> Scheduling writes `topic` only for CHAPTER periods — **exam `Schedule` rows get `topic: null`** — so an exam period cannot be matched to its template by chapter. It sorts template days by `dayNumber` and gives each its own date, so the template day is **the rank of the period's date among the course's scheduled dates**. Use `CourseService.getCourseDayNumbers` + `scheduleDateKey` (`4b8b3e79`) rather than re-deriving it.
+>
+> **Matching on `periodNumber` alone is wrong** whenever the same period number carries an exam on more than one day ("Exam 1" on days 1, 2 and 3). **A day index computed over a filtered query is not a course day** either — `getAllPeriods` counted exam-only dates as 1, 2, 3.
+>
+> The rank assumes every template day produced a date and dates keep their order after rescheduling. Source: [[Compose Exam - Period Chapters, Course Reset & Day Labels]].
+
 ## `/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)
 
 > [!warning] Admins and training managers get a 403 from the endpoint that carries the trainee schedule
 > `getMyCourseById` throws `FORBIDDEN` ("User is not enrolled in this course or assigned as an instructor") unless the caller has an `ENROLLED`/`PENDING` enrollment **or** a `schedule` row as `instructorId`. The route's `@Roles(...SystemRolesCodes)` lists every role, which makes it look staff-callable — the gate lives in the service, not the decorator.
 >
-> The obvious staff substitute, `GET /schedule/course/:courseId`, is **not the same data**: no `dayNumber`, no `examiner`, no fallback to the `CourseSchedule` template. For the same view as trainees, go through `CourseService.getCourseSchedules()` — now exposed to staff as `GET /courses/:id/schedule` (`9e5bd7e7`, undeployed as of 2026-09-13). Source: [[Course Details Show Schedule]].
+> The obvious staff substitute, `GET /schedule/course/:courseId`, is **not the same data**: no `dayNumber`, no `examiner`, no fallback to the `CourseSchedule` template. For the same view as trainees, go through `CourseService.getCourseSchedules()` — now exposed to staff as `GET /courses/:id/schedule` (`9e5bd7e7`) and to everyone as `GET /courses/public/:id/schedule` (`cb77bb27`), both undeployed as of 2026-09-15. Source: [[Course Details Show Schedule]].
 
 ## `evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)
 
@@ -87,32 +98,7 @@ The trap is baked into the FE type: `AdditionalTrainingItem` carries `evidenceFi
 
 > [!warning] The FE sends `file.type` (`video/mp4`); the backend compared it to bare extensions (`mp4`). Nothing could ever match, so **every** upload 400'd.
 > `assertValidVideo` normalised `fileType` and checked it against `STAFF_ASSESSMENT_VIDEO_EXTENSIONS = ["mp4","webm","mov",…]`. The browser's `File.type` is a **MIME type**, so `"video/mp4" !== "mp4"` — the whitelist was unreachable and the feature had never once worked. Widening the whitelist would have fixed nothing.
-> **Validate the uploaded `fileKey`'s extension, not the browser's MIME.** The backend already rewrites extensions on upload (see [[Gotchas - Frontend#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]), so the key is the authoritative source. The browser's MIME is *also* unreliable — it's frequently an empty string for `.mkv`/`.avi`.
-
-## Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)
-
-> [!danger] Setting `STAFF_MANAGEMENT_URL` after the first seed never took effect — staff-management notification links kept pointing at the dashboard host
-> Two [[tat-app-ws Backend]] behaviors compounded into a "we added the env var but links are still wrong" bug:
-> - **Bootstrap resolved the base URL *once, at seed time* and stored it as an absolute URL.** `bootstrap.service.ts` called `generateNotificationUrl(param.url, {}, {clientApp})` while seeding, baking e.g. `https://<base>/staff/{{userId}}` into `NotificationSetting.parameters[].url`. If `staffManagementUrl` was empty when the settings were first seeded, `resolveClientBaseUrl` fell back to `dashboardUrl` — so the rows permanently held the dashboard host.
-> - **Re-seeding skips any setting whose name already exists** (`if (settingExists) { skippedCount++; continue }`). So adding `STAFF_MANAGEMENT_URL` later and rebooting did **nothing** — bootstrap never re-processes existing rows.
-> - **The runtime resolver was dead code.** `sendNotification` re-calls `generateNotificationUrl` on the stored URL and *does* pass `param.client` as context — but `generateNotificationUrl` only resolves a base when `!url.startsWith("http")`. Since the stored URL was already absolute, the guard was skipped and the send-time context never mattered.
->
-> **Fix (option A, 2026-07-09):** stop baking — store the **relative** `param.url` + `client` on the setting, and let `sendNotification` resolve the base per-client on every send. Plus a migration (`2026-07-09-relativize-notification-urls.js`) to relativize the already-baked rows so the runtime resolver takes over. Future host changes now just work with a redeploy. Deleted the earlier `2026-07-08-repoint-staff-notification-urls.js` (it re-baked absolute — re-running it would reintroduce the bug).
->
-> **Two general rules:** (1) **resolve environment-dependent values at use time, not at seed/write time** — anything baked into a DB row on first seed is frozen against whatever config existed then, and idempotent-skip seeders never refresh it. (2) When a re-runnable seeder is **skip-if-exists**, changing the seed data (URLs, params) is a **no-op on existing rows** — you need a migration, not a reboot. Same shared-DB re-seed family as [[Gotchas - Backend Services & Environment|Booting tat-app-ws against a shared DB re-runs ALL seeders — role-action seeding is DESTRUCTIVE]] against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)|the destructive role-action seeder]]. Context: [[TAT Notification System - Bell, Detail Page & Prereq Deep-Links]].
-
-## Booting [[tat-app-ws Backend]] against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)
-
-`BootstrapService.onModuleInit()` runs the full seeder chain on **every** app start (`nx serve api`, or any deploy). It is **not** a safe way to trigger one seeder against a shared DB. `seedRoleActions` calls **`editRoleActions`, which REPLACES a role's entire action set** with the hard-coded local `roleActionsMap` — so booting a **local branch** against the **shared dev cluster** overwrites every role's permissions with the local definitions. If local ≠ deployed, this **regresses permissions for everyone on that dev DB** (observed: instructor `/details` went 200→403 after a local `nx serve` pointed at dev).
-
-- **Confirmed 2026-07-07** while running a one-off `instanceKey` backfill via the app (see [[Staff Creation Blocked - qualificationTrackingMode Enum Bug]] neighbourhood / Form 285 work). The backfill itself worked (`/form-285` 404→403), but the collateral role-action overwrite did not.
-- **Self-healing:** redeploy/restart staging (or run the *deployed* branch) → bootstrap re-seeds role-actions to the deployed truth.
-- **Rule:** never boot the app against shared dev/prod to run a single data fix. Use a **standalone script** with the DB driver (needs the current `MONGO_URI` — the local `.env` dev URI is stale/NXDOMAIN; grab the live one from AWS ECS task def / Bitbucket vars / Atlas). Or gate the fix so only it runs.
-- Related: `.env` values have stray **trailing commas** (`redis,`, `tat147-dev,`) that break Redis/host lookups. See [[Patterns - Method & Conventions#Propose before implementing — don't jump to code (Qusai, 2026-07-07)]].
-- **Updated 2026-07-10:** the local `.env` `MONGO_URI` now points at the live cluster (`…oemqsva…`, db `tat-dev`), not the dead `cqtcwb3` host — that part of this gotcha is stale. It still won't connect from a laptop: **Atlas IP allowlist** rejects un-whitelisted IPs (`MongooseServerSelectionError: ReplicaSetNoPrimary`). Whitelist your IP or run migrations from a host that's already allowed.
-- **The allowlist rejection wears two different masks — neither mentions the firewall.** Seen as `ReplicaSetNoPrimary` (2026-07-10) *and* as a bogus TLS error (2026-07-12): `MongoServerSelectionError: SSL routines:ssl3_read_bytes:tlsv1 alert internal error … SSL alert number 80`. Atlas kills the TLS handshake for an unknown source IP, so the driver reports an OpenSSL fault. **It is not a cert problem — do not debug TLS. Check the allowlist first.**
-- **Your egress IP rotates.** Whitelisted `188.123.164.132` on 2026-07-11; by 2026-07-12 it was `188.123.164.137` — same `/24`, ISP re-leased the last octet (dynamic DHCP; it can change overnight with no action). Re-whitelisting one address means doing it again in days. **Whitelist `188.123.164.0/24`** (acceptable for the *dev* cluster; not for prod), or route through a fixed egress. Check current IP with `curl -s https://api.ipify.org`.
-- **`REDIS_HOST=redis` only resolves inside Docker.** Running `nx serve api` on the host with Docker down leaves the API retrying `getaddrinfo ENOTFOUND redis` forever — it never reaches `app.listen`, so port 3333 is simply dead with no error saying why. Redis usually runs natively on `localhost:6379` anyway: override with `REDIS_HOST=localhost npx nx serve api` rather than editing `.env`.
+> **Validate the uploaded `fileKey`'s extension, not the browser's MIME.** The backend already rewrites extensions on upload (see [[Gotchas - Frontend Data & API Contracts#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]), so the key is the authoritative source. The browser's MIME is *also* unreliable — it's frequently an empty string for `.mkv`/`.avi`.
 
 ## TAT backend user: `role` is an OBJECT, not a string
 
@@ -127,28 +113,3 @@ Driving the [[TAT-432 Staff Profile]] create/edit forms against staging surfaced
 - **`officeLocation` is an OfficeLocation ObjectId, not free text.** Sending `"HQ"` → `500 "Cast to ObjectId failed for value \"HQ\" at path \"_id\" for model OfficeLocation"`. Source the value from `GET /office-location` (`[{ _id, name, cityId{name} }]`) as a select keyed by `_id`, and **omit the field entirely when blank** (a blank string also fails the cast). On read, `/user/details` returns `officeLocation` populated as `{ _id, name }` — store the `_id` for the form, carry the `name` separately for display.
 
 Method note: every real-staging path in `tat-prereq` is gated on `getAccessToken()`; with no session the fetchers silently return dummy data. To verify "against staging" you MUST be logged in — otherwise you're only exercising the offline fallback. Context: [[TAT-432 Staff Profile]], [[TAT-409 Staff Management Subsystem]].
-
-## Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)
-
-> [!warning] Add a setting to `notification-settings.json` without a `notificationSettingMappings` entry and it is never created — no error, and the notification then never fires
-> `seedNotificationSettings` (`bootstrap.service.ts:1218`) looks up `notificationSettingMappings[setting.name]` for the action + template code. On a miss it `console.warn`s and `continue`s — the setting is **never inserted**. Downstream, `sendNotification` no-ops when `notificationSettingModel.findOne({name})` misses. So a new notification fails **silently at both ends**: nothing throws, nothing logs at runtime, the recipient just never hears anything.
->
-> **Adding a notification needs FOUR edits, not two** (I originally wrote THREE here — that was wrong, see the next gotcha): (1) `seed_data/notification-settings.json`, (2) `seed_data/notification-template.json` (with a unique `code`), (3) the `notificationSettingMappings` object in `bootstrap.service.ts` keyed by the exact setting `name`, and (4) **the `code` must also be a member of the `SystemActions` enum**. Caught on the `SIT_IN_MOVED` work — the first two were done and it would have shipped mute. The seeder itself is **upsert-style and non-destructive** (it updates existing settings' parameters, never deletes), unlike the role-action seeder above.
-
-## The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)
-
-> [!danger] `SIT_IN_MOVED` and `Assessment Assessor Assigned` shipped mute for 9 days. The three-edit rule above was **incomplete** — and I only found out by reading a startup log Qusai pasted.
-> `notification-template.schema.ts:8` is `@Prop({ unique: true, enum: SystemActions })`. The template `code` is therefore not a free string — it must **also exist as a `SystemActions` enum member**. `SIMV` and `ASNAR` never were, so Mongoose rejected the template on create:
-> ```
-> NotificationTemplate validation failed: code: `SIMV` is not a valid enum value for path `code`.
-> ```
-> No template → `seedNotificationSettings` can't create the setting → `sendNotification` no-ops on the missing setting. **Dead at three layers, and the only trace is a `console.error` at boot** that nobody reads. Fixed by adding `SIT_IN_MOVED = "SIMV"` and `ASSESSMENT_ASSESSOR_ASSIGNED = "ASNAR"` to `SystemActions` (`enums.ts`); both then seeded on the next boot.
->
-> **How to check a notification is actually live** (don't assume): query `notificationsettings` + `notificationtemplates` for the name/code, and grep the boot log for `not a valid enum value` / `No mapping found` / `Action not found`. All three failure modes are silent at runtime.
-
-## The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)
-
-> [!warning] Editing `destination` in `notification-settings.json` for an already-seeded setting is a **silent no-op, forever**
-> `seedNotificationSettings` takes an early `continue` on any existing setting after syncing **only `parameters`** — it never updates `destination`, `action`, or `notificationTemplate`. The seed file says "Assessment Pending TM Review" goes to `["TM", "SA"]`; the DB row still says `["TM"]` from its first seed, so **Super Admins never receive it** no matter what the JSON claims. 67 settings are "synced" on every boot, parameters only — so any of them can be drifted the same way.
->
-> Fixing it properly means making the seeder sync `destination` too, which would overwrite destinations deliberately customized in the DB. **Unresolved — needs a product call.**

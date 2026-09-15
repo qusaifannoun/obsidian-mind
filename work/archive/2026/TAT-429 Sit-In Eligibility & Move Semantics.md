@@ -107,7 +107,7 @@ The status column is the real value: the onboarding progression was previously *
 - [x] `SIT_IN_MOVED` label added to `EVENT_LABELS` in [[tat-prereq]] (`9cb360f`)
 - [ ] **Confirm the TOR actually activated** after HF `APPROVED` — that's the last link in the bootstrap chain (`staff-tor-sync.processor`) and the whole point of the fix. Not yet verified.
 - [ ] **Verify the move path on staging** — none of it has been exercised: the Move confirmation, the soft-delete of the old enrollment, the `SIT_IN_MOVED` audit row, the 409 at `pending_tm_review`, and the stranded-evaluator notification
-- [ ] Verify the "Sit-In Moved To Another Course" notification setting actually seeds on deploy — `sendNotification` silently no-ops if the setting is missing (see [[Gotchas - Backend Services & Environment#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]])
+- [ ] Verify the "Sit-In Moved To Another Course" notification setting actually seeds on deploy — `sendNotification` silently no-ops if the setting is missing (see [[Gotchas - Seeding & Notifications#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]])
 - [ ] Comment on TAT-424 / TAT-429 recording the exemption, so the TOR filter isn't reinstated
 - [ ] **Remove-instructor endpoint** — nothing in the codebase can un-enroll an instructor from a course. Deferred deliberately; can largely reuse `deactivateForMove`
 - [x] ~~Separate ticket for the `aircraftTypeIds` keystone gap~~ — **not a gap; it was already fixed. My claim was wrong.**

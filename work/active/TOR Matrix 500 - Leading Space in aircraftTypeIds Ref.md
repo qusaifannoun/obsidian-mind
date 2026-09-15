@@ -75,7 +75,7 @@ Ruled out along the way, each conclusively: role/permission mismatch (FE `ROUTE_
 - [[TOR Activation - Details Endpoint Lied About ACTIVE]] — the previous time `getTorMatrix`/`evaluateTorCompletion` was the scene
 - [[TAT-409 Backend Open Items]] — where the email/phone card-DTO ask was filed
 - [[Gotchas - Backend Schema & Data#A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)]]
-- [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
+- [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
 - [[tat-app-ws Backend]] · [[tat-prereq]]
 - [[Index|Work Notes]]
 

@@ -52,7 +52,7 @@ Nine commits across [[tat-app-ws Backend]] and [[tat-ws]] over 2026-09-09/10. Th
 ## Related
 
 - [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]] — the same session, the same lesson: the error state *was* the diagnosis
-- [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]] — recorded that morning, then hit again the same week on a second screen
+- [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]] — recorded that morning, then hit again the same week on a second screen
 - [[Patterns - Method & Conventions#A screen that cannot fail is a screen that cannot be debugged (2026-09-10)]]
 - [[Gotchas - Tooling & Method]] — the environment traps this session produced
 - [[tat-app-ws Backend]] · [[tat-ws]]

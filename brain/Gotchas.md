@@ -1,6 +1,6 @@
 ---
 date: 2026-06-02
-description: "Index of things that have bitten before and will bite again — one line per trap, linking into the six domain notes"
+description: "Index of things that have bitten before and will bite again — one line per trap, linking into the domain notes"
 tags:
   - brain
   - index
@@ -16,6 +16,7 @@ Split into domain notes on 2026-07-28, when the single file reached 96KB. Substa
 
 _Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation._
 
+- [[Gotchas - Backend Schema & Data#A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)|A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)]]
 - [[Gotchas - Backend Schema & Data#A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)|A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)]]
 - [[Gotchas - Backend Schema & Data#A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)|A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)]]
 - [[Gotchas - Backend Schema & Data#A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)|A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)]]
@@ -30,8 +31,9 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 ## [[Gotchas - Backend Services & Environment]]
 
-_tat-app-ws service-layer and environment traps — seeding, notification plumbing, API contract shapes, and which database an environment actually points at._
+_tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at_
 
+- [[Gotchas - Backend Services & Environment#A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)|A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)]]
 - [[Gotchas - Backend Services & Environment#`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)|`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)]]
 - [[Gotchas - Backend Services & Environment#`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)|`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)]]
 - [[Gotchas - Backend Services & Environment#BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)|BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)]]
@@ -40,13 +42,18 @@ _tat-app-ws service-layer and environment traps — seeding, notification plumbi
 - [[Gotchas - Backend Services & Environment#Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)|Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)]]
 - [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]
 - [[Gotchas - Backend Services & Environment#A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)|A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)]]
-- [[Gotchas - Backend Services & Environment#Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)|Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)]]
-- [[Gotchas - Backend Services & Environment|Booting tat-app-ws Backend against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)]]
 - [[Gotchas - Backend Services & Environment#TAT backend user: `role` is an OBJECT, not a string|TAT backend user: `role` is an OBJECT, not a string]]
 - [[Gotchas - Backend Services & Environment#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)|Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)]]
-- [[Gotchas - Backend Services & Environment#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)|Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]]
-- [[Gotchas - Backend Services & Environment#The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)|The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)]]
-- [[Gotchas - Backend Services & Environment#The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)|The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)]]
+
+## [[Gotchas - Seeding & Notifications]]
+
+_tat-app-ws boot-time seeding and notification plumbing traps — destructive re-seeds, skip-existing seeders, and the enum and mapping gates a notification must pass_
+
+- [[Gotchas - Seeding & Notifications#Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)|Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)]]
+- [[Gotchas - Seeding & Notifications|Booting tat-app-ws Backend against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)]]
+- [[Gotchas - Seeding & Notifications#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)|Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]]
+- [[Gotchas - Seeding & Notifications#The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)|The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)]]
+- [[Gotchas - Seeding & Notifications#The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)|The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)]]
 
 ## [[Gotchas - TOR & Staff Management]]
 
@@ -85,31 +92,36 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 ## [[Gotchas - Frontend]]
 
-_Component and framework traps across tat-prereq, tat-portal and tat-ws — Next.js, MUI, React Query, uploads and layout._
+_Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
 - [[Gotchas - Frontend#A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)|A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)]]
 - [[Gotchas - Frontend#A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)|A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)]]
-- [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)|A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
 - [[Gotchas - Frontend#`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)|`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)]]
 - [[Gotchas - Frontend#A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)|A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)]]
-- [[Gotchas - Frontend#Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)|Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)]]
-- [[Gotchas - Frontend#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)|tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
 - [[Gotchas - Frontend#A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)|A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)]]
 - [[Gotchas - Frontend#Card-morph slider: keep the OUTGOING card full-screen until the new one covers it|Card-morph slider: keep the OUTGOING card full-screen until the new one covers it]]
-- [[Gotchas - Frontend#`router.refresh()` does NOT invalidate the React Query cache (tat-portal)|`router.refresh()` does NOT invalidate the React Query cache (tat-portal)]]
 - [[Gotchas - Frontend#App-shell layout: pin to the viewport, scroll only `<main>`|App-shell layout: pin to the viewport, scroll only `<main>`]]
-- [[Gotchas - Frontend#tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs|tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs]]
-- [[Gotchas - Frontend#Online-course certs ARE trainee-reachable (storefront)|Online-course certs ARE trainee-reachable (storefront)]]
-- [[Gotchas - Frontend#tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`|tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`]]
-- [[Gotchas - Frontend#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted|Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]
 - [[Gotchas - Frontend|Next.js 16 scaffolding traps (hit on tat-prereq 2026-06-04)]]
 - [[Gotchas - Frontend#Next 16's react-hooks rules false-positive on react-hook-form primitives|Next 16's react-hooks rules false-positive on react-hook-form primitives]]
 - [[Gotchas - Frontend#tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`|tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`]]
-- [[Gotchas - Frontend#FE hook built against a speculative endpoint the backend never shipped|FE hook built against a speculative endpoint the backend never shipped]]
-- [[Gotchas - Frontend#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original|tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]
-- [[Gotchas - Frontend#tat-ws online-course trainees endpoint: no server search + fake pagination|tat-ws online-course trainees endpoint: no server search + fake pagination]]
-- [[Gotchas - Frontend#tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)|tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)]]
 - [[Gotchas - Frontend#MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)|MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)]]
+
+## [[Gotchas - Frontend Data & API Contracts]]
+
+_Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
+
+- [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)|A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
+- [[Gotchas - Frontend Data & API Contracts#Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)|Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)]]
+- [[Gotchas - Frontend Data & API Contracts#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)|tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
+- [[Gotchas - Frontend Data & API Contracts#`router.refresh()` does NOT invalidate the React Query cache (tat-portal)|`router.refresh()` does NOT invalidate the React Query cache (tat-portal)]]
+- [[Gotchas - Frontend Data & API Contracts#tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs|tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs]]
+- [[Gotchas - Frontend Data & API Contracts#Online-course certs ARE trainee-reachable (storefront)|Online-course certs ARE trainee-reachable (storefront)]]
+- [[Gotchas - Frontend Data & API Contracts#tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`|tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`]]
+- [[Gotchas - Frontend Data & API Contracts#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted|Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]
+- [[Gotchas - Frontend Data & API Contracts#FE hook built against a speculative endpoint the backend never shipped|FE hook built against a speculative endpoint the backend never shipped]]
+- [[Gotchas - Frontend Data & API Contracts#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original|tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]
+- [[Gotchas - Frontend Data & API Contracts#tat-ws online-course trainees endpoint: no server search + fake pagination|tat-ws online-course trainees endpoint: no server search + fake pagination]]
+- [[Gotchas - Frontend Data & API Contracts#tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)|tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)]]
 
 ## [[Gotchas - Tooling & Method]]
 

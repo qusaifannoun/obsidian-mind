@@ -8,6 +8,16 @@ tags:
 # Gotchas - Backend Schema & Data
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
+
+## A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)
+
+> [!danger] `[firstName, familyName].filter(Boolean).join(" ")` is `""` for a nameless user, and Mongoose fails `required: true` on an empty string
+> The boot-time Super Admin is created with only `email`, `password` and `role` (`UserService.initializeSuperAdmin`), and `User.firstName`/`familyName` are optional. So a nameless user exists **in every environment**, and it is the most privileged one. Any schema field that stores an actor name as `required: true` rejects its writes — and because Mongoose validates the whole parent document, the error surfaces as the entire form failing to save: `StaffHistoryForm validation failed: mandatoryTraining.0.reviewHistory.1.reviewerName: Path \`reviewerName\` is required.`
+>
+> **A stored bad subdocument poisons every later save** of its parent, even edits that never touch it, since re-validation covers every array entry. Check whether the failing entry is new or old before choosing between a code fix and a data repair.
+>
+> **Rule: a stored actor name needs a non-empty fallback** — the email, as Form 285 and TOR documents already do. The name is hand-built in about a dozen places with five different fallbacks, several still able to return `""`. Source: [[Mandatory Training Review Log - Nameless Super Admin]].
+
 ## A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)
 
 > [!danger] `ref: " TrainingTypes"` — a leading space, and a model name registered under no spelling. Nothing complains at boot, at build, or under `tsc`.

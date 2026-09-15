@@ -1,6 +1,6 @@
 ---
 date: 2026-09-13
-description: "The trainee schedule endpoint 403s for anyone not enrolled or assigned, so staff got a new schedule endpoint plus a shared table in a course-details modal"
+description: "The trainee schedule endpoint 403s for anyone not enrolled or assigned, so staff and the public page got their own endpoints and a shared schedule drawer"
 tags:
   - work-note
   - project/tat
@@ -11,9 +11,9 @@ project: tat-ws
 
 # Course Details Show Schedule
 
-Request: a **Show Schedule** button on Manage Courses → Course Details that shows the same schedule table trainees see on their own course page.
+Request (2026-09-13): a **Show Schedule** button on Manage Courses → Course Details that shows the same schedule table trainees see on their own course page. Extended 2026-09-15: the same button on the **public** course page (`/courses/:id`), and the modal replaced by a **right-side drawer** on both.
 
-Committed on `dev` 2026-09-13, **not pushed**: [[tat-ws]] `ac780cf` (table extraction, its own commit) + `248359d` (button, modal, hook); [[tat-app-ws Backend]] `9e5bd7e7` (endpoint). **Typecheck-only, never run** — see [[#Still open]].
+Committed on `dev`, **not pushed** (as of 2026-09-15): [[tat-ws]] `ac780cf` → `248359d` → `7402e06` → `6f675e1`; [[tat-app-ws Backend]] `9e5bd7e7` → `cb77bb27`. **Typecheck-only, never run** — see [[#Still open]].
 
 ## Root cause — the only schedule source was gated to participants
 
@@ -33,23 +33,28 @@ if (!enrollment && !instructorSchedule) {
 
 The alternative, `GET /schedule/course/:courseId` (`SCHEDULE_TRAINING` action), is **a different data source**, not the same data behind another gate: no `dayNumber`, no `examiner`, and no fallback to the `CourseSchedule` template. Using it would have let the staff view drift from what trainees see.
 
-## Decision
+The public course page is served to anonymous visitors, unenrolled trainees and staff alike, so the staff endpoint (`InternalSystemRolesCodes` + JWT) could not back it either.
 
-Chosen by the user over the frontend-only option: a new staff endpoint that reuses the exact trainee data path, a modal rather than a new page, and extraction of the table rather than a copy.
+## Decisions
+
+All chosen by the user:
+
+- **2026-09-13** — a new staff endpoint reusing the exact trainee data path (over the frontend-only option); extraction of the table rather than a copy.
+- **2026-09-15** — the public page's schedule is visible to **everyone, including anonymous visitors**. Chosen over staff-only and signed-in-only, with the consequence stated up front: instructor/examiner names and dates become public for any visible course.
+- **2026-09-15** — widen the shared `CustomDrawer` through its previously-ignored `className` prop, rather than keep its fixed 40.438rem width with horizontal scroll.
 
 ## Fix
 
-| Repo | File | Change |
+| Repo | Commit | Change |
 |---|---|---|
-| [[tat-app-ws Backend]] | `apps/api/src/app/course/course.controller.ts` | `@Get(":id/schedule")` → `getCourseSchedule`, gated like `GET /courses/:id` (`InternalSystemRolesCodes` + `JwtAtGuard`, no action) |
-| [[tat-app-ws Backend]] | `libs/database/src/lib/course/course.service.ts` | `getCourseScheduleById` — id validation, 404 on missing course, then the existing private `getCourseSchedules()` (`Schedule` model with `dayNumber` added, falling back to the `CourseSchedule` template) |
-| [[tat-ws]] | `components/common/CourseScheduleTable/index.tsx` *(new)* | table extracted verbatim from the trainee page; still highlights the viewer's own name in instructor cells |
-| [[tat-ws]] | `app/(private)/my-courses/details/[id]/page.tsx` | now renders `CourseScheduleTable` (−174 lines); a debug `console.log` removed |
-| [[tat-ws]] | `services/api-hooks/coursers/useFetchCourseScheduleById.ts` *(new)* | fetches only while the modal is open |
-| [[tat-ws]] | `manage-courses/[id]/details/_components/CourseDetailsContent/CourseScheduleModal.tsx` *(new)* | `maxWidth="xl"` dialog in the `ChangeCertificatesModal` idiom, loading + error states |
-| [[tat-ws]] | `…/CourseDetailsContent/index.tsx` | Show Schedule button beside Show Enrolment |
+| [[tat-app-ws Backend]] | `9e5bd7e7` | `GET /courses/:id/schedule` (staff, gated like `GET /courses/:id`) → `getCourseScheduleById`, reusing the private `getCourseSchedules()` (`Schedule` model with `dayNumber`, falling back to the `CourseSchedule` template) |
+| [[tat-app-ws Backend]] | `cb77bb27` | `GET /courses/public/:id/schedule` (no auth) → `getPublicCourseScheduleById`. Visibility matches `GET /courses/public/:id` via a new `PUBLIC_COURSE_STATUSES` constant (`SCHEDULED`/`APPROVED`/`ASSIGNED`) now shared by both, so a draft course 404s instead of leaking. Both schedule methods go through a private `findExistingCourseSchedules` |
+| [[tat-ws]] | `ac780cf` | table extracted from the trainee page into `components/common/CourseScheduleTable/index.tsx` — its own commit |
+| [[tat-ws]] | `248359d` | `useFetchCourseScheduleById` + a Show Schedule modal on Manage Courses → Details (the modal is gone as of `6f675e1`) |
+| [[tat-ws]] | `7402e06` | `libs/ui` `CustomDrawer` applies its `className` via the existing `cn()` helper; the default width is unchanged for its four existing callers |
+| [[tat-ws]] | `6f675e1` | `CourseScheduleTable/CourseScheduleDrawer.tsx` (90vw, capped at 90rem, loading/error states), used on both pages; `useFetchPublicCourseScheduleById`; Show Schedule button on the public page |
 
-The extraction landed as **its own commit** (`ac780cf`), separate from the button and endpoint.
+**Commit hygiene slip:** the modal's `git rm` was already staged when `7402e06` was made, so the deletion of `CourseScheduleModal.tsx` landed in the `CustomDrawer` commit instead of `6f675e1`. A re-split was started and **interrupted by the user**; the history was left as is.
 
 ## Evidence
 
@@ -63,18 +68,26 @@ apps/tat-ws/specs/index.spec.tsx(2,24): error TS2307: Cannot find module '@testi
 
 The one tat-ws error is pre-existing — the count is identical (1) with the changes stashed.
 
+Local tat-ws points at a remote API, so nothing could be exercised end to end:
+
+```
+NEXT_PUBLIC_API_URL=https://api.tat147.com
+```
+
 ## Still open
 
-- **Nothing was exercised.** The endpoint was never called, the modal never opened, and the trainee `my-courses/details` page was not re-checked after the table moved out of it. Built, **not verified** — per [[Patterns - Method & Conventions]].
-- **Does nothing until [[tat-app-ws Backend]] is deployed** — the button will error on `dev` until then.
-- The button has **no `ActionsWrapper` action gate**, unlike Show Enrolment beside it; any internal role that can open the page sees it. No matching action code was looked for.
-- Layout of a wide schedule (many periods) inside the modal is unchecked.
+- **Nothing was exercised.** Neither endpoint was called, the drawer was never opened on either page, and the trainee `my-courses/details` page was not re-checked after the table moved out of it. Built, **not verified** — per [[Patterns - Method & Conventions]].
+- **Does nothing until [[tat-app-ws Backend]] is deployed** — both drawers will show "Failed to load course schedule" until then.
+- The four existing `CustomDrawer` callers (Show Enrolment, enrolment approval, Add Phase, Course Sign-Up) were not re-checked after the `className` change. Phone-width drawer layout unchecked.
+- The manage-page button has **no `ActionsWrapper` action gate**, unlike Show Enrolment beside it.
+- Pre-existing, not fixed: `CustomDrawer` never closes on backdrop click or Esc — its `SwipeableDrawer` `onClose` only logs `"closed "`, for every drawer in the app.
+- Pre-existing, not fixed: the public course **list** and the public course **details** use different visibility rules — the list excludes `DRAFT`/`COMPLETED`/`ARCHIVED`/`TEMPLATE`, the details include only `SCHEDULED`/`APPROVED`/`ASSIGNED`. A course in any other status can be listed and then 404 when opened.
 - Commits are local on `dev` — but see [[Gotchas - Tooling & Method]] on why "local only" is not a safe claim in these repos.
 
 ## Related
 
 - [[tat-ws]] — primary repo
-- [[tat-app-ws Backend]] — the new endpoint
+- [[tat-app-ws Backend]] — the two new endpoints
 - [[Gotchas - Backend Services & Environment]] — the participant-only `my-courses/:id` gate written up
-- [[Patterns - Architecture & Boundaries]] — one rule, one implementation: the staff view reuses the trainee data path instead of rebuilding it from a second endpoint
+- [[Patterns - Architecture & Boundaries]] — one rule, one implementation: both new views reuse the trainee data path instead of rebuilding it from a second endpoint
 - [[tat-ws Tooltips Unstyled]] — same repo, same week

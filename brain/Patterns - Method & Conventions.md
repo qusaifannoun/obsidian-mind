@@ -32,7 +32,7 @@ Two concrete rules this yields:
 - **Destructure `isError` wherever `data` is destructured**, and render the server's own message ([[tat-prereq]] has `formatApiError`, [[tat-ws]] has `extractApiError` — both already handle the two Nest shapes). A generic "something went wrong" throws away the same information the missing branch did.
 - **A count-returning endpoint must be read, not assumed.** `toast.success` after a mutation that reports `inserted` is a lie waiting to happen; branch on the number.
 
-Evidence: [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]], [[Question Bank Bulk Upload - A Feature That Only Reported Success]], [[Gotchas - Frontend#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]].
+Evidence: [[TOR Matrix 500 - Leading Space in aircraftTypeIds Ref]], [[Question Bank Bulk Upload - A Feature That Only Reported Success]], [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]].
 
 ## Grep the call sites before reasoning from a flag's name (2026-08-12)
 
