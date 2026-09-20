@@ -11,6 +11,22 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)
+
+> [!danger] `const token = request.cookies.get('access_token')?.value; if (!token) redirect('/login')` — a 30-day-dead JWT is a **present cookie**. The gate passes, the user keeps navigating, and nothing in the UI says otherwise.
+> Every frontend had this shape: [[tat-prereq]] `proxy.ts`, [[tat-portal]] `middleware.ts`, `exam-portal` `middleware.ts`. None of them decoded `exp`. The only thing that knew a token was expired was the backend, and the only way the app found out was a 401 arriving on a request it had not exempted — so on any screen fed by cached data or an unguarded route, the expired session simply continued.
+>
+> Two rules came out of it. **Decode `exp` at the gate.** And test the **refresh token**, not the access token — the access token is short-lived and renewable, so bouncing on it logs people out mid-session. See [[Decision - Refresh Token as the Session Boundary]] and [[Expired Sessions Undetected Across All TAT Frontends]].
+>
+> Reading order matters too: `tat-prereq` is on Next 16, where `middleware.ts` was renamed **`proxy.ts`** — grepping for `middleware.ts` finds nothing and it looks like the app has no gate at all.
+
+## A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)
+
+> [!warning] `setCookie(ACCESS_TOKEN_KEY, accessToken, ONE_YEAR)` — the storage outlives the credential by a year, so the browser keeps presenting a long-expired JWT and the app keeps believing it has a session.
+> Derive the lifetime from the token: `secondsUntilExpiry(token)`. Then the cookie disappearing *is* the session ending, and the two stores can never disagree.
+>
+> Watch the second-order effect: once cookies expire honestly, any gate that requires the access-token cookie to be **present** in order to attempt a refresh will start bouncing users who still hold a valid refresh token. [[tat-ws]]'s `middleware.ts` had exactly that condition and it only surfaced after the expiry fix.
+
 ## A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)
 
 > [!danger] `import 'tippy.js/dist/tippy.css'` sitting in a component is **not** an app-wide import. In the Next.js App Router it is bundled into that route's CSS chunk, so the library is themed on that one route and renders as bare unstyled text on every other.

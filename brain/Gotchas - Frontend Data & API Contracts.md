@@ -9,6 +9,19 @@ tags:
 
 Split out of [[Gotchas - Frontend]] on 2026-09-15, when it reached 29KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)
+
+> [!danger] The route is `@UseGuards(JwtRtGuard)` and the strategy reads `ExtractJwt.fromAuthHeaderAsBearerToken()` (`jwt-rt-strategy.ts:14`). A `{ refreshToken }` body never reaches it: the guard rejects the request before the controller runs.
+> [[tat-prereq]] and [[tat-portal]] both did this, and both made the call with bare `axios` rather than the configured client — so there was not even a stale `Authorization` header to accidentally satisfy the guard. Neither app could refresh a token, ever. The failure is invisible in code review because the call *looks* right and the catch block does something plausible (clear tokens, go to `/login`).
+>
+> ```ts
+> await axios.post(`${API_URL}/auth/refresh-token`, undefined, {
+>   headers: { Authorization: `Bearer ${refreshToken}` },
+> });
+> ```
+>
+> [[tat-ws]] and `exam-portal` had it right all along, which is why only two of the four apps were broken this way. The contract is now correct in [[TAT API & Auth Model]] — it had documented the body form, which is what both apps were built against. See [[Expired Sessions Undetected Across All TAT Frontends]].
+
 ## A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)
 
 > [!danger] `const { data, isLoading } = useQuery(...)` then `const rows = data?.rows ?? []` — a 500, a 403, a network drop and a genuinely empty result all render the same reassuring "No results" message.

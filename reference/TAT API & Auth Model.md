@@ -19,11 +19,17 @@ The contract that [[tat-app-ws Backend]] exposes and that [[tat-portal]], [[tat-
 ## Auth (JWT)
 
 - `POST /auth/login` → `{ user, accessToken, refreshToken }`. Token fields are **camelCase**.
-- `POST /auth/refresh-token` with `{ refreshToken }` → new token pair.
+- `POST /auth/refresh-token` — the refresh token goes in the **`Authorization: Bearer` header, not the body**. The route is `@UseGuards(JwtRtGuard)` and the strategy extracts via `ExtractJwt.fromAuthHeaderAsBearerToken()` (`jwt-rt-strategy.ts:14`), so a `{ refreshToken }` body 401s every time. Returns a new token pair.
 - Access token sent as `Authorization: Bearer <token>`.
-- **Refresh flow (client interceptor):** on `401` → pause in-flight requests → refresh → resume; on refresh failure → clear tokens + redirect to login.
+- **Refresh flow (client interceptor):** on `401` → pause in-flight requests → refresh → resume; on refresh failure → clear tokens + redirect to login. An access token that is *already* expired is refreshed pre-emptively rather than spending a guaranteed-401 round trip.
+- **Rotation revokes.** The presented refresh token is retired on use (30s grace for concurrent tabs), so a client holding a rotated-away token is logged out. Whoever refreshes must persist **both** new tokens.
+- **The refresh token is the session boundary** — an expired access token is renewable state, not a signed-out one. Route gates must decode `exp`; testing cookie *presence* cannot detect an expired session. See [[Decision - Refresh Token as the Session Boundary]].
+- **Cookie lifetimes derive from each token's `exp`**, and cookies are authoritative over client-side stores (`localforage` in tat-ws) because only cookies are reachable from server middleware.
 - Role-based guards on the backend: `SUPERADMIN`, `ADMIN`, `INSTRUCTOR`, `STUDENT` (+ tat-ws uses a wider 13+ role set).
 - SSO: `tat-portal` exchanges a code at `/auth/exchange-sso-token`.
+
+> [!warning] This section said `{ refreshToken }` in the body until 2026-09-20
+> [[tat-prereq]] and [[tat-portal]] were both built against that wrong line, so neither app could ever refresh a token — see [[Expired Sessions Undetected Across All TAT Frontends]]. Corrected here at the source rather than annotated.
 
 > [!warning] Never desync token + state
 > In `tat-portal`, always use the atomic auth thunks (`loginSuccess` / `logout`) — never `saveTokens` + `dispatch(setUser)` separately. This caused subtle logged-in/out mismatches. See `tat-portal/ARCHITECTURE.md §4`.
@@ -37,7 +43,9 @@ _As of 2026-08-19._ tat-ws **dual-writes** tokens: `localforage` (via `utilities
 >
 > The cost of the disagreement was concrete: a lone `httpOnly: true` on the middleware refresh path made the cookie undeletable by `clearAllTokens()`, silently breaking logout for any session that had refreshed. See [[Gotchas - Frontend#`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)]] and [[tat-ws Sign-Out 404]].
 
-**Logout** is `usePostLogout` — `POST /auth/logout` → `clearAllTokens()` → `updateCachedToken(null)` → full React Query cache clear → cross-tab broadcast → `window.location.href = '/login'`. It is the single logout path; route any new sign-out control through it rather than navigating.
+**Logout** is `usePostLogout` — `POST /auth/logout` → `clearAllTokens()` → full React Query cache clear → cross-tab broadcast → `window.location.href = '/login'`. It is the single logout path; route any new sign-out control through it rather than navigating.
+
+_Updated 2026-09-20:_ the `updateCachedToken(null)` step is gone — `authMiddleware`'s module-level token cache was removed, because a process-lifetime cache can never learn that `middleware.ts` rotated the cookie server-side. The client now reads the cookie, which is authoritative over `localforage`. See [[Decision - Refresh Token as the Session Boundary]].
 
 ## Payments — CCAvenue
 

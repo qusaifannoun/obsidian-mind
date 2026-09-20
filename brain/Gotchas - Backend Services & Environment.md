@@ -11,6 +11,19 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## `cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)
+
+> [!danger] `refreshTokenInMinutes()` was named for minutes, its body returned **milliseconds**, and `cacheManager.set(key, val, { ttl })` wanted **seconds**. `30d` → `2_592_000_000` seconds ≈ 82 years. Every refresh token written to Redis was effectively immortal.
+> Three different units in one call chain, and nothing fails loudly — an over-long TTL just silently never expires. Fixed by `parseDurationToSeconds` + `refreshTokenTtlSeconds()`/`accessTokenTtlSeconds()` across all 7 call sites, including the logout access-token blacklist, which had the same bug and so blacklisted forever instead of for one token lifetime.
+>
+> **Deploying the fix changes live behaviour**: sessions that previously never expired start expiring at the configured lifetime. See [[Expired Sessions Undetected Across All TAT Frontends]].
+
+## The Redis cache silently falls back to in-process memory — and refresh tokens live in it (2026-09-20)
+
+> [!warning] `apps/api/src/app/cache-db/cache-db.module.ts:14-20` probes Redis with a 2s TCP connect and, on any failure, returns `{ ttl: 0, max: 100 }` — an in-process LRU. It logs `"Redis is not available. Using memory cache."` and boots normally.
+> Refresh-token validity is a cache lookup, so on the fallback path: tokens vanish on every restart or redeploy, are invisible to any other ECS task behind the load balancer, and are **LRU-evicted past 100 entries**. Each one makes `refreshToken()` throw `invalidToken` and logs the user out for no visible reason.
+> Noticed while tracing session expiry; **not fixed** — it is an infra/config decision. Check that boot log before diagnosing any "random logout" report.
+
 ## `Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)
 
 > [!warning] Two `createdBy` fields, two different people
