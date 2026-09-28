@@ -11,6 +11,17 @@ Where logic belongs — the backend owns business rules and the frontend renders
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## Derived state computed at one event goes stale when its inputs change later (2026-09-22)
+
+> [!tip] If a value is a function of other records, either recompute it on read or re-trigger it from every write that feeds it — picking one write site guarantees the others rot
+> Three unrelated bugs in a single live exam were all this shape. Certificates are computed once at course completion from four inputs (absence rate, enrolment not DENIED, `examEligible`, exams passed), so a trainee who becomes eligible afterwards gets nothing and one who becomes ineligible keeps a valid certificate. Exam submissions are created once at enrolment, so composing the exam later leaves trainees who can never load it. Exam start writes two fields from two endpoints, so calling one leaves the other permanently unset.
+>
+> **The tell is an event handler that reads several records and writes a conclusion.** Every one of those reads is a dependency, and nothing in the language or the schema records that. The write sites drift apart one feature at a time.
+>
+> **Bolting a re-trigger onto the site that just bit you is a patch, not a fix.** Closing the re-grade path for certificates left three other inputs with the identical hole, and the inverse — revoking on a *loss* of eligibility — still has no handler at all. When the same conclusion is reachable from several mutations, the durable answer is to derive it on read, or to funnel every input through one place that re-evaluates.
+>
+> Sources: [[Live Exam Failure]], [[Certificate Eligibility Is a Snapshot]], [[Exam Submissions Never Created - Enroll Before Compose]].
+
 ## The backend owns business rules; the frontend renders the answer (2026-07-12)
 
 If a number or date encodes a **rule** — a compliance total, a validity window, a due date — it is computed **once, server-side**, and returned. The FE displays it and never recomputes it.

@@ -11,6 +11,26 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)
+
+> [!danger] `CourseService.update` compared chapter ids as two `Set`s, so reordering phases or chapters never counted as a change
+> `phasesChanged` gates the destructive reset that throws away a course's saved `courseSchedule` so bulk edit regenerates it from the course. It was computed as set equality (`size` equal + `every(has)` both ways). A reorder keeps the same set, so the reset never ran — and a course created from a template kept the template's cloned schedule in its old order forever.
+>
+> **When the thing being protected depends on order, the change check must compare the sequence, not the membership.** A schedule is a function of phase order and chapter order, so the check has to be an ordered comparison (flatten, then compare length + index-by-index). Membership checks are right only when order is meaningless downstream.
+>
+> Same family as [[Gotchas - Backend Schema & Data#`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)|the `$lookup` order loss]]: order is the whole meaning of a curriculum, and every layer that treats it as a bag drops it silently. Fixed by `d009258a` (pushed 2026-09-28, never run). Source: [[Course Phase Order]].
+
+## An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)
+
+> [!danger] `if (exam) { createInitialSubmission(...) }` — no exam document yet means no submission, ever, and nothing back-fills when the exam is composed later
+> Exam enrolments are keyed on the exam **schedule**, not the exam, so the cron creates them whether or not an exam exists (`course-enrollment-cron.service.ts:227`). It then looks the exam up afterwards and guards submission creation on it. Enrol before composing — the normal order, since the schedule exists from course setup and the exam is composed later — and the trainee gets an enrolment and no submission. `createInitialSubmission` had exactly two callers, the cron and manual enrolment; composing or approving an exam calls neither.
+>
+> **The trainee then looks perfectly enrolled everywhere an operator checks.** They appear in the invigilator's Enrolled Trainees list at 0%, the exam starts normally, and only `getExamData` fails — with `Exam submission not found`, permanently.
+>
+> **Worse, the failure is swallowed per trainee.** `startExam` builds each trainee's socket payload by calling `getExamData` inside a `try/catch` that only `console.error`s (`exam.service.ts:1211-1217`), so that trainee is simply never emitted `exam-started` while the exam runs fine for everyone else. A per-trainee data gap is indistinguishable from a healthy exam.
+>
+> **Diagnostic that settles it in one query:** `db.examsubmissions.countDocuments({ examId })`. Zero means this, not a permissions or socket problem. Source: [[Exam Submissions Never Created - Enroll Before Compose]].
+
 ## `cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)
 
 > [!danger] `refreshTokenInMinutes()` was named for minutes, its body returned **milliseconds**, and `cacheManager.set(key, val, { ttl })` wanted **seconds**. `30d` → `2_592_000_000` seconds ≈ 82 years. Every refresh token written to Redis was effectively immortal.

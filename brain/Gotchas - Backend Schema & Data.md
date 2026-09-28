@@ -9,6 +9,17 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)
+
+> [!danger] `localField: "phases.chapters"` returns the chapter documents in `_id` order, not in the order the phase stores them
+> MongoDB explicitly does not guarantee `$lookup` result ordering, and it never honours the *local* array's sequence. So an aggregation that unwinds an embedded array and looks its refs up hands back a correctly-sized array in the **wrong order**, silently. `buildCourseAggregation` did this for months: every course read — list, detail and bulk-edit alike — returned each phase's chapters in creation order rather than curriculum order.
+>
+> **This is invisible to types, to `tsc`, and to any test that checks membership rather than sequence.** The array has the right length and the right elements; only the order is wrong, and order is exactly what a curriculum means.
+>
+> **The fix is to stash the id array before the lookup and map back into it**: `$addFields` the stored ids to a scratch field, land the `$lookup` in a second scratch field, then `$map` over the stored ids pulling each document out by `$filter` + `$arrayElemAt`, with an outer `$filter` dropping ids that no longer resolve. An inclusion `$project` downstream removes both scratch fields for free.
+>
+> Mongoose `.populate()` on an array of refs has the same property — it is the same server-side lookup. Source: [[Course Phase Order]].
+
 ## A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)
 
 > [!danger] `[firstName, familyName].filter(Boolean).join(" ")` is `""` for a nameless user, and Mongoose fails `required: true` on an empty string

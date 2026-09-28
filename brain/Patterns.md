@@ -34,6 +34,7 @@ _How work gets done in the TAT repos — verification bias, spec-gap routing, ti
 
 _Where logic belongs — the backend owns business rules and the frontend renders them, one rule means one implementation, and confirm the far side exists before wiring a control to it._
 
+- [[Patterns - Architecture & Boundaries#Derived state computed at one event goes stale when its inputs change later (2026-09-22)|Derived state computed at one event goes stale when its inputs change later (2026-09-22)]]
 - [[Patterns - Architecture & Boundaries#The backend owns business rules; the frontend renders the answer (2026-07-12)|The backend owns business rules; the frontend renders the answer (2026-07-12)]]
 - [[Patterns - Architecture & Boundaries#A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)|A gate that re-derives "does this apply?" by its own rule is a fork with no call site to grep (2026-08-12)]]
 - [[Patterns - Architecture & Boundaries#A bootstrap escape hatch must not depend on the machinery it escapes (2026-08-12)|A bootstrap escape hatch must not depend on the machinery it escapes (2026-08-12)]]

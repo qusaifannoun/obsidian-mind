@@ -16,6 +16,7 @@ Split into domain notes on 2026-07-28, when the single file reached 96KB. Substa
 
 _Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation._
 
+- [[Gotchas - Backend Schema & Data#`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)|`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)]]
 - [[Gotchas - Backend Schema & Data#A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)|A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)]]
 - [[Gotchas - Backend Schema & Data#A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)|A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)]]
 - [[Gotchas - Backend Schema & Data#A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)|A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)]]
@@ -33,6 +34,8 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 _tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at_
 
+- [[Gotchas - Backend Services & Environment#A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)|A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)]]
+- [[Gotchas - Backend Services & Environment#An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)|An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)]]
 - [[Gotchas - Backend Services & Environment#`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)|`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)]]
 - [[Gotchas - Backend Services & Environment#The Redis cache silently falls back to in-process memory — and refresh tokens live in it (2026-09-20)|The Redis cache silently falls back to in-process memory — and refresh tokens live in it (2026-09-20)]]
 - [[Gotchas - Backend Services & Environment#`Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)|`Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)]]
