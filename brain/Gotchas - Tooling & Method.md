@@ -9,6 +9,10 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## Jira ticket text does not include attachments — the mockups and the real forms were there all along (2026-10-11)
+
+`node .claude/scripts/jira.mjs get <KEY>` requests a fixed field list **without `attachment`**, so a pull shows the story and acceptance criteria and nothing else. The TAT-314 Forms tickets carried **design mockups (TAT-481, TAT-484) and the approved Word forms plus a filled PDF (TAT-482, TAT-483)** — found only when asked "is the design similar to the one attached?", after a full build against the text. List them before building: `jira.mjs search "key in (…)" --fields summary,attachment --json`, then download by attachment id from `/rest/api/3/attachment/content/{id}`. [[TAT-482 + TAT-483 Enrollment Forms]].
+
 ## A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)
 
 > [!danger] `localhost:4200` was talking to `https://api.tat147.com` — production, not staging. Nothing in the UI says so.

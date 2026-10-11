@@ -100,6 +100,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
+- [[Gotchas - Frontend#The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)|The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend#A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)|A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)]]
 - [[Gotchas - Frontend#A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)|A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)]]
 - [[Gotchas - Frontend#A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)|A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)]]
@@ -118,6 +119,8 @@ _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-web
 
 _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
 
+- [[Gotchas - Frontend Data & API Contracts#`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)|`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)]]
+- [[Gotchas - Frontend Data & API Contracts#`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)|`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend Data & API Contracts#`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)|`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)]]
 - [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)|A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
 - [[Gotchas - Frontend Data & API Contracts#Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)|Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)]]
@@ -136,6 +139,7 @@ _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Qu
 
 _Toolchain and working-method traps — vault tooling, lint and IDE behaviour, and recurring reasoning failures._
 
+- [[Gotchas - Tooling & Method#Jira ticket text does not include attachments — the mockups and the real forms were there all along (2026-10-11)|Jira ticket text does not include attachments — the mockups and the real forms were there all along (2026-10-11)]]
 - [[Gotchas - Tooling & Method#A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)|A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)]]
 - [[Gotchas - Tooling & Method#A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)|A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)]]
 - [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)|A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]]

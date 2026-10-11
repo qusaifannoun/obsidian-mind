@@ -39,3 +39,4 @@ Needs a running [[tat-app-ws Backend]].
 ## Related
 
 - [[TAT Platform]] · [[TAT API & Auth Model]] · [[tat-app-ws Backend]]
+- [[Word Template Document Generation]] — `/proposal-test` spike: [[Proposal Generator - Word Template Spike]]

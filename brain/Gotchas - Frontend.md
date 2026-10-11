@@ -11,6 +11,10 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)
+
+`RHFComponents/RHFDateInput` wraps `react-datepicker` with month arrows only, and typed input does not take. Reaching 1990 from today means hundreds of clicks — the old course sign-up used it for date of birth, so the field was close to unusable. For dates far from today use `RHFTextInput type="date"` (native input; the year is typed). `"date"` was added to `RHFTextInput`'s `type` union for this. Separate trap: the date input's container is `h-full`, so as a grid item it stretches to the row's height — wrap it in a plain `div`. [[TAT-482 + TAT-483 Enrollment Forms]].
+
 ## A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)
 
 > [!danger] `const token = request.cookies.get('access_token')?.value; if (!token) redirect('/login')` — a 30-day-dead JWT is a **present cookie**. The gate passes, the user keeps navigating, and nothing in the UI says otherwise.
