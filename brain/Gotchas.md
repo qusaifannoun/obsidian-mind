@@ -100,6 +100,10 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
+- [[Gotchas - Frontend#The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)|The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)]]
+- [[Gotchas - Frontend#A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)|A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)]]
+- [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)|A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]]
+- [[Gotchas - Frontend#docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)|docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)]]
 - [[Gotchas - Frontend#Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)|Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)]]
 - [[Gotchas - Frontend#The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)|The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend#A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)|A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)]]

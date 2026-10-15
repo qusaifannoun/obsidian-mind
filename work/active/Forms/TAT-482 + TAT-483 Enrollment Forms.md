@@ -31,7 +31,7 @@ graph LR
 - `POST /enrollment/enroll` now takes **only `{ courseId, licenseIds }`** and creates a `draft` enrollment. Calling it again for the same course returns the existing draft, so a trainee resumes by signing up again.
 - `GET /enrollment/draft/:id/forms`, `PATCH …/forms/:formId/draft`, `POST …/forms/:formId/submit` (trainee only).
 - The Planning Sheet cannot be submitted before the Application. Submitting copies the form once per selected license (AC-14/15, AC-21/22).
-- Required `data` keys — Application: `name, idNumber, dateOfBirth, placeOfBirth, employer, tel, email, signatureImage, date`. Planning Sheet: `studentName, studentId, category, amlNumber, signatureImage, date`, plus arrays `sameCategoryRatings, otherCategoryRatings, experience` (item shape not defined by the backend).
+- `data` keys — Application: `name, idNumber, dateOfBirth, placeOfBirth, employer, tel, email, signatureImage, date`. Planning Sheet: `studentName, studentId, category, amlNumber, signatureImage, date`, plus arrays `sameCategoryRatings, otherCategoryRatings, experience` (item shape not defined by the backend). **Only `signatureImage` is required on submit since 2026-10-15** — the other required-field checks were removed at my request: [[Forms - No Field Validation & Export to Word]].
 - The backend fills and locks: static header, course name, category, aircraft type, and "Prepared by" (course creator's name and signature, course creation date).
 
 > [!warning] Breaking change
@@ -80,6 +80,8 @@ Hamza's seed uses placeholders such as `TAT-APP-CARC-001`. The forms say:
 - [ ] Run the full flow on staging (trainee → both forms → TM approval) once approved to write test data
 
 ## Related
+
+- [[Forms - No Field Validation & Export to Word]] — validation removed and Export to Word for both forms
 
 - [[TAT-481 Super Admin Forms Browser]] · [[TAT-484 Assigned Forms Inbox]] — the same `Form` records, seen by the Super Admin and the five staff roles
 - [[Decision - Word Templates for Generated Documents]] · [[Proposal Generator - Word Template Spike]] — the docxtemplater approach the backend's templates are meant for

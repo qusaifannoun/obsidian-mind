@@ -11,6 +11,28 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)
+
+> [!danger] On `staging.tat147.com` every file in `apps/tat-ws/public/` 404s — Word templates, `proposal-template.docx`, `pdf.worker.min.js` — while it works on `next dev` and on a local `next start` that has the folder. Only `/favicon.ico` answers (the app serves it as a route). Where the deploy drops `public/` is unknown (the repo's only pipeline covers `dev`).
+> Anything the browser fetches must be **imported** so webpack emits it under `/_next/static/media/` (add an `asset/resource` rule for new file types, plus a `declare module` in `apps/tat-ws/index.d.ts`). Verify with a production build started **without** `public/`. [[Forms - No Field Validation & Export to Word]].
+
+## A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)
+
+> [!warning] `grid-cols-[minmax(8rem,1fr)_2fr_…]` looks bounded, but a bare `2fr` track is `minmax(auto, 2fr)`, and `auto` is the content's min-content width. A training order number such as `TAT/MTO/EASA/Theoretical/JOR/01/10/26` has no break opportunity, so the column — and the form — grew past the page.
+> Fix it in the shared cell class, not per view: `[overflow-wrap:anywhere]` makes min-content tiny, so every `fr` track in every form stays within the container. [[Forms - No Field Validation & Export to Word]].
+
+## A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)
+
+> [!warning] A signature shown with `<img>` is cached from a no-CORS request. A later `fetch(sameUrl)` (to embed it in a Word file) reuses that cached response, which lacks `Access-Control-Allow-Origin`, and fails with *Failed to fetch* — although the dev S3 bucket does allow CORS. `fetch(url, { cache: 'no-store' })` returned 200. Any code that downloads an image already on screen needs it. [[Forms - No Field Validation & Export to Word]].
+
+## docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)
+
+> [!warning] Three traps hit while turning the client's Word forms into templates ([[Word Template Document Generation]]):
+> - **Loop tags must sit alone in their paragraphs.** `{#pages}` inside the title and `{/pages}` inside the footer made each repetition glue the next page's title onto the previous footer line. Separate paragraphs are dropped cleanly with `paragraphLoop: true`.
+> - **A row loop needs its tags in different cells.** In a single-cell row, `{#list}{.}{/list}` loops *inline* ("A319A321"). Use the explicit `{-w:tr list}…{/list}` to repeat the row.
+> - **Repeated content repeats drawing ids.** A loop that copies an image (a logo, a signature) duplicates `<wp:docPr id>`, which Word may "repair". Renumber every `docPr` id after rendering.
+> Also: empty cells in some client files are self-closing `<w:p/>` — an edit tool appending a run must open the paragraph first. [[Forms - No Field Validation & Export to Word]].
+
 ## Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)
 
 > [!warning] `roleCodesOf(user)` returned `[activeRole, role.code, ...secondaryRoles.map(r => r.code)]`, and the sidebar, `proxy.ts` and every `useUserRole()` check read it. The backend's `jwt-at-strategy.ts` overwrites `req.user.role` with the token's single role. An Instructor with a secondary Training Manager role therefore saw TM pages and buttons whose requests were authorized as an Instructor.

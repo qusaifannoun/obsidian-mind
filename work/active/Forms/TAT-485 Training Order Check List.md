@@ -24,7 +24,7 @@ AC-07/AC-08 ask for **one Yes/No per section** ("Before Commencing Training Form
 
 **[[tat-app-ws Backend]]** — pushed to `origin/dev` (seen there 2026-10-15; pushed outside this session):
 - `19ac6211` — consolidation only: the Classroom Assessment's map-of-answers validation moved into a `mergeAnswers` helper in `course-form-definitions.ts`.
-- `9fe0036e` — the checklist stores `formsAvailable: Record<key, "yes" | "no">` instead of `beforeCommencingFormsAttached` / `afterTrainingFormsAttached`. Keys are the exported `CHECKLIST_FORM_KEYS`: `applicationForTraining, trainingOrder, planningSheet, classroomAssessment, authorityApproval, attendanceSheet, feedbackQuestionnaire`. Unknown keys and non-yes/no values → 400. Submit requires all seven (`missing formsAvailable.<key>`); drafts merge with earlier answers.
+- `9fe0036e` — the checklist stores `formsAvailable: Record<key, "yes" | "no">` instead of `beforeCommencingFormsAttached` / `afterTrainingFormsAttached`. Keys are the exported `CHECKLIST_FORM_KEYS`: `applicationForTraining, trainingOrder, planningSheet, classroomAssessment, authorityApproval, attendanceSheet, feedbackQuestionnaire`. Unknown keys and non-yes/no values → 400; drafts merge with earlier answers. This commit also required all seven answers on submit — **removed 2026-10-15** with every other field check on the Forms tickets ([[Forms - No Field Validation & Export to Word]]).
 
 **[[tat-ws]]** — `178f129`, pushed to `origin/dev` (seen there 2026-10-15; pushed outside this session):
 - `TrainingOrderChecklistView`: one "Available" header spanning Yes/No, Form Name and Form Number spanning two header rows; only the first section carries the header row, as on paper.
@@ -53,11 +53,12 @@ AC-07/AC-08 ask for **one Yes/No per section** ("Before Commencing Training Form
 - [x] Synced to every branch 2026-10-15 at my call, backend first: tat-app-ws `prepod` ← merge `7fbdb77a`, `master` → `9fe0036e`; tat-ws `prepod` + `main` → `3a60c3c`. **Production now carries this unverified** (whether pipelines ran: unknown — `gh` gets 404 on Actions)
 - [ ] After staging deploys, browser-run the Admin draft → submit → TM approve path and check the header and in-cell radios
 - [ ] Check staging for checklists answered the old way
-- [ ] Get AC-07 / AC-08 / AC-10 reworded to per-form "Available Yes/No" before QA tests them
+- [ ] Get AC-07 / AC-08 / AC-10 reworded to per-form "Available Yes/No" — and to optional answers, since nothing is required on submit any more — before QA tests them
 
 ## Related
 
 - [[TAT-484 Assigned Forms Inbox]] — where the Admin and Training Manager open the checklist
+- [[Forms - No Field Validation & Export to Word]] — validation removed, Export to Word, the paper-style signature/stamp block
 - [[Gotchas - Forms & Approval]] — approval and post-approval locking traps
 - [[Patterns - Method & Conventions]] — spec-gap routing: the paper form beat the ACs, and the ticket now lags the build
 - [[tat-ws]] · [[tat-app-ws Backend]] · [[TAT Platform]]

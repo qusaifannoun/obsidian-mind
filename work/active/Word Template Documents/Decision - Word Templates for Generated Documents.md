@@ -29,10 +29,8 @@ Why: the output looks exactly like the template, non-developers can edit the tem
 ## Consequences
 
 - The form schema / backend DTO is the contract with the template: placeholder names must match field names.
-- **Not yet decided (as of 2026-10-01):**
-  - where rendering runs in production. The spike renders in the browser; the proposed production shape renders in [[tat-app-ws Backend]];
-  - where templates are stored;
-  - how a `.docx` gets past the upload endpoint's PDF conversion.
+- **Settled for the TAT-314 forms (2026-10-15):** rendering runs **in the browser** (can view = can export, no new endpoint), templates ship **inside the build** (`apps/tat-ws/src/assets/templates/forms/`, imported so webpack serves them from `/_next/static/media/` — `public/` is not served by the live servers), and signatures/stamps go in through an in-house image helper rather than a paid or CVE-carrying module — see [[Forms - No Field Validation & Export to Word]].
+- **Still open (as of 2026-10-15):** template storage outside a deploy, and how a `.docx` gets past the upload endpoint's PDF conversion — both only matter if admins ever upload templates.
 - Adds `docxtemplater` + `pizzip` to [[tat-ws]] (and to tat-app-ws if rendering moves there).
 
 ## Related

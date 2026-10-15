@@ -36,6 +36,10 @@ doc.render(values);
 const blob = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 ```
 
+## Images (signatures, stamps)
+
+`renderDocxTemplate` in `apps/tat-ws/src/utilities/docxTemplate.ts` takes an `images` map. The template carries an ordinary `{tag}`; the renderer fills it with a marker, then swaps the marker for an inline `<w:drawing>` inside the same run (a run may hold text and drawings), adding the media file, relationship and content type, and renumbers every `docPr` id. No image module — the free one pulls a deprecated, CVE-flagged `xmldom`. Fetch images with `cache: 'no-store'` — see [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]].
+
 ## Template authoring rules
 
 - **Plain `{camelCase}` placeholders** typed in the document text. Names must match the form schema / DTO field names exactly — the schema *is* the template contract.
@@ -43,6 +47,7 @@ const blob = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.op
 - **Conditionals:** `{#hasDiscount}…{/hasDiscount}` shows the block only when truthy.
 - **Headers and footers work** — placeholders there are filled like the body.
 - **Computed values are computed before render** (totals, formatted money and dates) — the template only prints.
+- **A row in a one-cell table** repeats only with `{-w:tr items}…{/items}`; and loop tags must sit in their own paragraphs — [[Gotchas - Frontend#docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)]].
 - **Type each placeholder in one go.** Editing inside an existing `{tag}` can make Word split it across runs; docxtemplater copes with most splits and throws a clear error otherwise.
 
 > [!warning] Not Word fields
@@ -52,7 +57,8 @@ const blob = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.op
 
 | Option | Status |
 |---|---|
-| `apps/tat-ws/public/templates/*.docx`, fetched by URL | **What the spike does** — simplest, but a template change needs a deploy |
+| `apps/tat-ws/public/templates/*.docx`, fetched by URL | **Does not work live** — the deployed tat-ws servers serve nothing from `public/` (2026-10-15); every export 404'd |
+| `apps/tat-ws/src/assets/templates/**/*.docx`, **imported** (webpack `asset/resource` → `/_next/static/media/`) | **In use** — the spike and the six TAT-314 form templates since `97fb5e90` (2026-10-15, [[Forms - No Field Validation & Export to Word]]). A template change needs a deploy |
 | Backend streams it — `api.get(...).blob()`, the same idiom as `useViewCompanyDocument` → `GET /company-documents/:id/view` | Proposed — bucket stays private, no S3 CORS |
 | Pre-signed S3 URL fetched by the browser | Possible — needs an S3 **CORS rule** for the frontend origins |
 | Backend reads from S3, renders, returns the file (frontend sends data only) | **Proposed production shape** — values validated server-side, generated file can be saved back to S3 as a record |
