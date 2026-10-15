@@ -87,6 +87,7 @@ graph LR
 ## Related
 
 - [[TAT-481 Super Admin Forms Browser]] — same epic; the SA catalogue reads the same template and form data
+- [[TAT-485 Training Order Check List]] — same epic; the Admin checklist and its TM approval run through this inbox
 - [[Gotchas - Forms & Approval]] — post-approval locking and approval-permission traps hit before, directly relevant to AC-16→18
 - [[Proposal Generator - Word Template Spike]] · [[Decision - Word Templates for Generated Documents]] · [[Word Template Document Generation]] — the uncommitted Word-template work in [[tat-ws]], part of this forms effort (per me, 2026-10-08)
 - [[tat-ws]] · [[tat-app-ws Backend]] · [[TAT Platform]]
