@@ -9,6 +9,10 @@ tags:
 
 Architectural or workflow decisions worth recalling. Link to the full [[Decision Record]] when one exists.
 
+## 2026-10-15 — Staff Management gates by the active role only
+
+[[tat-prereq]] used to gate its sidebar, route guard and permission checks on the **union** of every role a user held, while the backend authorizes each request as the single role in the token. Adding a tat-ws-style role switcher forced the choice. **Qusai's call: gate by the active role only** (`activeRole ?? role.code`), so the UI shows exactly what the token can do. Rejected: keeping the union and letting the switcher change only the token, which leaves the UI offering controls the backend will refuse. **What is accepted:** multi-role users must switch to reach their other roles' pages. **The trap for whoever revisits it:** re-adding secondary roles to `roleCodesOf` silently restores the old disagreement; the switcher's list (`switchableRolesOf`) is the only place secondaries belong. Work note: [[Staff Management Role Switcher]].
+
 ## 2026-10-01 — Editable Word output comes from .docx templates, not HTML
 
 New TAT forms whose output is an **editable Word document** (proposals first) fill a `.docx` template with `{placeholders}` using docxtemplater; the form sends values only. HTML → server → Word was rejected because the conversion always loses layout and every wording change is a code change. Word `DOCPROPERTY` fields were also rejected: a generated file shows stale cached values until someone presses F9. **Scope:** locked compliance PDFs (Form 031/032, Form 32/285) stay on the Puppeteer pipeline. **Open (as of 2026-10-01):** where rendering runs in production, and template storage. **The trap for whoever builds the storage:** `POST /file/upload-file` converts office uploads to PDF, so a template uploaded through it is destroyed. Full record: [[Decision - Word Templates for Generated Documents]], approach in [[Word Template Document Generation]].

@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)
+
+> [!warning] `roleCodesOf(user)` returned `[activeRole, role.code, ...secondaryRoles.map(r => r.code)]`, and the sidebar, `proxy.ts` and every `useUserRole()` check read it. The backend's `jwt-at-strategy.ts` overwrites `req.user.role` with the token's single role. An Instructor with a secondary Training Manager role therefore saw TM pages and buttons whose requests were authorized as an Instructor.
+> The UI must gate on the role the token carries: `activeRole ?? role.code`. Secondary roles belong only in the role switcher's list. Note that `/auth/switch-role` accepts **any** role the user holds, including Trainee, so a subsystem frontend must filter that list to the roles it serves. [[Staff Management Role Switcher]].
+
 ## The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)
 
 `RHFComponents/RHFDateInput` wraps `react-datepicker` with month arrows only, and typed input does not take. Reaching 1990 from today means hundreds of clicks — the old course sign-up used it for date of birth, so the field was close to unusable. For dates far from today use `RHFTextInput type="date"` (native input; the year is typed). `"date"` was added to `RHFTextInput`'s `type` union for this. Separate trap: the date input's container is `h-full`, so as a grid item it stretches to the row's height — wrap it in a plain `div`. [[TAT-482 + TAT-483 Enrollment Forms]].

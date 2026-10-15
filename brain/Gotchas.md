@@ -100,6 +100,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
+- [[Gotchas - Frontend#Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)|Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)]]
 - [[Gotchas - Frontend#The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)|The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend#A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)|A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)]]
 - [[Gotchas - Frontend#A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)|A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)]]
