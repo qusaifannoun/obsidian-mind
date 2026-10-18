@@ -124,6 +124,7 @@ _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-web
 
 _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
 
+- [[Gotchas - Frontend Data & API Contracts#A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)|A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)]]
 - [[Gotchas - Frontend Data & API Contracts#`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)|`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend Data & API Contracts#`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)|`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend Data & API Contracts#`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)|`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)]]

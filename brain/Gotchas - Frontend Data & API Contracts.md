@@ -22,6 +22,13 @@ Split out of [[Gotchas - Frontend]] on 2026-09-15, when it reached 29KB. Entries
 >
 > [[tat-ws]] and `exam-portal` had it right all along, which is why only two of the four apps were broken this way. The contract is now correct in [[TAT API & Auth Model]] — it had documented the body form, which is what both apps were built against. See [[Expired Sessions Undetected Across All TAT Frontends]].
 
+## A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)
+
+> [!danger] In the [[tat-app-ws Backend]] forms workflow, **reading** a form (`GET /forms/inbox/:id`) is gated on being in `assignedUserIds`, and every hand-off **replaces** that list: reject → the Quality Managers, instructor submit → the next instructor, last submit → the Training Managers. So the user who acted loses read access the moment the mutation succeeds.
+> A success handler that invalidates the detail query (`['inboxForm', id]`) makes the still-mounted page refetch as an unassigned user, gets **Forbidden**, and replaces the success toast with an error screen. The action looks like it failed when it actually worked.
+>
+> **Rule:** after a mutation that moves a record out of the caller's hands, invalidate the **list** and navigate away. Don't refetch the record. Ask "can I still read this after the call?" before choosing what to invalidate. Context and fix: [[Classroom Assessment Reject - Error Screen After Forwarding to QM]].
+
 ## `isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)
 
 > [!danger] In React Query v5, `isLoading` is `isPending && isFetching`. A query that has no data yet but **is not fetching** reports `isLoading: false` — and a list written as `isLoading ? <Skeleton/> : rows.length ? <List/> : <Empty/>` renders **"No results"** for a request that has not finished.

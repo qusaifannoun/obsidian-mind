@@ -50,7 +50,7 @@ graph LR
 - `GET /forms/inbox/:id` → the full form, read-only.
 - `POST /forms/inbox/:id/approve` → **Training Manager only**, Planning Sheet only, status `submitted` only. Body `{ signatureImage, date?, notes? }`. Approves every license version and moves the enrollment from `draft` to `pending`; the TM's profile stamp is added automatically.
 - **Who is "assigned":** every user holding one of the five roles is assigned **every** submitted form (`resolveFormsAssigneeIds`), including Application forms that need no action from them. This answers the "who assigns forms" gap, but it is not "forms that require an action from that user" (AC-06).
-- Answers to earlier gaps, as built: only the Training Manager approves, and only the Planning Sheet; there is no rejection state.
+- Answers to earlier gaps, as built on 2026-10-10: only the Training Manager approves, and only the Planning Sheet; there is no rejection state. **Superseded as of 2026-10-18:** the course-forms service now has a Training Manager **Reject and Forward to QM** for the Classroom Assessment (`QUALITY_MANAGER_REVIEW` stage). When it landed was not checked. See [[Classroom Assessment Reject - Error Screen After Forwarding to QM]].
 
 ## Frontend — rebuilt on the real API 2026-10-11 ([[tat-ws]] `015a66c`, pushed to `origin/dev` + `origin/prepod` 2026-10-11)
 
@@ -72,7 +72,7 @@ graph LR
 - **Who assigns forms, and how.** *Answered by the backend:* everyone in the five roles gets every submitted form. Confirm with the reporter that this is intended.
 - **Submit with no approval step.** AC-15 sets "Submitted" only *when* another step is required. What status does a form get when none is?
 - **Submitted, from each side.** Can the submitter still edit or withdraw? Does the approver see the same form in *their* inbox, and what status is it in there?
-- **Rejection.** There is no Rejected or returned state. What happens when an approver turns a form down?
+- **Rejection.** There is no Rejected or returned state. What happens when an approver turns a form down? *(Partly answered 2026-10-18: a Classroom Assessment escalates to the Quality Manager. Other forms still have no reject.)*
 - **Approver identity.** AC-16 says "an authorized user". Which role approves which form?
 - **"Admin" role.** Listed separately from Super Admin. Confirm it maps to a real role in the role enum.
 - **"Read-only by default" (AC-18).** "By default" suggests some override exists. Who has it?
@@ -88,6 +88,7 @@ graph LR
 
 - [[TAT-481 Super Admin Forms Browser]] — same epic; the SA catalogue reads the same template and form data
 - [[TAT-485 Training Order Check List]] — same epic; the Admin checklist and its TM approval run through this inbox
+- [[Classroom Assessment Reject - Error Screen After Forwarding to QM]] — the detail page refetched a form the TM had just handed to QM (2026-10-18)
 - [[Gotchas - Forms & Approval]] — post-approval locking and approval-permission traps hit before, directly relevant to AC-16→18
 - [[Proposal Generator - Word Template Spike]] · [[Decision - Word Templates for Generated Documents]] · [[Word Template Document Generation]] — the uncommitted Word-template work in [[tat-ws]], part of this forms effort (per me, 2026-10-08)
 - [[tat-ws]] · [[tat-app-ws Backend]] · [[TAT Platform]]
