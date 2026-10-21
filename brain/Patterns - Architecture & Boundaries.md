@@ -110,6 +110,8 @@ Three duplicated-rule bugs in one week, all with the same shape: **each copy is 
 
 **Rule:** if two places need the same decision, extract it — a shared util (`staff-tor-activation.util.ts` → `resolveTorStatusFromGates`), and both call it. Not "keep them in sync"; there is no in-sync, only not-yet-drifted.
 
+> **2026-10-21, again:** the "find this user's saved signature" chain existed in Forms and in the History Form. The Super Admin was added to one copy, so a Super Admin's History Form PDF printed a blank signature. Merged into `resolveProfileSignatureKey`, see [[Super Admin Profile Signature & Stamp]].
+
 **Smell to grep for:** the same set of boolean gates `&&`-ed together in more than one file. And when a read path and a write path both decide the same thing, the **writer is the source of truth** — reads should report the persisted value, not recompute it.
 
 ## A guard that fails open on absent data is disabled by the data, silently (2026-08-01)

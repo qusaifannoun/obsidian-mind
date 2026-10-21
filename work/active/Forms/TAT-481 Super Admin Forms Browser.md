@@ -83,7 +83,7 @@ The 2026-10-08 build used guessed endpoints and an aircraft level; both were rep
 - `approvalDetails.approvedBy` is a bare user id, so no screen can show the approver's name.
 - Grouping uses the course **start date**; a same-named course with no start date gets no date, so two such runs look identical.
 - The Word templates in the seed are placeholders, and so are the reference IDs — the footer shows `TAT-APP-EASA-001` where the form says `TAT Form 004 09.20 ISSUE/REV. 01/01` (real numbers in [[TAT-482 + TAT-483 Enrollment Forms]]).
-- **"Prepared by – Signature" is always blank for a course a Super Admin created:** `buildPreparedByFields` only reads the creator's TM / EM / QM / AM `signatureImage`. Seen on staging 2026-10-11 ("new course1", created by a Super Admin).
+- ~~"Prepared by – Signature" blank for a course a Super Admin created~~ **Fixed 2026-10-12** (`68632d3f`): Super Admin profiles now carry a required signature and stamp, and "Prepared by" falls back to that signature. Not sent to Hamza; it was fixed on our side. See [[Super Admin Profile Signature & Stamp]].
 
 ## Spec gaps (raise with the reporter)
 

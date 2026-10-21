@@ -19,7 +19,7 @@ Across all signature sections (Assessment instructor/TM, Form 32, Form 285), add
 
 ## Implementation
 
-- `useMySignature()` (in `api/Profile/useProfile.ts`) resolves the key via `resolveProfileSignature(user)` — first non-null across the manager role sub-objects (`trainingManager` / `qualityManager` / `examinationManager` / `accountableManager`).
+- `useMySignature()` (in `api/Profile/useProfile.ts`) resolves the key via `resolveProfileSignature(user)` — first non-null across the manager role sub-objects (`trainingManager` / `qualityManager` / `examinationManager` / `accountableManager`, plus `superAdmin` since 2026-10-21, `3108cc4`; see [[Super Admin Profile Signature & Stamp]]).
 - The shared `SignatureInput` shows the "Sign" button when a saved signature exists **and** the field is empty; `null` → normal draw/upload input. Lives in the one shared component, so it covers **every** signature section at once.
 
 Committed `dev` `c86dd5e`. `tsc` clean (the 2 eslint `<img>` warnings are pre-existing, not mine).
