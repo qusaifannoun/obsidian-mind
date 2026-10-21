@@ -16,7 +16,6 @@ Consolidated output of the full [[TAT-409 Ticket Groups & Inspection Map|group-b
 
 > [!tip] Shareable versions (kept in sync with this note)
 > - **`TAT-409 Bug & Gap List.docx`** — Word document. Best for sharing in **Microsoft Teams / email** (renders reliably, clickable Jira links, no encoding issues).
-> - **`TAT-409 Bug & Gap List.html`** — interactive dashboard (severity/platform filters + search). Best opened in a **browser** or as a claude.ai artifact. Rows are static so they still show where scripts are blocked.
 > - This markdown note is the canonical text source.
 
 **Platforms:** `tat-app-ws` = NestJS backend · `tat-prereq` = Staff Management FE · `tat-ws` = admin/enrollment FE · `tat-portal` = student storefront.
