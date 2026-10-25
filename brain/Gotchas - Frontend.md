@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)
+
+> [!warning] The Dashboard's new Edit redirect went to `http://localhost:4200/undefined/sso?code=…` although `NEXT_PUBLIC_STAFF_MANAGEMENT_URL` was in `tat-ws/.env`.
+> Next.js reads `.env` once, when the server starts, and inlines every `NEXT_PUBLIC_*` value into the client bundle. The 4200 server had started at 14:59:11; the line was added at 15:00:45. Hot reload doesn't pick up a new variable — **stop and restart the server, then hard-refresh.** The same applies to every deployment: the value is baked in at build time, so it must be set before the build. A missing value shows up as the literal string `undefined` in a URL, not as an error. [[TAT-492 + TAT-493 Staff Editing Moves to Staff Management]].
+
 ## The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)
 
 > [!danger] On `staging.tat147.com` every file in `apps/tat-ws/public/` 404s — Word templates, `proposal-template.docx`, `pdf.worker.min.js` — while it works on `next dev` and on a local `next start` that has the folder. Only `/favicon.ico` answers (the app serves it as a route). Where the deploy drops `public/` is unknown (the repo's only pipeline covers `dev`).

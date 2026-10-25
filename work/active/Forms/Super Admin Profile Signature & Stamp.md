@@ -25,6 +25,10 @@ A Super Admin profile now holds its own `superAdmin.signatureImage` and `superAd
 - [[tat-prereq]] `3108cc4` on `prepod`, picked onto `dev`/`main` as `9194cc9`; all three pushed 2026-10-21: `superAdmin` added to `User` and to `resolveProfileSignature`, so the [[Profile Signature Sign Button]] fills the field for a Super Admin.
 - Not changed, on purpose: Form 285 reads only the Accountable Manager signature, the TOR certificate only the Quality Manager signature, and assessment approval stores the signature sent in the request.
 
+**2026-10-25. Generalised by TAT-490**
+- The SA-only signature rule is now one rule for eight roles in [[TAT-490 Profile Signature for Every Signing Role]]: backend `updateProfile` checks every held signature role, and tat-ws's SA-only signature refine was replaced by the shared `requireProfileSignatures`. The SA **stamp** rule is unchanged.
+- tat-ws Add User's schema had no `superAdmin` object, so zod stripped the SA signature and stamp on create; fixed in [[tat-ws]] `77e4ef2a`.
+
 ## Still open
 
 - **Nothing here has been run.** Only `tsc` and eslint, both clean. To check: approve a History Form as a Super Admin who has a saved signature and download the PDF; press "Sign" on any tat-prereq signature field as that Super Admin; create a course as a Super Admin and open its Planning Sheet.
@@ -38,5 +42,6 @@ A Super Admin profile now holds its own `superAdmin.signatureImage` and `superAd
 - [[TAT-482 + TAT-483 Enrollment Forms]] — the Planning Sheet's "Prepared by" block
 - [[Export History Form - TAT Form 031 PDF]] — the PDF whose approver signature this fills
 - [[Profile Signature Sign Button]] — the tat-prereq Sign button
+- [[TAT-490 Profile Signature for Every Signing Role]] — the same rule for every signing role
 - [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]] — the duplicated resolver is another case
 - [[tat-app-ws Backend]] · [[tat-ws]] · [[tat-prereq]] · [[TAT Platform]]

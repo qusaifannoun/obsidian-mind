@@ -26,7 +26,10 @@ Committed `dev` `c86dd5e`. `tsc` clean (the 2 eslint `<img>` warnings are pre-ex
 
 ## Limitation
 
-> [!warning] Instructors have no role signature
+> [!info] Update 2026-10-25 — instructors now have a profile signature
+> [[TAT-490 Profile Signature for Every Signing Role|TAT-490]] added a required `instructor.signatureImage` (plus Admin and Trainee). **`resolveProfileSignature` still doesn't read it**, so instructors still don't get the button — closing that is now a one-line resolver change, not a backend feature (inferred, not done). Edit Staff passes `offerSavedSignature={false}`, so the button never appears on someone else's profile.
+
+> [!warning] Instructors have no role signature (as of 2026-07-16)
 > Only the **manager roles** carry a `signatureImage`. **Instructors do not** — so the most common signer (an instructor signing an assessment) won't get the button; they still draw/upload. Covering instructors would mean building a **real per-user profile signature** (upload UI + storage + `profiles/me` exposure) — the fuller option that was deferred.
 
 Not browser/live-verified (assumes those keys are populated and `fileViewUrl` renders them).
@@ -35,4 +38,5 @@ Not browser/live-verified (assumes those keys are populated and `fileViewUrl` re
 
 - [[TAT-423 Assessment Report Rubric]] — assessment signatures (a primary consumer)
 - [[Auto-Populate Instructor Name in Forms]] — sibling "prefill from profile" convenience shipped the same day
+- [[TAT-490 Profile Signature for Every Signing Role]] — gave instructors the profile signature this note lacked
 - [[tat-prereq]]

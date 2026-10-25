@@ -9,6 +9,14 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)
+
+> [!danger] tat-prereq's `withRoleData` (`api/Staff/fetchers.ts`) sent `admin: {}` for a secondary Admin and `trainee: {}` for a secondary Trainee on every staff save.
+> The backend needs *some* object for each secondary role (`roleDataMapping` in `user.service.ts` throws `requiredDataMissing` otherwise), and `updateProfile` writes the request with `$set: updateData` — **a role object in the request replaces the stored one whole.** So the placeholder that satisfies the check also erases that role's data. Harmless while `Admin` was an empty class; once [[TAT-490 Profile Signature for Every Signing Role|TAT-490]] gave Admin a required signature, every save would have erased it and then failed the new rule. Admin now sends its signature; **`trainee: {}` is still sent**, so a staff member who is also a Trainee loses their trainee data (passport, documents, signature) on any tat-prereq save, and now gets a 400.
+> **Rule: never send a role object you didn't load.** Either send the full stored object back, or omit it and let the backend's `dto.x ?? user.x` keep the stored one.
+>
+> **Related, suspected (unverified):** the same `updateProfile` sets `secondaryRoles: secondaryRolesIds` unconditionally, and that list is empty when the request has no `secondaryRoles`. tat-prereq's My Profile always submits with `secondaryRoles: undefined`, so a self-save there may wipe the user's secondary roles. Not reproduced. Cousin of [[Gotchas - Frontend#A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)|the hidden-section wipe]].
+
 ## `instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)
 
 > [!danger] The same unmigrated field now gates **which Form 32s an instructor sees** *and* **who can be assigned as an assessor**. Its schema default is `NONE`, and its backfill has still never run.

@@ -104,7 +104,7 @@ NOW eligible to teach / examine — TAT-424 applies from here on
 | Page | Who | Purpose |
 |------|-----|---------|
 | **Manage Staff** | Super Admin only | Table of all staff (name/email/role/status/edit), search, role filter, active count, add/edit staff `TAT-431` |
-| **Staff Profile Management** | Super Admin | Profile + roles + contacts + status + TORs at bottom; **Deactivate Staff** (continue vs suspend qualification tracking; blocked if active assignments exist) `TAT-432` |
+| **Staff Profile Management** | Super Admin; Admin can open Edit Staff since 2026-10-25 ([[TAT-492 + TAT-493 Staff Editing Moves to Staff Management|TAT-493]]) | Profile + roles + contacts + status + TORs at bottom; **Deactivate Staff** (continue vs suspend qualification tracking; blocked if active assignments exist) `TAT-432` |
 | **Staff TOR Matrix** | Admin/SA/QM/TM/Exam Mgr | Centralized matrix of all staff TOR statuses; expandable cards; filter by aircraft; live indicators `TAT-433` |
 | **Pending TORs** | SA/TM/QM | Staff with ≥1 pending-approval form/field; drill into TOR Details; highlight rejected/waiting/expired/missing `TAT-435` |
 

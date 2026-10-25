@@ -65,6 +65,7 @@ _tat-app-ws boot-time seeding and notification plumbing traps — destructive re
 
 _TOR activation, sit-in eligibility, staff profile and qualification traps in the staff-management subsystem._
 
+- [[Gotchas - TOR & Staff Management#A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)|A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)]]
 - [[Gotchas - TOR & Staff Management#`instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)|`instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)]]
 - [[Gotchas - TOR & Staff Management#Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)|Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)]]
 - [[Gotchas - TOR & Staff Management#A THIRD copy of the TOR activation rule survived the 2026-07-12 consolidation — it makes the certificate banner permanent (2026-08-12)|A THIRD copy of the TOR activation rule survived the 2026-07-12 consolidation — it makes the certificate banner permanent (2026-08-12)]]
@@ -100,6 +101,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
+- [[Gotchas - Frontend#A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)|A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)]]
 - [[Gotchas - Frontend#The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)|The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)]]
 - [[Gotchas - Frontend#A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)|A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)]]
 - [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)|A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]]
