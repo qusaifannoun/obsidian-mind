@@ -11,6 +11,12 @@ How work gets done in the TAT repos — verification bias, spec-gap routing, tic
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## Sync branches by merging `dev`, never by cherry-picking — one change, one hash (Qusai, 2026-10-27)
+
+> [!warning] Commit once on `dev`, then bring `prepod` and `main`/`master` up to date by **merging `dev` into them** (`Merge branch 'dev'`, `Merge branch 'dev' into prepod`) and pushing. Never copy a change onto another branch with `git cherry-pick`.
+> Cherry-picking gave every change a different hash on each branch. By 2026-10-27 `dev`, `prepod` and `main` held the same work under three sets of hashes in tat-ws, tat-portal and tat-prereq. When Qusai asked for one straight line, the only way to get it from that state was force-pushing production branches, and he stopped it: **other people work on these repos, tat-app-ws especially**, so shared history is never rewritten.
+> tat-app-ws's `master` and `prepod` also carry their own deploy-workflow commits (`.github/workflows/deploy.prod.yml`, `deploypreprod.yml`), so those branches can never be identical to `dev` — merging is the only sync that keeps them. Merging is already the team's idiom there. See [[TAT-490 Profile Signature for Every Signing Role]] and [[TAT-492 + TAT-493 Staff Editing Moves to Staff Management]] for the cherry-picked syncs this replaces.
+
 ## A screen that cannot fail is a screen that cannot be debugged (2026-09-10)
 
 Three times in one week, on three independent surfaces, a server-side failure rendered as *success* or *no results*:
