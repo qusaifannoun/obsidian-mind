@@ -11,6 +11,18 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)
+
+> [!warning] TOR expiry (`2 * 365.25` days), training due date (730.5 days), the training refresher (−30 days) and the aircraft refresher (`years * 365.25` days) were all fixed millisecond spans. From 12 Aug 2026 to 12 Aug 2028 is 731 days (2028 is a leap year), so the expiry landed at `00:08` instead of `12:08`; a due date at UTC midnight landed on the previous day.
+> QA read it as a timezone bug (TAT-522); it wasn't. Use calendar arithmetic — `calendar-date.util.ts` (`addYears`/`addMonths`, UTC, clamps 31 Mar − 1 month to 28/29 Feb). See [[Fixed-Length Years Made Expiries Land Early]].
+> **Fixing the formula doesn't fix stored dates** — existing records keep the short value until recomputed.
+
+## "Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)
+
+> [!danger] `LicenseService.deleteLicense` hard-deletes unless `isLicenseUsed` finds the license somewhere — and that check only looked at **courses and certificate templates**. A license referenced only by staff TORs and TOR form templates was deleted outright.
+> 28 staging TORs then pointed at nothing: the backend returned `license: null`, so they had **no form templates at all** (no Form 285, 32, assessment or certificate), and tat-prereq's `?? 'CARC'` fallback disguised them as CARC rows. Fixed by `isLicenseUsedByTors` (archive instead of delete) and repaired with a dry-run-first migration — [[Deleted Licenses Orphaned 28 Staging TORs]].
+> **Rule: a "safe to delete?" check must cover every collection that stores the id** — and a UI fallback that invents a value (`?? 'CARC'`) turns missing data into wrong-looking data. Prefer "Unknown".
+
 ## A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)
 
 > [!danger] `CourseService.update` compared chapter ids as two `Set`s, so reordering phases or chapters never counted as a change

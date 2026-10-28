@@ -34,6 +34,8 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 _tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at_
 
+- [[Gotchas - Backend Services & Environment#A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)|A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)]]
+- [[Gotchas - Backend Services & Environment#"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)|"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)]]
 - [[Gotchas - Backend Services & Environment#A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)|A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)]]
 - [[Gotchas - Backend Services & Environment#An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)|An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)]]
 - [[Gotchas - Backend Services & Environment#`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)|`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)]]

@@ -70,6 +70,8 @@ The blanket `/auth/` refresh exemption in `tat-ws` and `exam-portal` also hid 40
 
 ## Related
 
+- [[Session and Cache Leaks Across Logins]] — follow-up: logout left cached data and a live refresh token behind (TAT-496, TAT-505, 2026-10-27)
+
 - [[Decision - Refresh Token as the Session Boundary]] — the architectural call this fix rests on
 - [[TAT API & Auth Model]] — the contract; its refresh-flow line was **wrong** and was corrected in this pass
 - [[tat-ws Sign-Out 404]] — the previous session-handling bug in the same area, and where the JS-readable-cookie posture was set

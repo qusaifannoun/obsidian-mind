@@ -153,6 +153,8 @@ Filtering at read time is the right fix for the gate, but **is all four Form 32s
 
 ## Related
 
+- [[TOR Matrix Status Used Unfiltered Templates]] — the same unfiltered-template mistake, found again in the TOR Matrix and pending-TOR list (TAT-499, 2026-10-27)
+
 - [[TAT-455 Final TOR Certificate - SA Publish Gate]] · [[TAT-450 TOR Certificate FE - Read Path Only]] — both blocked behind this; their write paths have never run
 - [[TAT-450 AC-45 Superseded by TAT-455 - Certificate Not Auto-Released]] — the spec ruling on the same certificate
 - [[Form 32 C-D Fail-Open - Empty requestedRoleCodes on Legacy TORs]] · [[Instructor Type - Per-Authority Form 32 Split]] — the two fields this gate now reads
