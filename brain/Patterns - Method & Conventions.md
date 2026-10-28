@@ -22,6 +22,7 @@ Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the inde
 > - Refresher = due date - 1 calendar month (was 30 days)
 > ```
 > Still no Claude/Anthropic attribution lines (global rule 1).
+> **Now global:** this is HARD RULE 5 in `~/.claude/CLAUDE.md` (2026-10-28), covering every repo and everything written on GitHub — commits, PR titles and bodies, issues, comments. That file is the source of truth; this entry is the why.
 
 ## Sync branches by merging `dev`, never by cherry-picking — one change, one hash (Qusai, 2026-10-27)
 
