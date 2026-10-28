@@ -16,6 +16,7 @@ Split into domain notes on 2026-08-01, when the single file reached 46KB. Substa
 
 _How work gets done in the TAT repos — verification bias, spec-gap routing, ticket hygiene, the propose-before-implementing rule, and where a convention has to live to be reachable._
 
+- [[Patterns - Method & Conventions#Commit messages are a short header plus bullet points — never a paragraph (Qusai, 2026-10-28)|Commit messages are a short header plus bullet points — never a paragraph (Qusai, 2026-10-28)]]
 - [[Patterns - Method & Conventions#Sync branches by merging `dev`, never by cherry-picking — one change, one hash (Qusai, 2026-10-27)|Sync branches by merging `dev`, never by cherry-picking — one change, one hash (Qusai, 2026-10-27)]]
 - [[Patterns - Method & Conventions#`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)|`org/people/` is deliberately unused — don't create person notes (Qusai, 2026-08-01)]]
 - [[Patterns - Method & Conventions#A screen that cannot fail is a screen that cannot be debugged (2026-09-10)|A screen that cannot fail is a screen that cannot be debugged (2026-09-10)]]

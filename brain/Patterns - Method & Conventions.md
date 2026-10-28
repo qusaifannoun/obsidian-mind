@@ -11,6 +11,18 @@ How work gets done in the TAT repos — verification bias, spec-gap routing, tic
 
 Split out of [[Patterns]] on 2026-08-01. **Add new entries here, not to the index.**
 
+## Commit messages are a short header plus bullet points — never a paragraph (Qusai, 2026-10-28)
+
+> [!tip] Format every commit as a short imperative header (with the ticket in brackets when there is one), a blank line, then 2–4 brief bullets saying what changed. No prose paragraph, no "because…" essay.
+> Qusai found the earlier one-line-paragraph messages hard to read: they said too much and read like a book. Example:
+> ```
+> Fix training due date one day early (TAT-522)
+>
+> - Due date = accomplished + 2 calendar years (was 730.5 days)
+> - Refresher = due date - 1 calendar month (was 30 days)
+> ```
+> Still no Claude/Anthropic attribution lines (global rule 1).
+
 ## Sync branches by merging `dev`, never by cherry-picking — one change, one hash (Qusai, 2026-10-27)
 
 > [!warning] Commit once on `dev`, then bring `prepod` and `main`/`master` up to date by **merging `dev` into them** (`Merge branch 'dev'`, `Merge branch 'dev' into prepod`) and pushing. Never copy a change onto another branch with `git cherry-pick`.
