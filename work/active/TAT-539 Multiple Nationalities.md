@@ -23,7 +23,7 @@ The ticket asks for more than one nationality per user, each with its own Nation
 - `2ac489b0` removed `nationality`, `nationalId` and `nationalIdImage` from the User schema and DTOs. It replaced them with `nationalities: [{ nationality, nationalId, nationalIdImage | null }]`.
 - The API's `ValidationPipe` runs with `whitelist` + `forbidNonWhitelisted`, so the old fields are now **rejected**. As a result, every profile save in [[tat-prereq]], [[tat-portal]] and [[tat-ws]] returned a 400 once staging ran the new code.
 - The list **replaces the whole set**. An entry sent without its `nationalIdImage` stores `null`, which wipes the image. → [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]
-- Completeness now requires `nationalities`. No migration has been written, so every existing user reads as profile-incomplete until one runs.
+- Completeness now requires `nationalities`. No migration was written; no migration needed: the database was cleared (per Qusai, 2026-11-02).
 
 ## Evidence
 
@@ -42,13 +42,13 @@ The ticket asks for more than one nationality per user, each with its own Nation
 ## Still open
 
 - [ ] Save a profile on staging in each app: add, remove and replace an ID image, plus a duplicate National ID (should return "already used").
-- [ ] Nationality data migration (old fields → `nationalities`). Until it runs, existing users open with one empty row. The repo idiom is `scripts/migrations/`, dry run by default, e.g. `2026-10-28-training-manager-licenses-array.js`.
+- [x] ~~Nationality data migration~~: no migration needed: the database was cleared (per Qusai, 2026-11-02).
 - [ ] The [[tat-portal]] country picker has only 28 countries and stores Intl region names, not the `/country` names the other two apps use. A spelling mismatch can slip past the "only once" rule.
 - [ ] Unused old-field code in [[tat-ws]]: `DynamicFormGenerator.tsx`, `libs/configs/IntSignUpSchema.ts`, and two `ProfilesList.tsx` copies.
 
 ## Related
 
-- [[TAT-541 Multiple File Uploads]]: same deploy, same migration gap
+- [[TAT-541 Multiple File Uploads]]: same deploy
 - [[Staff Self-Service Polish - Nationality, Password, Profile Data]]: where nationality became a `/country` select storing the country name
 - [[Staff Management Subsystem & TOR Model]]
 - [[TAT-492 + TAT-493 Staff Editing Moves to Staff Management]]

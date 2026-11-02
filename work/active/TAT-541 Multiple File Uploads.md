@@ -58,12 +58,12 @@ Helpers added to existing modules: `uploadFileKeys` in `api/uploadFileKey.ts`, a
 
 - [ ] Run one upload, add and remove in each area on staging, plus the Form 32 save, copy and PDF with several files.
 - [ ] **Renewing an expired qualification is broken in the backend.** `replaceEvidence` → `addEvidenceFiles` → `assertEvidenceChangeAllowed` rejects `EXPIRED`. Hamza to fix.
-- [ ] **No file migration.** Existing TOR documents, signed 285s, Form 32 evidence, qualification and external-teaching evidence are hidden until one runs. Only History Form evidence has a legacy fallback (`staff-history-evidence.util.ts`), and that fallback's `uploadedAt` is the epoch; `StaffFileList` hides dates at or before it.
+- [x] ~~No file migration~~: no migration needed: the database was cleared (per Qusai, 2026-11-02). History Form evidence's legacy fallback (`staff-history-evidence.util.ts`) reports `uploadedAt` as the epoch; `StaffFileList` hides dates at or before it.
 - [ ] Training-history records have no evidence upload in the UI. Hamza's endpoints exist, if Dania wants it.
 - [ ] `f6a8c8ed` reached `origin/dev` through a push I didn't run; the reflog says "update by push" (possibly the IDE).
 
 ## Related
 
-- [[TAT-539 Multiple Nationalities]]: same deploy, same migration gap
+- [[TAT-539 Multiple Nationalities]]: same deploy
 - [[Staff Profile & TOR Page Simplification]]: where the upload cards live
 - [[Staff Management Subsystem & TOR Model]]
