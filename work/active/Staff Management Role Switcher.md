@@ -1,6 +1,6 @@
 ---
 date: 2026-10-15
-description: "tat-prereq merged every role a user held for UI gating while the backend acted only as the token's role; added a tat-ws-style switcher and gated by the active role"
+description: "tat-prereq merged every role a user held for UI gating while the backend acted only as the token's role; added a switcher and gated by the active role"
 tags:
   - work-note
   - project/tat
@@ -20,6 +20,8 @@ Request: a role switcher in [[tat-prereq]] that behaves like [[tat-ws]]'s. Commi
 So an Instructor holding a secondary Training Manager role saw Pending TORs and TM controls, while every request they made was evaluated as an Instructor. A switcher layered on top of the union would have changed nothing visible. See [[Gotchas - Frontend#Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)]].
 
 ## Decision
+
+> [!note] Briefly reversed by TAT-543 on 2026-10-29, then restored 2026-11-01 when the ticket turned out to be about user lookups — see [[TAT-543 Secondary Roles Count Everywhere]]. This decision stands.
 
 **Gate by the active role only**, the same as tat-ws and the backend. Chosen by Qusai over "keep the union and let the switcher change only the token". Consequence: multi-role users must switch to reach their other roles' pages. Logged in [[Key Decisions#2026-10-15 — Staff Management gates by the active role only]].
 

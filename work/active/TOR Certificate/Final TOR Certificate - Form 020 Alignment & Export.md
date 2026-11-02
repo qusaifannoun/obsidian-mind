@@ -53,6 +53,8 @@ Export is deliberately allowed at **any** stage so a draft can be checked agains
 
 ## Related
 
+- [[Final TOR Certificate QA Batch - Nov 2026]] — 2026-11-01 follow-up: per-authority title/footer/reference, signatures, QM gating, aircraft selection
+
 - [[TOR Sync Never Re-Ran - Stale BullMQ Job Id]] — the real activation blocker, found in the same investigation
 - [[Final TOR Certificate Never Available - Unfiltered Mandatory Templates]] — the display bug, corrected
 - [[TAT-455 Final TOR Certificate - SA Publish Gate]] · [[TAT-450 TOR Certificate FE - Read Path Only]]

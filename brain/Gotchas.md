@@ -34,6 +34,7 @@ _Mongoose document and schema mechanics that bite — enum defaults, index lifec
 
 _tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at_
 
+- [[Gotchas - Backend Services & Environment#`S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)|`S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)]]
 - [[Gotchas - Backend Services & Environment#A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)|A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)]]
 - [[Gotchas - Backend Services & Environment#"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)|"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)]]
 - [[Gotchas - Backend Services & Environment#A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)|A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)]]
@@ -85,6 +86,7 @@ _TOR activation, sit-in eligibility, staff profile and qualification traps in th
 
 _TAT form traps — Form 32/285, History Form, approval and permission rules, and post-approval locking._
 
+- [[Gotchas - Forms & Approval#A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)|A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)]]
 - [[Gotchas - Forms & Approval#Edit and Delete gates are not the same gate — an `approved` additional-training row is editable but not removable (2026-08-23)|Edit and Delete gates are not the same gate — an `approved` additional-training row is editable but not removable (2026-08-23)]]
 - [[Gotchas - Forms & Approval#Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)|Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)]]
 - [[Gotchas - Forms & Approval#"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)|"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)]]
@@ -103,6 +105,7 @@ _TAT form traps — Form 32/285, History Form, approval and permission rules, an
 
 _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
 
+- [[Gotchas - Frontend#Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)|Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)]]
 - [[Gotchas - Frontend#A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)|A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)]]
 - [[Gotchas - Frontend#The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)|The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)]]
 - [[Gotchas - Frontend#A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)|A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)]]
@@ -128,6 +131,8 @@ _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-web
 
 _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
 
+- [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)|`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]
+- [[Gotchas - Frontend Data & API Contracts#Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)|Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)]]
 - [[Gotchas - Frontend Data & API Contracts#A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)|A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)]]
 - [[Gotchas - Frontend Data & API Contracts#`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)|`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)]]
 - [[Gotchas - Frontend Data & API Contracts#`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)|`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)]]

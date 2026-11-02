@@ -11,6 +11,10 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## `S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)
+
+Every caller builds a descriptive `fileName` (`form-32-${formKey}-…pdf`) and `uploadFile` throws it away: the key is `bucket/<folder>/${Date.now()}-${generate()}.<ext>`. So a generated PDF opens and saves under a random name, whatever the service passed. To name a download, sign the link with a name — `getSignedUrl(fileKey, bucket, expiresIn, downloadFileName)` sends `Content-Disposition` (added for TAT-549). Don't "fix" it by changing the key: keys are shared storage paths and must stay unique. [[TAT-549 Exported PDFs Named After the Form]].
+
 ## A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)
 
 > [!warning] TOR expiry (`2 * 365.25` days), training due date (730.5 days), the training refresher (−30 days) and the aircraft refresher (`years * 365.25` days) were all fixed millisecond spans. From 12 Aug 2026 to 12 Aug 2028 is 731 days (2028 is a leap year), so the expiry landed at `00:08` instead of `12:08`; a due date at UTC midnight landed on the previous day.

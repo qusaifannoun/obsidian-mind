@@ -9,6 +9,11 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)
+
+> [!danger] `toDTO` sent `qmEditable: available && stage === PENDING_QM` — true for the instructor too — while `assertCanEditTorCertificate` (role + ownership) refused the save. The instructor got live QM fields whose Save did nothing and showed nothing (TAT-559).
+> A flag the UI uses to *offer* an action must come from the **same rule** that authorizes it. Fixed by `canEditTorCertificate`, a boolean wrapper over the assert, so the flag and the 403 cannot disagree. Check other `*Editable` DTO flags for the same shape before trusting them. [[Final TOR Certificate QA Batch - Nov 2026]].
+
 ## Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)
 
 > [!danger] `GET …/certificate` returns 403 for **"not published yet"** and 403 for **"not your certificate"**. Same status, same endpoint, **no error code anywhere in the response.**

@@ -9,6 +9,16 @@ tags:
 
 Split out of [[Gotchas - Frontend]] on 2026-09-15, when it reached 29KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## `nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)
+
+> [!danger] Since [[tat-app-ws Backend]] `2ac489b0` (TAT-539), profile saves take `nationalities: [{ nationality, nationalId, nationalIdImage }]`, and the list **replaces** what is stored. An entry without its `nationalIdImage` saves `null`, so a form that only uploads *new* images silently deletes the old ones. Keep the stored URL in the form value and send it back unless the user picks a new file.
+> The old `nationality` / `nationalId` / `nationalIdImage` fields are not ignored: the API's `ValidationPipe` (`whitelist` + `forbidNonWhitelisted`) **rejects** them with a 400. A frontend still sending the old shape can't save the profile at all. → [[TAT-539 Multiple Nationalities]]
+
+## Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)
+
+> [!warning] Staff Management's profile upload (`api/Staff/fetchers.ts` `uploadFile`) returns `Location ?? Key`, so `qualityManager.signatureImage` and the other profile signatures are **full URLs**; form signature fields upload through `uploadFileKey`, which returns the **Key**. Anything copied from a profile into a form (the QM signature on approval, the "Sign" button) carries a URL into a field that elsewhere holds a key.
+> `fileViewUrl` always prefixed `NEXT_PUBLIC_S3_PUBLIC_BASE`, and the backend's `signFileKey` passed the value straight to `getSignedUrl` — both produce a broken link for a URL. Resolve both shapes: `fileViewUrl` now returns an `http(s)` value unchanged, and the backend runs `s3Service.toObjectKey` first. [[Final TOR Certificate QA Batch - Nov 2026]].
+
 ## `POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)
 
 > [!danger] The route is `@UseGuards(JwtRtGuard)` and the strategy reads `ExtractJwt.fromAuthHeaderAsBearerToken()` (`jwt-rt-strategy.ts:14`). A `{ refreshToken }` body never reaches it: the guard rejects the request before the controller runs.

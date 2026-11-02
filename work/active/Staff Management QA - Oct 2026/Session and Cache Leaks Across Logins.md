@@ -35,6 +35,17 @@ ticket: TAT-505
 - [ ] Browser test: log out, open `/manage-staff` and `/tor-matrix`; switch accounts in one tab.
 - [ ] `auth_user` stores the whole user object; a user past ~4 KB would now bounce to login on every page.
 
+## QA round 2026-11-01: still failing, real cause was CloudFront
+
+Ayat on 2026-11-01: logged out, in a fresh tab, `/manage-staff` and `/tor-matrix` sometimes rendered "Only a Super Admin…" / "You don't have access" instead of redirecting.
+
+- **Root cause:** both pages were prerendered **static** pages, sent with `cache-control: s-maxage=31536000`. CloudFront cached the 200 from a logged-in visit and served it to logged-out visitors **without the proxy running**. Which edge you hit decided the result, hence "works sometimes". The cookie fixes above were real, but not this bug.
+- **Evidence:** `staging.staff.tat147.com/login` → `cache-control: s-maxage=31536000`, `x-cache: Hit from cloudfront`. A no-cookie `/manage-staff` → `307 Miss` every time.
+- **Fix:** [[tat-prereq]] `43ff737` sets `export const dynamic = 'force-dynamic'` in the root layout. Every route now renders per request and sends `private, no-cache, no-store`. Checked on a local `next start`: logged out → 307 to login; logged in → 200 with `no-store`. On dev + prepod. → [[Gotchas - Frontend#Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)]]
+
+- [ ] **Run a CloudFront invalidation (`/*`)** on the staff staging distribution after deploy. Copies cached earlier can live for a year.
+- [ ] The [[tat-portal]] `/login` also sends `s-maxage=31536000`, so the portal probably has the same bug (unverified).
+
 ## Related
 
 - [[Expired Sessions Undetected Across All TAT Frontends]] — the earlier session work this builds on

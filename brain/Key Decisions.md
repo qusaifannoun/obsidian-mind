@@ -9,6 +9,14 @@ tags:
 
 Architectural or workflow decisions worth recalling. Link to the full [[Decision Record]] when one exists.
 
+## 2026-11-01 — Per-authority Form 020 values live in code, not on the License
+
+TAT-554/557 needed each authority's approval reference (CARC `CARC.MTO.06`, EASA `EASA 147.0147`, GCAA `U.A.E. CAR 147/66/2023`), its `Non-<authority>` title and its Form 020 footer. **Qusai's call: one table in code** (`TOR_CERTIFICATE_AUTHORITY_DETAILS`, `tor-certificate.types.ts`). Rejected: filling the existing `License.approvalReference` field — the footer and title would still have been code, splitting one authority's identity across data and code. **What is accepted:** a changed reference or form revision needs a deploy. **The trap for whoever revisits it:** `License.approvalReference` still exists and is now unread — writing to it changes nothing on the certificate. Work note: [[Final TOR Certificate QA Batch - Nov 2026]].
+
+## 2026-11-01 — TAT-543 is about finding users by role, not about what the requester may do
+
+TAT-543 ("primary + secondary roles") was first built as *every permission check accepts any held role*. **Qusai corrected the reading on 2026-11-01:** the bug is lookups that find **other** users by role — eligible instructors, examiners, assessors — checking only `user.role` and skipping `secondaryRoles`, like the bulk-edit instructor list. The permission part was reverted (`756daf58`, `d5108e2`); requests are authorized by the token's active role again, so **the 2026-10-15 active-role decision below stands**. **The trap for whoever revisits it:** "count secondary roles" means `$or: [{ role }, { secondaryRoles }]` in a user query, never widening the requester's grants. Work note: [[TAT-543 Secondary Roles Count Everywhere]].
+
 ## 2026-10-15 — Staff Management gates by the active role only
 
 [[tat-prereq]] used to gate its sidebar, route guard and permission checks on the **union** of every role a user held, while the backend authorizes each request as the single role in the token. Adding a tat-ws-style role switcher forced the choice. **Qusai's call: gate by the active role only** (`activeRole ?? role.code`), so the UI shows exactly what the token can do. Rejected: keeping the union and letting the switcher change only the token, which leaves the UI offering controls the backend will refuse. **What is accepted:** multi-role users must switch to reach their other roles' pages. **The trap for whoever revisits it:** re-adding secondary roles to `roleCodesOf` silently restores the old disagreement; the switcher's list (`switchableRolesOf`) is the only place secondaries belong. Work note: [[Staff Management Role Switcher]].

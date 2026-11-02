@@ -69,6 +69,14 @@ Hamza's seed uses placeholders such as `TAT-APP-CARC-001`. The forms say:
 | Application | TAT Form 004 08.26 ISSUE/REV. 01/01 | TAT Form 004 09.20 ISSUE/REV. 01/01 | TAT Form 004 09.20 ISSUE/REV. 01/01 |
 | Planning Sheet | TAT Form 008 08.26 ISSUE/REV. 02/01 | TAT Form 008 04.24 ISSUE/REV. 01/02 | TAT Form 008 09.26 ISSUE/REV. 01/03 |
 
+## TAT-540 — profile signature fills both forms (2026-10-29)
+
+**Root cause:** both forms stored `data.signatureImage` only from the drawn pad, and submit required it, though the trainee profile already held a signature (`trainee.signatureImage`, required since [[TAT-490 Profile Signature for Every Signing Role|TAT-490]]). Both are the same format: a full public S3 URL (staging: profile `https://tat147-dev.s3.eu-central-1.amazonaws.com/…P4.jpg`, form signatures on the same host).
+
+- [[tat-app-ws Backend]] `0d4dbc69`: `resolveTraineeSignature(traineeId)` fills both drafts at creation, and fills save/submit when the form's signature is empty. `forms.service.spec` 18/18 with new profile-signature assertions.
+- [[tat-ws]] `520ece1d`: Application and Planning Sheet editors prefill from `user.trainee.signatureImage`; the trainee type gains `signatureImage`.
+- On `dev`, merged into `prepod`; Jira READY FOR QA. **Not browser-tested.** Already-submitted forms are unchanged; a trainee without a profile signature still draws one.
+
 ## Not done
 
 - Word output per license with the right reference ID in the footer (AC-19 / AC-25) — the backend's `.docx` templates are placeholders.

@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Data-layer and API-contract entries moved verbatim to [[Gotchas - Frontend Data & API Contracts]] on 2026-09-15, when this note reached 29KB. **Add data-layer and api-contract entries there.**
 
+## Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)
+
+> [!danger] Next.js prerenders a client-only page as static and sends `cache-control: s-maxage=31536000`. On staging, CloudFront honours that and caches the 200. The next request for that path from **any** visitor is served from the edge, so the `proxy.ts` login redirect never runs, and a logged-out user gets the page shell with no user ("Only a Super Admin…"). It depends on the edge, so it looks intermittent, and a no-cookie `curl` shows a correct `307 Miss`, which hides it.
+> Any page whose correctness depends on the proxy must be dynamic: `export const dynamic = 'force-dynamic'` (the root layout in [[tat-prereq]] `43ff737`) makes Next send `private, no-cache, no-store`. Pages cached before the fix stay at the edge until a CloudFront invalidation. → [[Session and Cache Leaks Across Logins]]
+
 ## A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)
 
 > [!warning] The Dashboard's new Edit redirect went to `http://localhost:4200/undefined/sso?code=…` although `NEXT_PUBLIC_STAFF_MANAGEMENT_URL` was in `tat-ws/.env`.
