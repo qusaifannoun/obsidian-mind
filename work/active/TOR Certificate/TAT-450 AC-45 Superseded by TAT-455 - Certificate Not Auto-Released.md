@@ -86,7 +86,7 @@ See [[Patterns - Method & Conventions#An "Approved" stamp is not a consistency c
 - [[TAT-429 Sit-In Eligibility & Move Semantics]] — the prior instance of contradicting
   approved ACs (TAT-424 AC-09)
 - [[TAT-409 Backend Open Items]] — adjacent backend/Jira-hygiene handoffs (the AC-45 edit
-  itself is tracked here and in the [[Index#Decisions Log|Decisions Log]])
+  itself is tracked here and in the [[Index - Decisions Log|Decisions Log]])
 - [[Staff Management Subsystem & TOR Model]] · [[TAT-409 Staff Management Subsystem]] ·
   [[TAT-409 Delivery Log]]
 - [[tat-app-ws Backend]] · [[tat-prereq]]

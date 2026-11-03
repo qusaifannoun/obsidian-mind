@@ -17,7 +17,8 @@ Persistent context and knowledge retained across sessions. Each topic lives in i
   - [[Patterns - Frontend & UI]] — forms, tables, uploads, auth gating, cache invalidation and layout across the four frontends
   - [[Patterns - Backend & Domain]] — staff-management wiring, section placement by data ownership, notifications, reject flows, server-generated form PDFs
 - [[Gotchas]] — index of things that have bitten before and will bite again; split into six domain notes on 2026-07-28, **add new entries to the domain note, not the index**
-  - [[Gotchas - Backend Schema & Data]] — Mongoose document/schema mechanics: enum defaults, index lifecycle, subdocument spreads, sequence allocation
+  - [[Gotchas - Backend Schema & Data]] — Mongoose document/schema mechanics: enum defaults, index lifecycle, refs and lookups, sequence allocation
+  - [[Gotchas - Backend Merging & Subdocuments]] — object spread and merge traps: `Object.assign` clobbering, spread subdocuments dropping patches and arrays
   - [[Gotchas - Backend Services & Environment]] — seeding, notification plumbing, API contract shapes, which DB an environment actually points at
   - [[Gotchas - TOR & Staff Management]] — TOR activation, sit-in eligibility, staff profile and qualification traps
   - [[Gotchas - Forms & Approval]] — Form 32/285, History Form, approval and permission rules, post-approval locking

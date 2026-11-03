@@ -9,6 +9,10 @@ tags:
 
 Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A TOR owner's role was hard-coded to `IN` — Examiner and Assessor owners could not open or save their own TOR (2026-11-03)
+
+Permissions come from the **active role in the JWT** (`switch-role` re-signs it). The bootstrap gave the staff-TOR actions (`SM_VIEW_PENDING_TORS`, Form 285/32, History Form) only to `IN`. Every owner check in the Form 285, Form 32, certificate, History Form and training-request code also read `roleCode === INSTRUCTOR`. So a secondary Examiner who switched role got "Couldn't load this TOR". Use `isStaffTorRoleCode` for owner checks and `smStaffTorHolderActions` for the seed. When adding a staff-TOR action, add it to that group, not to `IN`. [[TAT-543 Secondary Roles Count Everywhere#Retest fixes (2026-11-03)]].
+
 ## A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)
 
 > [!danger] tat-prereq's `withRoleData` (`api/Staff/fetchers.ts`) sent `admin: {}` for a secondary Admin and `trainee: {}` for a secondary Trainee on every staff save.

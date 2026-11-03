@@ -51,7 +51,7 @@ The next refresher falls due **one month before expiry** — the same rule manda
 
 - [ ] **Nothing here has been exercised.** Every feature touched this week had latent bugs the moment it was first actually driven.
 - [ ] Consider making `OnlineCourse.duration` required — auto-added records are only as good as the course data.
-- [ ] **Pre-existing bug left alone**, sitting right beside the code I touched: the mandatory branch of `applyOnlineCourseCompletion` does `{ ...slots[index] }` — spreading a live Mongoose subdocument, the trap that silently drops nested arrays (it already ate the mandatory-training review history once). See [[Gotchas - Backend Schema & Data#Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)]].
+- [ ] **Pre-existing bug left alone**, sitting right beside the code I touched: the mandatory branch of `applyOnlineCourseCompletion` does `{ ...slots[index] }` — spreading a live Mongoose subdocument, the trap that silently drops nested arrays (it already ate the mandatory-training review history once). See [[Gotchas - Backend Merging & Subdocuments#Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)]].
 - [ ] The training-history section still stores `durationHours: 0` and lands records straight at `APPROVED` (per TAT-417 AC-17). It no longer feeds the 35h total, so this is now harmless — but the field is dead weight.
 
 ## Related

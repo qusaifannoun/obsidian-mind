@@ -11,6 +11,10 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Seeding and notification entries moved verbatim to [[Gotchas - Seeding & Notifications]] on 2026-09-15, when this note reached 25KB. **Add seeding and notification entries there.**
 
+## "The database was cleared" is not a reason to skip a migration — staging still held pre-change records (2026-11-03)
+
+[[TAT-539 Multiple Nationalities|TAT-539]] and [[TAT-541 Multiple File Uploads|TAT-541]] shipped without migrations on the word that the DB had been cleared. Ayat's retest then hit pre-change TOR documents with empty `files[]`. A schema change that drops a field makes the old value **unread, not gone**, so the data comes back blank instead of throwing. Before skipping a migration, count the records with the old field (`find({ fileKey: { $exists: true } })`). Assume production holds old data until someone checks.
+
 ## `S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)
 
 Every caller builds a descriptive `fileName` (`form-32-${formKey}-…pdf`) and `uploadFile` throws it away: the key is `bucket/<folder>/${Date.now()}-${generate()}.<ext>`. So a generated PDF opens and saves under a random name, whatever the service passed. To name a download, sign the link with a name — `getSignedUrl(fileKey, bucket, expiresIn, downloadFileName)` sends `Content-Disposition` (added for TAT-549). Don't "fix" it by changing the key: keys are shared storage paths and must stay unique. [[TAT-549 Exported PDFs Named After the Form]].
@@ -98,7 +102,7 @@ Every caller builds a descriptive `fileName` (`form-32-${formKey}-…pdf`) and `
 
 The trap is baked into the FE type: `AdditionalTrainingItem` carries `evidenceFileKey` but **not** `evidenceFileType`/`evidenceFileSize`, so a caller wanting to resend the existing key *cannot* resend faithful metadata — it doesn't have it. [[Additional Training Edit - History Form Row Action]] sidesteps this by always uploading a fresh file on a non-privileged edit, which is a workaround, not a fix.
 
-**Rule: a partial write that keys off one field but assigns a group rewrites the whole group.** Check what a `if (x) { … }` block assigns, not just what it reads. See also [[Gotchas - Backend Schema & Data]] for the sibling trap where spreading a Mongoose subdocument drops nested arrays.
+**Rule: a partial write that keys off one field but assigns a group rewrites the whole group.** Check what a `if (x) { … }` block assigns, not just what it reads. See also [[Gotchas - Backend Merging & Subdocuments]] for the sibling trap where spreading a Mongoose subdocument drops nested arrays.
 
 ## BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)
 

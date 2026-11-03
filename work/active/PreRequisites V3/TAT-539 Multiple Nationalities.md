@@ -23,7 +23,7 @@ The ticket asks for more than one nationality per user, each with its own Nation
 - `2ac489b0` removed `nationality`, `nationalId` and `nationalIdImage` from the User schema and DTOs. It replaced them with `nationalities: [{ nationality, nationalId, nationalIdImage | null }]`.
 - The API's `ValidationPipe` runs with `whitelist` + `forbidNonWhitelisted`, so the old fields are now **rejected**. As a result, every profile save in [[tat-prereq]], [[tat-portal]] and [[tat-ws]] returned a 400 once staging ran the new code.
 - The list **replaces the whole set**. An entry sent without its `nationalIdImage` stores `null`, which wipes the image. → [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]
-- Completeness now requires `nationalities`. No migration was written; no migration needed: the database was cleared (per Qusai, 2026-11-02).
+- Completeness now requires `nationalities`. No nationality migration has been written. **Correction (2026-11-03): the staging database was not cleared.** Pre-change users still exist, as [[TAT-541 Multiple File Uploads#Retest 2026-11-03 — legacy files lost|TAT-541's retest]] showed, so those users have no `nationalities` until they re-save their profile (inferred; not checked on staging).
 
 ## Evidence
 
@@ -42,7 +42,8 @@ The ticket asks for more than one nationality per user, each with its own Nation
 ## Still open
 
 - [ ] Save a profile on staging in each app: add, remove and replace an ID image, plus a duplicate National ID (should return "already used").
-- [x] ~~Nationality data migration~~: no migration needed: the database was cleared (per Qusai, 2026-11-02).
+- [ ] Decide whether pre-change users need a `nationality`/`nationalId`/`nationalIdImage` → `nationalities` migration. The "DB was cleared" reason (2026-11-02) turned out to be wrong for staging (2026-11-03).
+- [ ] TAT-541 retest asks for multiple National ID images. Today it's one `nationalIdImage` per nationality; this needs Dania's answer before the backend changes.
 - [ ] The [[tat-portal]] country picker has only 28 countries and stores Intl region names, not the `/country` names the other two apps use. A spelling mismatch can slip past the "only once" rule.
 - [ ] Unused old-field code in [[tat-ws]]: `DynamicFormGenerator.tsx`, `libs/configs/IntSignUpSchema.ts`, and two `ProfilesList.tsx` copies.
 

@@ -12,7 +12,7 @@ ticket: TAT-541
 
 # TAT-541 — Multiple File Uploads
 
-**Status (2026-11-02):** on `dev` + `prepod` in both repos. **Built, typechecked and linted only. No upload has been run against staging.**
+**Status (as of 2026-11-03):** Jira **Needs Fixes** after Ayat's retest. New uploads work on staging; files uploaded before the change are missing because **the staging database was not cleared** (corrected 2026-11-03; the 2026-11-02 "DB cleared, no migration" claim was wrong). Migration written, **not yet run on any real database**.
 
 ## Context
 
@@ -52,13 +52,38 @@ Helpers added to existing modules: `uploadFileKeys` in `api/uploadFileKey.ts`, a
 | External teaching | Submit with several files; add and remove while pending or rejected. |
 | History Form (mandatory + additional) | Several certificates per record; remove them in the edit panel. |
 
+## Retest 2026-11-03 — legacy files lost
+
+Ayat's retest: multiple upload, add and remove all **work**. Fails:
+- QA Sync TAT-412's CV, Passport, Degree, AML and 145 Auth are "Approved" but show "No files uploaded."
+- Old History Form certificates return 404 "NoSuchKey" (see [[#Still open]]).
+- National ID image takes one file only. That's the [[TAT-539 Multiple Nationalities|TAT-539]] contract (`nationalIdImage` is a single string), so it needs Dania's answer before anything is built.
+
+**Root cause:** `dd098a84` removed the single `fileKey` fields from the schemas. Pre-change records still hold the key in Mongo, but the model no longer reads it, so `files[]` comes back empty. Only the History Form has a read fallback (`listHistoryEvidence`).
+
+**Fix:** [[tat-app-ws Backend]] `99220831` adds `scripts/migrations/2026-11-03-staff-files-from-single-keys.js`. It is a dry run unless `--apply` is passed and reads `MIGRATION_MONGO_URI`. It copies the legacy keys into the arrays:
+
+| Collection | From | To |
+|---|---|---|
+| `stafftordocuments` | `fileKey`/`fileType`/`fileSize` | `files` |
+| `stafftorforms` (Form 285) | `signedFileKey`/`…Type`/`…Size`/`…UploadedBy`/`…UploadedAt` | `signedFiles` |
+| `stafftorforms` (Form 32, Mixed `data`) | `data.sections.*.fileKey` | `data.sections.*.files` (string ids/dates) |
+| `staffassessments` | `videoFileKey`/`…Type`/`…Size` | `videoFiles` |
+| `staffqualifications` | `evidenceFileKey` + `archivedRecords[].evidenceFileKey` | `evidenceFiles` |
+| `staffexternalteachingactivities` | `evidenceFileKey` | `evidenceFiles` |
+
+It skips records that already have files and leaves the legacy fields in place. `fileType` falls back to the key's extension, which is what `StaffFileService` stores. Exercised **only against an in-memory stub of the collections**: Docker wasn't running, and the repo `.env` points at a remote Atlas cluster.
+
 **Kept as is:** [[TOR Document History - Hide File Key]] hid file names in the version history, and that history no longer exists, since files now carry their own uploader and date.
 
 ## Still open
 
 - [ ] Run one upload, add and remove in each area on staging, plus the Form 32 save, copy and PDF with several files.
 - [ ] **Renewing an expired qualification is broken in the backend.** `replaceEvidence` → `addEvidenceFiles` → `assertEvidenceChangeAllowed` rejects `EXPIRED`. Hamza to fix.
-- [x] ~~No file migration~~: no migration needed: the database was cleared (per Qusai, 2026-11-02). History Form evidence's legacy fallback (`staff-history-evidence.util.ts`) reports `uploadedAt` as the epoch; `StaffFileList` hides dates at or before it.
+- [ ] **Run the migration** on staging (dry run, then `--apply`), and on production **before** the TAT-541 backend reaches it. The staging DB was not cleared (corrected 2026-11-03), so production almost certainly wasn't either (inferred).
+- [ ] **History Form 404 "NoSuchKey".** `downloadEvidence` signs any key without checking it exists, and a newly added certificate opens through the same route. So the old S3 objects look missing, not mis-keyed (inferred; staging data not inspected). Someone with AWS access should check one old key.
+- [ ] Multiple National ID images: ask Dania. Today it's one image per nationality ([[TAT-539 Multiple Nationalities|TAT-539]]).
+- History Form evidence's legacy fallback (`staff-history-evidence.util.ts`) reports `uploadedAt` as the epoch; `StaffFileList` hides dates at or before it.
 - [ ] Training-history records have no evidence upload in the UI. Hamza's endpoints exist, if Dania wants it.
 - [ ] `f6a8c8ed` reached `origin/dev` through a push I didn't run; the reflog says "update by push" (possibly the IDE).
 

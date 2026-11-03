@@ -1,6 +1,6 @@
 ---
 date: 2026-06-02
-description: "Index of things that have bitten before and will bite again — one line per trap, linking into the domain notes"
+description: "Index of things that have bitten before and will bite again — one line per domain note, with the per-trap one-liners in the backend and frontend sub-indexes"
 tags:
   - brain
   - index
@@ -10,161 +10,18 @@ tags:
 
 Things that have bitten before and will bite again.
 
-Split into domain notes on 2026-07-28, when the single file reached 96KB. Substance lives in the domain notes — **add new entries there, not here.** This page keeps one line per trap.
+Split into domain notes on 2026-07-28, when the single file reached 96KB. Substance lives in the domain notes — **add new entries there, not here.** The one-liners per trap live in the two sub-indexes below.
 
-## [[Gotchas - Backend Schema & Data]]
+The one-line-per-trap lists moved verbatim to two sub-indexes on 2026-11-03, when this note reached 32KB:
 
-_Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation._
-
-- [[Gotchas - Backend Schema & Data#`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)|`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)]]
-- [[Gotchas - Backend Schema & Data#A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)|A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)]]
-- [[Gotchas - Backend Schema & Data#A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)|A one-character typo in a Mongoose `ref` is invisible until populate runs — and only when there is something to populate (2026-09-09)]]
-- [[Gotchas - Backend Schema & Data#A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)|A guard that reads an unprojected field never fires — and looks identical to one that passes (2026-07-30)]]
-- [[Gotchas - Backend Schema & Data#A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)|A max-scan sequence generator has THREE independent duplicate paths — and the String one only detonates at row 1000 (2026-07-28)]]
-- [[Gotchas - Backend Schema & Data#A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)|A soft-delete via `.save()` cannot delete an invalid document — and invalid documents are what you want to delete (2026-07-12)]]
-- [[Gotchas - Backend Schema & Data#Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)|Mongoose enum + `default: null` rejects null — 5th instance, now CI-checked (2026-07-12)]]
-- [[Gotchas - Backend Schema & Data#`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)|`autoIndex: true` creates indexes but NEVER drops them — renaming an indexed field leaves a live unique constraint (2026-07-10)]]
-- [[Gotchas - Backend Schema & Data#`Object.assign(merged, mergeFn(current, …))` clobbers freshly-merged data with stale `current` (Form 32 PIC save, 2026-07-08)|`Object.assign(merged, mergeFn(current, …))` clobbers freshly-merged data with stale `current` (Form 32 PIC save, 2026-07-08)]]
-- [[Gotchas - Backend Schema & Data#Spreading a Mongoose single-nested subdocument drops the patch (History Form basic-info, 2026-07-09)|Spreading a Mongoose single-nested subdocument drops the patch (History Form basic-info, 2026-07-09)]]
-- [[Gotchas - Backend Schema & Data#Shallow spread shares nested refs — a before/after diff of a mutated object is always empty (Form 32, 2026-07-09)|Shallow spread shares nested refs — a before/after diff of a mutated object is always empty (Form 32, 2026-07-09)]]
-- [[Gotchas - Backend Schema & Data#Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)|Nullable enum + `default: null` crashes Mongoose on create (backend, 2026-07-05, recurring)]]
-- [[Gotchas - Backend Schema & Data#Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)|Spreading a Mongoose subdocument (`{...subdoc}`) drops nested arrays on re-save (2026-07-09)]]
-
-## [[Gotchas - Backend Services & Environment]]
-
-_tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at_
-
-- [[Gotchas - Backend Services & Environment#`S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)|`S3Service.uploadFile` keeps only the extension of the name you pass — the object is always `<timestamp>-<random>` (2026-11-01)]]
-- [[Gotchas - Backend Services & Environment#A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)|A year is not 365.25 days of milliseconds — fixed spans made every expiry and due date land 12 hours to a day early (2026-10-28)]]
-- [[Gotchas - Backend Services & Environment#"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)|"Is this license used?" checked courses and certificate templates only — deleting a TOR-only license orphaned 28 TORs (2026-10-27)]]
-- [[Gotchas - Backend Services & Environment#A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)|A "did it change" check built on a `Set` is blind to reorders — the course schedule survived every phase reorder (2026-09-28)]]
-- [[Gotchas - Backend Services & Environment#An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)|An exam enrollment can exist with no exam submission — the cron enrols against the *schedule*, before the exam is composed (2026-09-22)]]
-- [[Gotchas - Backend Services & Environment#`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)|`cache-manager` v3 `ttl` is SECONDS — a helper returning ms made a 30-day Redis TTL ~82 years (2026-09-20)]]
-- [[Gotchas - Backend Services & Environment#The Redis cache silently falls back to in-process memory — and refresh tokens live in it (2026-09-20)|The Redis cache silently falls back to in-process memory — and refresh tokens live in it (2026-09-20)]]
-- [[Gotchas - Backend Services & Environment#`Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)|`Schedule.createdBy` is whoever scheduled the course, not who created it — and `Course.createdBy` isn't in any course response (2026-09-15)]]
-- [[Gotchas - Backend Services & Environment#A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)|A scheduled exam period has no chapters and no day — its template period is found only by date rank + period number (2026-09-15)]]
-- [[Gotchas - Backend Services & Environment#`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)|`/courses/my-courses/:id` is participant-only — a staff screen cannot reuse the trainee course/schedule payload (2026-09-13)]]
-- [[Gotchas - Backend Services & Environment#`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)|`evidenceFileKey` without its type/size NULLS both on the stored record (2026-08-23)]]
-- [[Gotchas - Backend Services & Environment#BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)|BullMQ silently discards an `add()` whose `jobId` still exists — a retained completed job blocks every later enqueue (2026-08-12)]]
-- [[Gotchas - Backend Services & Environment#A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)|A deny-list sanitizer exposes new fields by default; an allow-list DTO hides them — the same field needs opposite work on each path (2026-08-02)]]
-- [[Gotchas - Backend Services & Environment#`dev` and `staging` are the same database in this project — not two environments (2026-07-28)|`dev` and `staging` are the same database in this project — not two environments (2026-07-28)]] — plus the 2026-08-01 corollary: a GET can lazy-create, so browsing seeds rows
-- [[Gotchas - Backend Services & Environment#Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)|Send the enum's *name*, not the object's `_id` — `courseMethod` is `@IsEnum`, the course carries `{_id, name}` (2026-08-01)]]
-- [[Gotchas - Backend Services & Environment#Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)|Don't reimplement a business rule in the frontend — compute it server-side and return the answer (2026-07-12)]]
-- [[Gotchas - Backend Services & Environment#A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)|A browser MIME type is not a file extension — assessment video upload never worked (2026-07-12)]]
-- [[Gotchas - Backend Services & Environment#TAT backend user: `role` is an OBJECT, not a string|TAT backend user: `role` is an OBJECT, not a string]]
-- [[Gotchas - Backend Services & Environment#Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)|Staff signup/update DTO: 3 contract traps the FE got wrong (verified on staging 2026-06-07)]]
-
-## [[Gotchas - Seeding & Notifications]]
-
-_tat-app-ws boot-time seeding and notification plumbing traps — destructive re-seeds, skip-existing seeders, and the enum and mapping gates a notification must pass_
-
-- [[Gotchas - Seeding & Notifications#Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)|Notification URLs baked at seed time + skip-existing seeding = env-var changes silently ignored (2026-07-09)]]
-- [[Gotchas - Seeding & Notifications|Booting tat-app-ws Backend against a shared DB re-runs ALL seeders — and role-action seeding is DESTRUCTIVE (2026-07-07)]]
-- [[Gotchas - Seeding & Notifications#Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)|Bootstrap silently SKIPS any notification setting with no mapping entry (2026-07-12)]]
-- [[Gotchas - Seeding & Notifications#The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)|The 4th notification edit: `NotificationTemplate.code` is validated against the `SystemActions` enum (2026-07-12)]]
-- [[Gotchas - Seeding & Notifications#The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)|The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)]]
-
-## [[Gotchas - TOR & Staff Management]]
-
-_TOR activation, sit-in eligibility, staff profile and qualification traps in the staff-management subsystem._
-
-- [[Gotchas - TOR & Staff Management#A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)|A role-data placeholder `{}` erases the stored subdocument — the backend `$set`s role objects whole (tat-prereq, 2026-10-25)]]
-- [[Gotchas - TOR & Staff Management#`instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)|`instructorType` is unbackfilled and now load-bearing in two subsystems — Form 32 A/B and assessor eligibility (2026-08-02)]]
-- [[Gotchas - TOR & Staff Management#Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)|Two backfills, one order — deriving from a field nothing has backfilled yet writes a confidently wrong value (2026-08-01)]]
-- [[Gotchas - TOR & Staff Management#A THIRD copy of the TOR activation rule survived the 2026-07-12 consolidation — it makes the certificate banner permanent (2026-08-12)|A THIRD copy of the TOR activation rule survived the 2026-07-12 consolidation — it makes the certificate banner permanent (2026-08-12)]]
-- [[Gotchas - TOR & Staff Management#The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)|The TOR "is it active?" rule was written TWICE — the reader lied and the writer was right (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)|An "ACTIVE" record with null timestamps means the WRITE path never ran — check the writer, not the renderer (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#The Assessment Report is NOT a TOR form — one hardcoded "missing" row hid two outstanding assessments (2026-07-12)|The Assessment Report is NOT a TOR form — one hardcoded "missing" row hid two outstanding assessments (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#`refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)|`refresherDate` is when the LAST refresher happened, not when the next is due (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#The 35h/2yr badge summed the wrong collection (2026-07-12)|The 35h/2yr badge summed the wrong collection (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)|`StaffSitIn.active` means "in progress", NOT "exists" — completing the flow makes the record invisible (2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#tat-prereq staff self-profile — stale mapper, dead per-user record endpoints, and an unmapped-enum crash (2026-07-08)|tat-prereq staff self-profile — stale mapper, dead per-user record endpoints, and an unmapped-enum crash (2026-07-08)]]
-- [[Gotchas - TOR & Staff Management#~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)|~~`tor.aircraftTypeIds` is never populated — the keystone gap~~ — RESOLVED, and I got this badly wrong (2026-07-05 → corrected 2026-07-12)]]
-- [[Gotchas - TOR & Staff Management#Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)|Sit-in eligibility was circular — the TOR gate made new-instructor onboarding impossible (2026-07-12)]]
-
-## [[Gotchas - Forms & Approval]]
-
-_TAT form traps — Form 32/285, History Form, approval and permission rules, and post-approval locking._
-
-- [[Gotchas - Forms & Approval#A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)|A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)]]
-- [[Gotchas - Forms & Approval#Edit and Delete gates are not the same gate — an `approved` additional-training row is editable but not removable (2026-08-23)|Edit and Delete gates are not the same gate — an `approved` additional-training row is editable but not removable (2026-08-23)]]
-- [[Gotchas - Forms & Approval#Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)|Two different 403s on one endpoint with no error code — the FE can only tell them apart by message string (2026-08-02)]]
-- [[Gotchas - Forms & Approval#"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)|"Approved" doesn't lock itself — each tat-prereq form type enforces its own post-approval read-only, so one ships unlocked (2026-07-15)]]
-- [[Gotchas - Forms & Approval#The same state has two names — backend serializes `PENDING_PIC` as `'pending'`, the FE expects `'pending_pic'` (2026-07-15)|The same state has two names — backend serializes `PENDING_PIC` as `'pending'`, the FE expects `'pending_pic'` (2026-07-15)]]
-- [[Gotchas - Forms & Approval#The Approve button approved the form, then asked the backend to approve it again — and showed you the 400 (2026-07-14)|The Approve button approved the form, then asked the backend to approve it again — and showed you the 400 (2026-07-14)]]
-- [[Gotchas - Forms & Approval#A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)|A form with a schema can still be unvalidated — partial Zod compliance looks clean and isn't (2026-07-14)]]
-- [[Gotchas - Forms & Approval#History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)|History Form writes: privileged (SA) vs instructor paths differ — evidence is REQUIRED for the instructor (2026-06-28)]]
-- [[Gotchas - Forms & Approval#Form 32 assessment Signature is a FILE key, not text (2026-07-05)|Form 32 assessment Signature is a FILE key, not text (2026-07-05)]]
-- [[Gotchas - Forms & Approval#~~Form 32 forms are license-scoped, not role-scoped — shows all 4 A-B-C-D~~ — the gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)|~~Form 32 forms are license-scoped, not role-scoped~~ — the role gate exists and fails open on legacy data (2026-07-05 → corrected 2026-08-01)]]
-- [[Gotchas - Forms & Approval#History Form: eligibility needs THREE approvals (2026-07-05)|History Form: eligibility needs THREE approvals (2026-07-05)]]
-- [[Gotchas - Forms & Approval#History Form spec-vs-impl divergences: training-history approval + FE 2-year window (2026-07-05)|History Form spec-vs-impl divergences: training-history approval + FE 2-year window (2026-07-05)]]
-- [[Gotchas - Forms & Approval#Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)|Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)]]
-- [[Gotchas - Forms & Approval#Certified-by / approver identity lives only in the audit log — the form wipes field reviews on approval (2026-07-16)|Certified-by / approver identity lives only in the audit log — the form wipes field reviews on approval (2026-07-16)]]
-
-## [[Gotchas - Frontend]]
-
-_Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout_
-
-- [[Gotchas - Frontend#Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)|Static pages behind CloudFront skip the auth proxy — a cached 200 reaches logged-out users (2026-11-02)]]
-- [[Gotchas - Frontend#A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)|A `NEXT_PUBLIC_*` variable added while the dev server runs stays `undefined` until a full restart (tat-ws, 2026-10-25)]]
-- [[Gotchas - Frontend#The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)|The live tat-ws servers serve nothing from `public/` — reference static files by import (tat-ws, 2026-10-15)]]
-- [[Gotchas - Frontend#A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)|A CSS-grid `fr` column grows to its longest unbreakable word — one long ID pushes the whole form wider (tat-ws, 2026-10-15)]]
-- [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)|A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]]
-- [[Gotchas - Frontend#docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)|docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)]]
-- [[Gotchas - Frontend#Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)|Unioning a user's roles for UI gating lets the UI promise what the token can't do (tat-prereq, 2026-10-15)]]
-- [[Gotchas - Frontend#The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)|The shared `RHFDateInput` has no year selector — a date of birth is effectively unreachable (tat-ws, 2026-10-11)]]
-- [[Gotchas - Frontend#A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)|A route gate that tests cookie *presence* cannot detect an expired session (all TAT frontends, 2026-09-20)]]
-- [[Gotchas - Frontend#A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)|A cookie `max-age` longer than its token's `exp` keeps a dead credential in the browser (tat-prereq, tat-portal, 2026-09-20)]]
-- [[Gotchas - Frontend#A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)|A vendor stylesheet imported inside a component is scoped to that route's CSS chunk — the library looks unstyled everywhere else (tat-ws, 2026-09-10)]]
-- [[Gotchas - Frontend#A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)|A tooltip that closes when the pointer leaves the trigger can never be copied from (tat-ws, 2026-09-10)]]
-- [[Gotchas - Frontend#`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)|`httpOnly` set once by middleware makes every `js-cookie` clear a silent no-op (tat-ws, 2026-08-19)]]
-- [[Gotchas - Frontend#A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)|A `<Link>` where an action belongs — sign out 404'd and never logged anyone out (tat-ws, 2026-08-19)]]
-- [[Gotchas - Frontend#A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)|A hidden form section still submits its defaults — one shared form, and self-edit silently wipes admin-only data (2026-07-30)]]
-- [[Gotchas - Frontend#Card-morph slider: keep the OUTGOING card full-screen until the new one covers it|Card-morph slider: keep the OUTGOING card full-screen until the new one covers it]]
-- [[Gotchas - Frontend#App-shell layout: pin to the viewport, scroll only `<main>`|App-shell layout: pin to the viewport, scroll only `<main>`]]
-- [[Gotchas - Frontend|Next.js 16 scaffolding traps (hit on tat-prereq 2026-06-04)]]
-- [[Gotchas - Frontend#Next 16's react-hooks rules false-positive on react-hook-form primitives|Next 16's react-hooks rules false-positive on react-hook-form primitives]]
-- [[Gotchas - Frontend#tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`|tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`]]
-- [[Gotchas - Frontend#MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)|MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)]]
-
-## [[Gotchas - Frontend Data & API Contracts]]
-
-_Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
-
-- [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)|`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]
-- [[Gotchas - Frontend Data & API Contracts#Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)|Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)]]
-- [[Gotchas - Frontend Data & API Contracts#A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)|A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)]]
-- [[Gotchas - Frontend Data & API Contracts#`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)|`isLoading` is false while a query is paused, and on the server — key skeletons on `isPending` (tat-ws, 2026-10-11)]]
-- [[Gotchas - Frontend Data & API Contracts#`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)|`GET /courses/:id` 403s for trainees — read their enrollment status from `/courses/public/:id` (tat-ws, 2026-10-11)]]
-- [[Gotchas - Frontend Data & API Contracts#`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)|`POST /auth/refresh-token` takes the token as a Bearer header, not a body field — the body form 401s every time (2026-09-20)]]
-- [[Gotchas - Frontend Data & API Contracts#A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)|A query hook read without `isError` turns every server failure into an empty-state card (2026-09-09)]]
-- [[Gotchas - Frontend Data & API Contracts#Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)|Bulk Edit reads a different query-config source — patching one leaves the page looking wired and unfiltered (tat-ws, 2026-08-01)]]
-- [[Gotchas - Frontend Data & API Contracts#tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)|tat-prereq Form 32 cache keys are shaped `[Form32, kind, torId, …]` — a `[Form32, torId]` invalidation silently no-ops (2026-08-01)]]
-- [[Gotchas - Frontend Data & API Contracts#`router.refresh()` does NOT invalidate the React Query cache (tat-portal)|`router.refresh()` does NOT invalidate the React Query cache (tat-portal)]]
-- [[Gotchas - Frontend Data & API Contracts#tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs|tat-ws cert hooks: `usePatchOnlineCourseCertificate` is NOT for issued certs]]
-- [[Gotchas - Frontend Data & API Contracts#Online-course certs ARE trainee-reachable (storefront)|Online-course certs ARE trainee-reachable (storefront)]]
-- [[Gotchas - Frontend Data & API Contracts#tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`|tat-portal: derive pass/fail from backend `passed`, not a local `examPassed` hardcoded to `>= 70`]]
-- [[Gotchas - Frontend Data & API Contracts#Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted|Two certificate-template preview endpoints — wrong one leaves tokens unsubstituted]]
-- [[Gotchas - Frontend Data & API Contracts#FE hook built against a speculative endpoint the backend never shipped|FE hook built against a speculative endpoint the backend never shipped]]
-- [[Gotchas - Frontend Data & API Contracts#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original|tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]
-- [[Gotchas - Frontend Data & API Contracts#tat-ws online-course trainees endpoint: no server search + fake pagination|tat-ws online-course trainees endpoint: no server search + fake pagination]]
-- [[Gotchas - Frontend Data & API Contracts#tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)|tat-prereq `uploadFileKey` must send a `FileUploadCategory` — else `bucket/undefined/` (2026-07-05)]]
-
-## [[Gotchas - Tooling & Method]]
-
-_Toolchain and working-method traps — vault tooling, lint and IDE behaviour, and recurring reasoning failures._
-
-- [[Gotchas - Tooling & Method#Jira ticket text does not include attachments — the mockups and the real forms were there all along (2026-10-11)|Jira ticket text does not include attachments — the mockups and the real forms were there all along (2026-10-11)]]
-- [[Gotchas - Tooling & Method#A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)|A frontend on `localhost` can be pointed at PRODUCTION — check `.env` before clicking anything (2026-09-10)]]
-- [[Gotchas - Tooling & Method#A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)|A commit's ticket label doesn't mean it contains that ticket's code (2026-08-02)]]
-- [[Gotchas - Tooling & Method#A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02, recurred 2026-08-12, 2026-09-09/10 and 2026-09-15)|A commit reached `origin/dev` with no `git push` run — "local only" is not a safe claim here (2026-08-02)]]
-- [[Gotchas - Tooling & Method#The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)|The browser extension's network capture under-reports cross-origin calls — read `performance.getEntriesByType('resource')` instead (2026-08-01)]]
-- [[Gotchas - Tooling & Method#A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)|A git worktree has no `node_modules`, so a delegated agent writes code it cannot verify (2026-07-30)]]
-- [[Gotchas - Tooling & Method#Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)|Installing the qmd Claude Code plugin shadows the vault's scoped MCP server and silently serves an EMPTY index (2026-07-28)]]
-- [[Gotchas - Tooling & Method#"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)|"Verified" is a timestamp, not proof the fact still holds — and a consistency gate rejects corrections as readily as errors (2026-07-23)]]
-- [[Gotchas - Tooling & Method#Scoping debt from the files you happen to be looking at under-counts it (2026-07-14)|Scoping debt from the files you happen to be looking at under-counts it (2026-07-14)]]
-- [[Gotchas - Tooling & Method#An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)|An FE "no backend yet" comment is not evidence — the capability usually exists (2026-07-12)]]
-- [[Gotchas - Tooling & Method#Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)|Latent bugs surface in a burst the first time a blocked path is actually walked (2026-07-12)]]
-- [[Gotchas - Tooling & Method#tat-ws — `nx lint` crashed on asset imports (FIXED 2026-06-02)|tat-ws — `nx lint` crashed on asset imports (FIXED 2026-06-02)]]
-- [[Gotchas - Tooling & Method#IDE TS-server flags "implicit any" where batch `tsc` passes — annotate React-Query callbacks (2026-07-06)|IDE TS-server flags "implicit any" where batch `tsc` passes — annotate React-Query callbacks (2026-07-06)]]
-- [[Gotchas - Tooling & Method#Sharing an HTML deliverable in Teams: JS is stripped + UTF-8 mojibakes → prefer a `.docx` (2026-07-05)|Sharing an HTML deliverable in Teams: JS is stripped + UTF-8 mojibakes → prefer a `.docx` (2026-07-05)]]
+- **[[Gotchas - Backend Index]]**
+  - [[Gotchas - Backend Schema & Data]] — Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation.
+  - [[Gotchas - Backend Merging & Subdocuments]] — Object spread and merge traps in tat-app-ws — Object.assign clobbering merged data, spread Mongoose subdocuments dropping patches and nested arrays, shared refs hiding diffs.
+  - [[Gotchas - Backend Services & Environment]] — tat-app-ws service-layer and environment traps — API contract shapes, serializers, queues, schedule mapping, and which database an environment actually points at
+  - [[Gotchas - Seeding & Notifications]] — tat-app-ws boot-time seeding and notification plumbing traps — destructive re-seeds, skip-existing seeders, and the enum and mapping gates a notification must pass
+  - [[Gotchas - TOR & Staff Management]] — TOR activation, sit-in eligibility, staff profile and qualification traps in the staff-management subsystem.
+  - [[Gotchas - Forms & Approval]] — TAT form traps — Form 32/285, History Form, approval and permission rules, and post-approval locking.
+- **[[Gotchas - Frontend & Method Index]]**
+  - [[Gotchas - Frontend]] — Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-website — Next.js, MUI, styling, auth cookies, forms and layout
+  - [[Gotchas - Frontend Data & API Contracts]] — Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks
+  - [[Gotchas - Tooling & Method]] — Toolchain and working-method traps — vault tooling, lint and IDE behaviour, and recurring reasoning failures.

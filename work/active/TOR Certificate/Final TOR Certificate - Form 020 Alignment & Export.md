@@ -33,7 +33,7 @@ The model had all four editable fields on `TorCertificateAircraftRow`, so a QM w
 - `assertQmFieldsComplete` now requires DSL on every row **plus** the three certificate fields once — 8 dropdowns down to 5 on a two-aircraft TOR.
 - Amendment reset clears them at certificate level; `rebuildAutoFields` carries them through its existing spread.
 - FE drops the three columns, adds a card headed *"He may exercise the above duties as follows:"*.
-- **No migration** — the dev DB is being cleared, so old rows keep their now-unread fields until then (Qusai's call).
+- **No migration** — the dev DB is being cleared, so old rows keep their now-unread fields until then (Qusai's call). As of 2026-11-03 staging had **not** been cleared ([[TAT-541 Multiple File Uploads#Retest 2026-11-03 — legacy files lost|TAT-541 retest]]), so those rows are still unread.
 
 ## The export
 
