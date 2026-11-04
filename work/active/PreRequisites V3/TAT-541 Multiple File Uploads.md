@@ -12,7 +12,13 @@ ticket: TAT-541
 
 # TAT-541 — Multiple File Uploads
 
-**Status (as of 2026-11-03):** Jira **Needs Fixes** after Ayat's retest. New uploads work on staging; files uploaded before the change are missing because **the staging database was not cleared** (corrected 2026-11-03; the 2026-11-02 "DB cleared, no migration" claim was wrong). Migration written, **not yet run on any real database**.
+**Status (as of 2026-11-04):** Jira **Passed QA**. Ayat's 2026-11-04 retest on staging passed on TOR documents, training record certificates, Form 32 evidence, aircraft qualification evidence and the profile Certificates list (add, open, remove). On 2026-11-03, Hamza and Dania agreed that the missing pre-change files on staging are dev data and don't count. The staging database was not cleared (the 2026-11-02 "DB cleared" claim was wrong). The migration `99220831` exists but **has not been run on any database**.
+
+## QA outcome (2026-11-04)
+
+- **Old staging files:** Hamza said the issue "only appears on old data, this is dev data". Dania agreed, and Ayat didn't count it.
+- **National ID image:** stays at one image per nationality, as the BA confirmed. No backend change.
+- **History Form 404s on old certificates:** covered by the same agreement. They're old dev data.
 
 ## Context
 
@@ -78,11 +84,11 @@ It skips records that already have files and leaves the legacy fields in place. 
 
 ## Still open
 
-- [ ] Run one upload, add and remove in each area on staging, plus the Form 32 save, copy and PDF with several files.
+- [x] Upload, add and remove in each area on staging: QA passed 2026-11-04. The Form 32 copy and the PDF with several files weren't named in the retest.
 - [ ] **Renewing an expired qualification is broken in the backend.** `replaceEvidence` → `addEvidenceFiles` → `assertEvidenceChangeAllowed` rejects `EXPIRED`. Hamza to fix.
-- [ ] **Run the migration** on staging (dry run, then `--apply`), and on production **before** the TAT-541 backend reaches it. The staging DB was not cleared (corrected 2026-11-03), so production almost certainly wasn't either (inferred).
-- [ ] **History Form 404 "NoSuchKey".** `downloadEvidence` signs any key without checking it exists, and a newly added certificate opens through the same route. So the old S3 objects look missing, not mis-keyed (inferred; staging data not inspected). Someone with AWS access should check one old key.
-- [ ] Multiple National ID images: ask Dania. Today it's one image per nationality ([[TAT-539 Multiple Nationalities|TAT-539]]).
+- [ ] **Production:** the migration isn't needed for staging (old data was ruled dev data on 2026-11-03). Decide whether to run it on production **before** the TAT-541 backend reaches it. If production holds real pre-change files, they'll show as "No files uploaded" (inferred; production not checked).
+- [x] ~~History Form 404 "NoSuchKey"~~: old dev data, accepted as not counting on 2026-11-03. The S3 objects weren't checked.
+- [x] ~~Multiple National ID images~~: stays at one image per nationality, as the BA confirmed on 2026-11-04 ([[TAT-539 Multiple Nationalities|TAT-539]]).
 - History Form evidence's legacy fallback (`staff-history-evidence.util.ts`) reports `uploadedAt` as the epoch; `StaffFileList` hides dates at or before it.
 - [ ] Training-history records have no evidence upload in the UI. Hamza's endpoints exist, if Dania wants it.
 - [ ] `f6a8c8ed` reached `origin/dev` through a push I didn't run; the reflog says "update by push" (possibly the IDE).

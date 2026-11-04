@@ -43,7 +43,7 @@ The ticket asks for more than one nationality per user, each with its own Nation
 
 - [ ] Save a profile on staging in each app: add, remove and replace an ID image, plus a duplicate National ID (should return "already used").
 - [ ] Decide whether pre-change users need a `nationality`/`nationalId`/`nationalIdImage` → `nationalities` migration. The "DB was cleared" reason (2026-11-02) turned out to be wrong for staging (2026-11-03).
-- [ ] TAT-541 retest asks for multiple National ID images. Today it's one `nationalIdImage` per nationality; this needs Dania's answer before the backend changes.
+- [x] ~~Multiple National ID images~~: stays at one image per nationality, as the BA confirmed on 2026-11-04 in the TAT-541 QA pass.
 - [ ] The [[tat-portal]] country picker has only 28 countries and stores Intl region names, not the `/country` names the other two apps use. A spelling mismatch can slip past the "only once" rule.
 - [ ] Unused old-field code in [[tat-ws]]: `DynamicFormGenerator.tsx`, `libs/configs/IntSignUpSchema.ts`, and two `ProfilesList.tsx` copies.
 
