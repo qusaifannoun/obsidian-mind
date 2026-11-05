@@ -1,6 +1,6 @@
 ---
 date: 2026-08-12
-description: "A second circular dependency one edge around from TAT-429 — a new scope has no qualified evaluator, so its first instructor was unbootstrappable"
+description: "A second circular dependency one edge around from TAT-429 — a new scope has no qualified evaluator; SA can now complete the assessment or just submit the sit-in"
 tags:
   - work-note
   - project/tat
@@ -13,6 +13,8 @@ project: tat-prereq
 
 > [!success] Committed to `dev` 2026-08-12 — [[tat-prereq]] `e8883c3`, 6 files, FE only
 > `tsc --noEmit` and `eslint` clean. **Nothing browser-verified.** See [[#Still open]].
+>
+> **2026-11-05:** SA can also *submit* the sit-in on its own ([[tat-prereq]] `88a8cae`); see [[#Super Admin submits the sit-in (2026-11-05)]].
 
 ## The root cause: a second circular dependency
 
@@ -85,13 +87,32 @@ const body: CompleteFinalAssessmentApi = {
 
 The tempting version is to show the override *only when no eligible evaluator exists*. Rejected: that makes the escape hatch depend on the exact eligibility machinery it exists to escape — and eligibility computation is precisely what has failed repeatedly here ([[TAT-429 Sit-In Eligibility & Move Semantics|the TAT-429 cycle]], the `requestedRoleCodes` fail-open, the `aircraftTypeIds` claim). If the calc is wrong the hatch vanishes exactly when it is needed, and invisibly. **Unconditional is the safer choice, not the looser one.**
 
+## Super Admin submits the sit-in (2026-11-05)
+
+Hamza's [[tat-app-ws Backend]] `963a0316` ("Allowing SA to submit sit-ins", 2026-11-04) adds `SM_SUBMIT_SIT_IN` and `SM_COMPLETE_SIT_IN_FINAL_ASSESSMENT` to `smSuperAdminStaffActions`. The UI still showed "Record the sit-in" only to the assigned evaluator.
+
+**Root cause:** the UI gated the submit form on `sitIn.evaluatorUserId === currentUserId`. The backend never needed that commit to let SA in:
+- `assertCanSubmitEvaluatorSitIn` passes any `HISTORY_FORM_PRIVILEGED_EDITOR_ROLES` actor.
+- SA already held both actions: its block in `bootstrap.service.ts` spreads `smMandatoryTrainingInstructorActions` (contains `SM_SUBMIT_SIT_IN`) and `smMandatoryTrainingReviewActions` (contains `SM_COMPLETE_SIT_IN_FINAL_ASSESSMENT`). Hamza's lines are redundant for SA.
+
+**Fix:** [[tat-prereq]] `88a8cae`, 3 files:
+- `SitInSection.tsx`: `canSubmitSitIn = status === 'PendingEvaluator' && (isSuperAdmin || assigned evaluator)`, replacing `isEvaluator`.
+- `HistoryFormView` and `SitInDetailView` both pass `useUserRole().isSuperAdmin`. It reads the active role, matching the backend's `actor.role` check.
+
+**Why SA only, not every privileged role:** QM passes `assertCanSubmitEvaluatorSitIn` but doesn't hold `SM_SUBMIT_SIT_IN` (as of 2026-11-05 the action is on SA, AD, TM and the TOR holders IN/EX/PA). Gating on `isPrivileged` would show QM a button that 403s.
+
+At `PendingEvaluator`, SA now sees both forms: "Record the sit-in", which moves the sit-in to `PendingReview` for the TM, and the one-shot "Complete assessment" from the 2026-08-12 fix.
+
 ## Still open
 
 - [ ] **Nothing browser-verified.** `tsc` + `eslint` clean is not verification. Unexercised: SA opening the form at `PendingEvaluator`, the one-shot round trip, the resulting record, and the History Form flip to `APPROVED`.
-- [ ] **FE SA/AD/QM/TM vs backend `FORM_285_AUTO_APPROVE_ROLES` matched from the constant name, NOT confirmed member-by-member.** If they disagree the button renders for a role the backend 403s — the AD/Form 32 trap again ([[Gotchas - Forms & Approval#Form 32 privileged-editor (AC-415-12) is unimplemented — AD sees buttons that 403 (2026-07-05)]]).
+- [x] ~~FE SA/AD/QM/TM vs backend `FORM_285_AUTO_APPROVE_ROLES` matched from the constant name only~~: confirmed member-by-member on 2026-11-05. `enums.ts` lists SUPERADMIN, ADMIN, QUALITY_MANAGER, TRAINING_MANAGER.
 - [ ] **`assertHistoryFormReadyForApproval` still gates on all three legs** — `BASIC_INFO_APPROVED` exactly, valid mandatory training, no other active sit-ins. A genesis instructor usually fails those, so the override 400s with a *basic-info* or *mandatory-training* message surfaced under the **sit-in** form. Reads as a broken button. Undecided whether to pre-check and disable with a reason. **This is the one QA will report as "the SA override doesn't work".**
 - [ ] **Audit gap.** The privileged inline branch sets `evaluatorSubmittedBy` without writing `SIT_IN_EVALUATOR_SUBMITTED`, so an override logs only `SIT_IN_FINAL_ASSESSMENT_COMPLETED`. The override *is* recoverable from data (same actor id in `evaluatorSubmittedBy` and `finalAssessmentBy`) but nothing marks it explicitly. An SA-filled sit-in feeds "Successfully assessed as" on the [[Export History Form - TAT Form 031 PDF|Form 031 PDF]], which a CARC/EASA auditor reads as a third-party observation. See [[History Form Audit Log]].
 - [ ] **Pre-existing duplication, reported not touched** — the SA/AD/QM/TM predicate also lives at `types/form32.ts:20` (`PIC_ROLES`, used by `Form32Editor` and `Form32InstanceList`) and as a local fork at `components/documents/InitialDocuments.tsx:16`. Consolidating onto `hasPrivilegedEditorRole` is a separate commit awaiting go-ahead.
+
+- [ ] **SA submit (`88a8cae`) not exercised.** `tsc` and `eslint` clean. Qusai opened `/sit-ins` locally as SA on 2026-11-05; the outcome wasn't recorded. Pushed to dev and synced to prepod (`474640f`) on 2026-11-05.
+- [ ] **SA's `/sit-ins` list never shows sit-ins awaiting the evaluator.** `listActionableSitIns` gives privileged roles only their own assigned sit-ins plus every `PENDING_TM_REVIEW` one, so SA reaches a `PENDING_EVALUATOR_SUBMISSION` sit-in only through the staff member's History Form. Needs a backend change.
 
 ## Related
 
