@@ -40,6 +40,7 @@ Running list of everything still missing or broken that came up while doing [[TA
 | F7 | ✅ **Template-status buttons on Manage Certificate Templates (2026-06-26, `4bf9144`)** | `CertificateTemplatesStep` (shared by the manage page + add-course wizard) now fetches the course and colors each button by whether its template HTML is set: **blue "Create Template"** when null, **green "Edit Template"** when present. Reads `attendanceCertificateHtml` / `courseAndExamCertificateHtml` from `useGetOnlineCourse` (deduped). |
 | F8 | ✅ **Manage Trainees table responsive + paginated (2026-06-28, `79ba0b7`)** | Migrated the hand-rolled `<table>` to the shared `Table` component — fixes columns clipping off-screen on narrow viewports (built-in `overflow-x-auto`), adds pagination, moves row delete to a kebab (⋮) dropdown. Wired **server-side pagination** (`skip`/`limit`, `{data,total}`) and **disabled client-side search**: the trainees endpoint loads all rows then slices in-memory with **no search param**, so client search would only match the current page. Convention: [[Patterns - Frontend & UI#tat-ws: always use the shared `Table` component]]; backend gotcha: [[Gotchas - Frontend Data & API Contracts#tat-ws online-course trainees endpoint: no server search + fake pagination]]. |
 | F9 | ✅ **Uploaded Word docs reflect backend PDF conversion (2026-06-28, `1e55696`)** | The upload endpoint converts office docs → PDF (and images → JPG) and returns the rewritten `.pdf` key, but `MaterialFileUpload` derived the part `name`/`fileType` from the original `.docx` → stored as Word/`OTHER`. Now derives both from the returned key. Convention: [[Patterns - Frontend & UI#File uploads: always pass a `FileUploadCategory` (tat-ws)]]; gotcha: [[Gotchas - Frontend Data & API Contracts#tat-ws uploads: the backend rewrites the file extension — derive type/name from the RETURNED key, not the original]]. |
+| F10 | **Quill editor strips template CSS (2026-11-12)** | Online templates saved through `CertificateEditor` lose their `<style>`, so the PDF printed unstyled and spilled onto page 2. Backend adds a base A4 style when a template has none (`c32a3b5a`); authoring CSS in the editor is still impossible. See [[TAT-580 Online Certificate Template Placeholders]]. |
 
 ## Frontend (us — tat-portal)
 
@@ -55,6 +56,7 @@ Running list of everything still missing or broken that came up while doing [[TA
 |---|---|---|
 | D1 | **Two cert systems** | `OnlineCourseCertificate` (storefront, PDF, view-only) vs general `Certificate` (admin catalog, editable). Decide whether they should converge, and whether TAT-428's "edit" was ever meant for the online-course certs at all. |
 | D2 | **Page vs modal** | TAT-428 says "open the certificate edit page"; implementation reuses the existing edit **modal**. Confirm acceptable. |
+| D3 | **Placeholder brace format** | TAT-580 lists `{user_name}` and `{QR_code}`; the system uses `{{ user_name }}` and `{{ qr_code }}`. Waiting on Dania. See [[TAT-580 Online Certificate Template Placeholders#Still open]]. |
 
 ## Related
 - [[TAT-428 Edit Issued Certificates]] · [[TAT API & Auth Model]] · [[tat-ws]] · [[tat-app-ws Backend]] · [[Gotchas]]

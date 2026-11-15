@@ -9,6 +9,11 @@ tags:
 
 Split out of [[Gotchas - Frontend]] on 2026-09-15, when it reached 29KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)
+
+> [!warning] When form state lives in a parent and a child step fetches the records, a copy guarded by a one-off flag (`syncAfterUpload`) never runs on a plain load. The page then shows the parent's default state over data the API already returned.
+> [[tat-ws]]'s online-course `ExamStep` fetched all 10 saved questions but copied them in only after an Excel upload. Reopening the course showed "0 of 10 questions saved" and one blank question. Load on open too, guarded by "the form holds none of the fetched ids", so moving between steps doesn't overwrite unsaved edits. Source: [[TAT-581 Saved Exam Questions Not Shown on Reopen]].
+
 ## `nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)
 
 > [!danger] Since [[tat-app-ws Backend]] `2ac489b0` (TAT-539), profile saves take `nationalities: [{ nationality, nationalId, nationalIdImage }]`, and the list **replaces** what is stored. An entry without its `nationalIdImage` saves `null`, so a form that only uploads *new* images silently deletes the old ones. Keep the stored URL in the form value and send it back unless the user picks a new file.

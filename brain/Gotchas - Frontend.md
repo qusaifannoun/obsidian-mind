@@ -152,3 +152,16 @@ A hand-rolled `fixed inset-0 flex items-center justify-center` modal **clips beh
 
 > [!warning] `sx` targeting `.MuiOutlinedInput-*` silently does nothing on MUI X v7 date pickers
 > v7 renders a segmented field with `.MuiPickersOutlinedInput-root`, `.MuiPickersOutlinedInput-notchedOutline`, `.MuiPickersSectionList-root` — NOT the legacy `.MuiOutlinedInput-*`. The app's `DatePickerField` `sx` targeted the old names, so styling never applied and it fell back to MUI defaults (Roboto 16px, wrong border/height). Fix: target the `.MuiPickers*` classes. Applies to `ControlledDatePicker` + `DatePickerField` in tat-prereq. Verify the actual class names in the DOM before writing MUI `sx`.
+
+## MUI picker `helperText` inside `FormFieldWrapper` prints the error twice (2026-11-09)
+
+> [!warning] Passing `helperText: fieldState.error?.message` to an MUI X picker that sits inside [[tat-prereq]]'s `FormFieldWrapper` shows every error twice, because the wrapper already prints it. Drop `helperText` and let the wrapper own the message. `TimePickerField` renders its own label without the wrapper, so it keeps `helperText`. Source: [[TAT-570 Highlight Required Fields]].
+
+## A `v !== null` refine narrows `z.infer` under TS 5.5 (2026-11-09)
+
+> [!warning] `.nullable().refine((v) => v !== null, 'Required')` is inferred as a type predicate, so `z.infer` drops `null`, and every `null` default then fails typecheck. Use a helper with an explicit `boolean` return: `const isFilled = (v: unknown): boolean => v !== null`. Source: [[TAT-570 Highlight Required Fields]].
+
+## The tat-ws certificate editor is Quill — any template saved through it loses its CSS (2026-11-12)
+
+> [!warning] `CertificateEditor` (`certificate-templates/components/CertificateEditor.tsx`) is `react-quill`. Quill keeps only its own block formatting, so `<style>`, `<head>` and flex layouts are dropped on save. It turns alignment, font and size classes into inline styles, and that's all the styling that survives.
+> A default online template loaded and saved through "Create Template" becomes flat `<p>`/`<h1>` HTML. Its PDF prints with browser default margins, the `<title>` shows up as text, and the footer spills onto page 2. The backend now adds a base A4 stylesheet when a snapshot has no `<style>` ([[tat-app-ws Backend]] `c32a3b5a`). Anything that depends on template CSS still can't be authored in this editor. Source: [[TAT-580 Online Certificate Template Placeholders]].

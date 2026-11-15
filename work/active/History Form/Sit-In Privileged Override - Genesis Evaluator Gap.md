@@ -1,6 +1,6 @@
 ---
 date: 2026-08-12
-description: "A second circular dependency one edge around from TAT-429 — a new scope has no qualified evaluator; SA can now complete the assessment or just submit the sit-in"
+description: "A second circular dependency one edge around from TAT-429 — a new scope has no qualified evaluator; SA can complete the assessment or submit the sit-in, and now sees sit-ins awaiting the evaluator"
 tags:
   - work-note
   - project/tat
@@ -15,6 +15,8 @@ project: tat-prereq
 > `tsc --noEmit` and `eslint` clean. **Nothing browser-verified.** See [[#Still open]].
 >
 > **2026-11-05:** SA can also *submit* the sit-in on its own ([[tat-prereq]] `88a8cae`); see [[#Super Admin submits the sit-in (2026-11-05)]].
+>
+> **2026-11-08:** SA's `/sit-ins` list now includes sit-ins awaiting the evaluator ([[tat-app-ws Backend]] `d1fc4ed5`); see [[#SA list omitted sit-ins awaiting the evaluator (2026-11-08)]].
 
 ## The root cause: a second circular dependency
 
@@ -103,6 +105,24 @@ Hamza's [[tat-app-ws Backend]] `963a0316` ("Allowing SA to submit sit-ins", 2026
 
 At `PendingEvaluator`, SA now sees both forms: "Record the sit-in", which moves the sit-in to `PendingReview` for the TM, and the one-shot "Complete assessment" from the 2026-08-12 fix.
 
+## SA list omitted sit-ins awaiting the evaluator (2026-11-08)
+
+Qusai reported that the SA still couldn't submit a sit-in after `88a8cae`.
+
+**Root cause:** `listActionableSitIns` returned `PENDING_EVALUATOR_SUBMISSION` sit-ins only to the assigned evaluator. Privileged roles got only `PENDING_TM_REVIEW`. The SA never saw a sit-in it could submit, so neither the `88a8cae` UI gate nor Hamza's `963a0316` ever came into play.
+
+**Evidence:** on staging, `staging.staff.tat147.com/sit-ins` as SA (Hamza Dawahreh), 2026-11-08: two rows, both "Pending final assessment", none "Awaiting evaluator".
+
+**Fix:** [[tat-app-ws Backend]] `d1fc4ed5`:
+
+```ts
+if (roleCode === SystemRolesCodes.SUPERADMIN) {
+  or.push({ status: StaffSitInStatus.PENDING_EVALUATOR_SUBMISSION });
+}
+```
+
+SA only, for the same reason as the `canSubmitSitIn` gate: QM lacks `SM_SUBMIT_SIT_IN`. The FE `AssignedSitInsView` already maps `PendingEvaluator` → "Awaiting evaluator", so no FE change was needed. Pushed 2026-11-08: dev `d1fc4ed5`, prepod `e1ec7cca`, master `2719ec2c`.
+
 ## Still open
 
 - [ ] **Nothing browser-verified.** `tsc` + `eslint` clean is not verification. Unexercised: SA opening the form at `PendingEvaluator`, the one-shot round trip, the resulting record, and the History Form flip to `APPROVED`.
@@ -112,7 +132,8 @@ At `PendingEvaluator`, SA now sees both forms: "Record the sit-in", which moves 
 - [ ] **Pre-existing duplication, reported not touched** — the SA/AD/QM/TM predicate also lives at `types/form32.ts:20` (`PIC_ROLES`, used by `Form32Editor` and `Form32InstanceList`) and as a local fork at `components/documents/InitialDocuments.tsx:16`. Consolidating onto `hasPrivilegedEditorRole` is a separate commit awaiting go-ahead.
 
 - [ ] **SA submit (`88a8cae`) not exercised.** `tsc` and `eslint` clean. Qusai opened `/sit-ins` locally as SA on 2026-11-05; the outcome wasn't recorded. Pushed to dev and synced to prepod (`474640f`) on 2026-11-05.
-- [ ] **SA's `/sit-ins` list never shows sit-ins awaiting the evaluator.** `listActionableSitIns` gives privileged roles only their own assigned sit-ins plus every `PENDING_TM_REVIEW` one, so SA reaches a `PENDING_EVALUATOR_SUBMISSION` sit-in only through the staff member's History Form. Needs a backend change.
+- [x] ~~SA's `/sit-ins` list never shows sit-ins awaiting the evaluator~~: fixed in `d1fc4ed5` on 2026-11-08 ([[#SA list omitted sit-ins awaiting the evaluator (2026-11-08)]]).
+- [ ] **`d1fc4ed5` not exercised.** Backend `tsc` clean only; `staff-sit-in.service` has no spec. Unverified after the staging deploy: SA sees "Awaiting evaluator" rows on `/sit-ins`, submits one, and it moves to "Pending final assessment".
 
 ## Related
 

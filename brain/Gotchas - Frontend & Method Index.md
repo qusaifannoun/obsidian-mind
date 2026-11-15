@@ -35,11 +35,15 @@ _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-web
 - [[Gotchas - Frontend#Next 16's react-hooks rules false-positive on react-hook-form primitives|Next 16's react-hooks rules false-positive on react-hook-form primitives]]
 - [[Gotchas - Frontend#tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`|tat-ws modals: use MUI `<Dialog>`, not hand-rolled `fixed inset-0`]]
 - [[Gotchas - Frontend#MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)|MUI X Date Pickers v7 use `.MuiPickers*` classes, not `.MuiOutlinedInput-*` (2026-07-05)]]
+- [[Gotchas - Frontend#MUI picker `helperText` inside `FormFieldWrapper` prints the error twice (2026-11-09)|MUI picker `helperText` inside `FormFieldWrapper` prints the error twice (2026-11-09)]]
+- [[Gotchas - Frontend#A `v !== null` refine narrows `z.infer` under TS 5.5 (2026-11-09)|A `v !== null` refine narrows `z.infer` under TS 5.5 (2026-11-09)]]
+- [[Gotchas - Frontend#The tat-ws certificate editor is Quill — any template saved through it loses its CSS (2026-11-12)|The tat-ws certificate editor is Quill — any template saved through it loses its CSS (2026-11-12)]]
 
 ## [[Gotchas - Frontend Data & API Contracts]]
 
 _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
 
+- [[Gotchas - Frontend Data & API Contracts#A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)|A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)]]
 - [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)|`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]
 - [[Gotchas - Frontend Data & API Contracts#Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)|Profile signatures are full S3 URLs, form signatures are bare keys — a key-only resolver breaks one of them (tat-prereq, 2026-11-01)]]
 - [[Gotchas - Frontend Data & API Contracts#A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)|A hand-off that removes your own assignment 403s the page's success refetch (tat-ws, 2026-10-18)]]
