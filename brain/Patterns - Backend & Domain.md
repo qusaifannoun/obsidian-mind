@@ -74,6 +74,10 @@ HTML reproduction tips that worked: one bordered `<table>` **per section** (not 
 
 **Cross-service aggregation goes in the controller, not the service.** The History-Form export needs data from four services (history-form + mandatory-training + training-history + sit-in). Putting all four injections into `StaffHistoryFormService` would create a **circular DI** (the mandatory/sit-in services already depend on it). Instead the **controller** — which already injects every service — fetches the sibling sections and passes them into `historyFormService.downloadPdf(actor, userId, sections)`, exactly the compose-in-controller idiom `getMyHistoryForm` already used. The service owns only the data it already owns (basic info, quals, audit log) plus S3/PDF.
 
+## PDF of a Word-template form — convert the filled .docx with LibreOffice, not mammoth (2026-11-16)
+
+When a form already exists as a filled `.docx` (the tat-ws enrollment and course forms), its PDF comes from **converting that same file**, not from a second layout. `convertDocxToPdf` in the shared PDF helper runs LibreOffice headless; `POST /forms/export-pdf` takes the browser-filled `.docx` and returns the PDF, so Word and PDF can't drift. Don't route it through `FileConversionProcessor`: mammoth turns Word into bare HTML and drops borders, header boxes and table layout. The API image needs `libreoffice-writer` plus metric-compatible fonts (`font-carlito` for Calibri, `ttf-liberation` for Arial/Times) or spacing shifts. LibreOffice converts any input without failing, so validate the upload type before calling it. [[TAT-588 Export Forms to PDF]].
+
 ## Related
 
 - [[Patterns]] · [[Gotchas]] · [[Key Decisions]]

@@ -66,6 +66,7 @@ Fix (`97fb5e90`, my call over S3 — no credentials, no per-environment upload):
 
 ## Related
 
+- [[TAT-588 Export Forms to PDF]] — Export to PDF converts this same filled Word file with LibreOffice (2026-11-16)
 - [[Decision - Word Templates for Generated Documents]] · [[Word Template Document Generation]] · [[Proposal Generator - Word Template Spike]]
 - [[TAT-482 + TAT-483 Enrollment Forms]] · [[TAT-485 Training Order Check List]] · [[TAT-481 Super Admin Forms Browser]]
 - [[Gotchas - Frontend]] — the docx and grid traps hit here
