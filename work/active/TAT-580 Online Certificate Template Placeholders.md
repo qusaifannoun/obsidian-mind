@@ -12,7 +12,7 @@ ticket: TAT-580
 
 # TAT-580 — Online Certificate Template Placeholders
 
-**Status (as of 2026-11-12):** Jira **Needs Fixes**. The fix for page 2 is in [[tat-app-ws Backend]] `c32a3b5a`, on dev, prepod and master. **Rendered locally only.** The Without Exam certificate and the brace format are still open.
+**Status (as of 2026-11-16):** Jira **IN QA** (Ayat). The fix for page 2 is in [[tat-app-ws Backend]] `c32a3b5a`, on dev, prepod and master. **Rendered locally only.** The Without Exam certificate and the brace format are still open.
 
 ## Context
 
@@ -73,7 +73,7 @@ Online-course specs 36/36 passed; the API `tsc` is clean.
   - Reading the staging data through the browser session was blocked by the permission check. Needs the course name, or the course's attendance-template state.
 - [ ] Brace format `{name}` vs `{{ name }}` and `{QR_code}` vs `{{ qr_code }}`: waiting for Dania. I think the ticket's single braces are just how she wrote them (unconfirmed).
 - [ ] Ayat's course "Demo 4" shows a blank Duration, so the course probably has no duration set (unconfirmed).
-- [ ] Move back to READY FOR QA (waiting for Qusai's go-ahead).
+- [x] Moved back to READY FOR QA; Ayat is retesting.
 
 ## Related
 

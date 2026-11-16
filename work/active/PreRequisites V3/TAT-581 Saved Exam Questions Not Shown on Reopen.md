@@ -12,7 +12,7 @@ ticket: TAT-581
 
 # TAT-581 — Saved Exam Questions Not Shown on Reopen
 
-**Status (as of 2026-11-12):** Jira **Ready for Dev**. Fixed in [[tat-ws]] `e81098c5`, on dev, prepod and main. **Typecheck only; not tried in a browser.**
+**Status (as of 2026-11-16):** Jira **Passed QA**. Fixed in [[tat-ws]] `e81098c5`, on dev, prepod and main. I only typechecked it; Ayat passed it on staging.
 
 ## Context
 
@@ -36,7 +36,7 @@ See [[Gotchas - Frontend Data & API Contracts#A step that copies a query into fo
 ## Still open
 
 - [ ] Not tried in a browser: reopening a course, going back and forth with unsaved edits, and an Excel upload. The local dashboard needs a login, and that means entering credentials.
-- [ ] Move to READY FOR QA (waiting for Qusai's go-ahead).
+- [x] Moved to READY FOR QA; Ayat passed it.
 
 ## Related
 

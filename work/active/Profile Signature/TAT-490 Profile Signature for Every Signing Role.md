@@ -81,6 +81,7 @@ The upload category `signature` is not in the backend's `FileUploadCategory` enu
 ## Related
 
 - [[Super Admin Profile Signature & Stamp]] — the SA-only version this generalises
+- [[TAT-587 S3 Cleanup Deleted Examiner Signatures]] — the Examiner, Assessor and Invigilator signatures added after this were never added to the S3 cleanup, so production deleted them; the list is now derived
 - [[Profile Signature Sign Button]] — its "instructors have no role signature" limitation is now half-closed: the field exists, the resolver doesn't read it
 - [[TAT-492 + TAT-493 Staff Editing Moves to Staff Management]] — same session
 - [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]] — why the tat-ws rule is one file

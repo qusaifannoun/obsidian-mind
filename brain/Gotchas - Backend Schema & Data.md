@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Object-spread and merge entries moved verbatim to [[Gotchas - Backend Merging & Subdocuments]] on 2026-11-03, when this note reached 26KB. **Add merge and subdocument entries there.**
 
+## A file field the S3 cleanup doesn't list is deleted within 6 hours (2026-11-16)
+
+> [!danger] `S3CleanupService` deletes every S3 object that no field in its `FILE_FIELD_CONFIG` refers to, every 6 hours, on every environment
+> Adding a file field to a schema without adding it to that config means the file uploads, works, and is gone a few hours later. Examiner, Assessor and Invigilator signatures and the Examiner stamp went missing on production this way (TAT-587). Profile signature fields are now derived from `PROFILE_SIGNATURE_FIELDS`; **stamps and every other file field are still hand-listed**, so any new file field needs a cleanup entry in the same change. Also: in `isKey` collections with a `bucket/` prefix, full-URL values are skipped, so a signature URL copied into form data is not protected. [[TAT-587 S3 Cleanup Deleted Examiner Signatures]].
+
 ## `$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)
 
 > [!danger] `localField: "phases.chapters"` returns the chapter documents in `_id` order, not in the order the phase stores them

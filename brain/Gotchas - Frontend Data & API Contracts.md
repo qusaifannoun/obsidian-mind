@@ -9,6 +9,11 @@ tags:
 
 Split out of [[Gotchas - Frontend]] on 2026-09-15, when it reached 29KB. Entries moved verbatim; [[Gotchas]] keeps the one-line index. **Add new entries here, not to the index.**
 
+## A browser prefill that only fills empty fields freezes a wrong stored value (tat-ws, 2026-11-16)
+
+> [!warning] `useProfilePrefill` copies profile values into a form only where the field is empty, and the draft then stores them as editable data
+> Once a wrong value is saved, the profile can be corrected and the form still shows the old one; the trainee can also type anything. For values that must equal the profile or the course (birth fields, aircraft type), set them on the backend on every list, save and submit, and show them read-only. [[TAT-590 Application Form Auto-Filled Fields]].
+
 ## A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)
 
 > [!warning] When form state lives in a parent and a child step fetches the records, a copy guarded by a one-off flag (`syncAfterUpload`) never runs on a plain load. The page then shows the parent's default state over data the API already returned.

@@ -90,6 +90,7 @@ Hamza's seed uses placeholders such as `TAT-APP-CARC-001`. The forms say:
 ## Related
 
 - [[Forms - No Field Validation & Export to Word]] — validation removed and Export to Word for both forms
+- [[TAT-590 Application Form Auto-Filled Fields]] — birth fields and aircraft type now filled by the backend and locked (2026-11-16)
 
 - [[TAT-481 Super Admin Forms Browser]] · [[TAT-484 Assigned Forms Inbox]] — the same `Form` records, seen by the Super Admin and the five staff roles
 - [[Decision - Word Templates for Generated Documents]] · [[Proposal Generator - Word Template Spike]] — the docxtemplater approach the backend's templates are meant for

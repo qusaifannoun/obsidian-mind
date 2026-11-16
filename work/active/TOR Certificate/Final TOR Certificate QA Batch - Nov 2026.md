@@ -45,6 +45,7 @@ Five tickets on the Final TOR Certificate (TAT Form 020): TAT-557, TAT-558, TAT-
 
 ## Related
 
+- [[TAT-587 S3 Cleanup Deleted Examiner Signatures]] — production signature broken because the S3 cleanup deleted it
 - [[Final TOR Certificate - Form 020 Alignment & Export]] · [[TAT-450 AC-45 Superseded by TAT-455 - Certificate Not Auto-Released]]
 - [[Gotchas - Forms & Approval#A UI edit flag computed from the workflow stage alone shows a reviewer's controls to everyone in that stage (TOR certificate, 2026-11-01)]]
 - [[Patterns - Architecture & Boundaries]] · [[Staff Management Subsystem & TOR Model]]
