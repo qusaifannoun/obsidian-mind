@@ -66,6 +66,7 @@ With the fix: `Tests: 1 passed`. With the profile-completeness spec: `Test Suite
 ## Related
 
 - [[TAT-490 Profile Signature for Every Signing Role]]: the last time signature fields were added to the cleanup by hand
+- [[TAT-585 Certifier Signature Shown as Image]]: the same failure on sit-in signatures, found the same day
 - [[Final TOR Certificate QA Batch - Nov 2026]] · [[Final TOR Certificate - Form 020 Alignment & Export]]: the certificate page and PDF
 - [[Patterns - Architecture & Boundaries#One rule, one implementation — a duplicated rule doesn't drift, it lies (2026-07-12)]]: why the list is derived
 - [[tat-app-ws Backend]] · [[Staff Management Subsystem & TOR Model]]

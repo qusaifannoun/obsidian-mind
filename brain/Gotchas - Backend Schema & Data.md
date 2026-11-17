@@ -15,6 +15,7 @@ Object-spread and merge entries moved verbatim to [[Gotchas - Backend Merging & 
 
 > [!danger] `S3CleanupService` deletes every S3 object that no field in its `FILE_FIELD_CONFIG` refers to, every 6 hours, on every environment
 > Adding a file field to a schema without adding it to that config means the file uploads, works, and is gone a few hours later. Examiner, Assessor and Invigilator signatures and the Examiner stamp went missing on production this way (TAT-587). Profile signature fields are now derived from `PROFILE_SIGNATURE_FIELDS`; **stamps and every other file field are still hand-listed**, so any new file field needs a cleanup entry in the same change. Also: in `isKey` collections with a `bucket/` prefix, full-URL values are skipped, so a signature URL copied into form data is not protected. [[TAT-587 S3 Cleanup Deleted Examiner Signatures]].
+> **Second instance, same day:** sit-in final-assessment signatures (`StaffSitIn.assessorSignatureKey`) were unlisted too, so the History Form certifier signature opened S3 `NoSuchKey` (Hamza's `64472b78`). [[TAT-585 Certifier Signature Shown as Image]].
 
 ## `$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)
 
