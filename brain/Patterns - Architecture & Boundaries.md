@@ -112,6 +112,8 @@ Three duplicated-rule bugs in one week, all with the same shape: **each copy is 
 
 > **2026-10-21, again:** the "find this user's saved signature" chain existed in Forms and in the History Form. The Super Admin was added to one copy, so a Super Admin's History Form PDF printed a blank signature. Merged into `resolveProfileSignatureKey`, see [[Super Admin Profile Signature & Stamp]].
 
+> **2026-11-17, across repos:** the exam question count lived in the exam backend (`ceil(hours)` per chapter) and in tat-ws bulk edit (round the phase total once). Bulk edit made 40-minute periods for 42-minute exams, so production exam creation failed. Bulk edit now mirrors the per-chapter rule, see [[Bulk Edit Exam Period Too Short]].
+
 **Smell to grep for:** the same set of boolean gates `&&`-ed together in more than one file. And when a read path and a write path both decide the same thing, the **writer is the source of truth** — reads should report the persisted value, not recompute it.
 
 ## A guard that fails open on absent data is disabled by the data, silently (2026-08-01)

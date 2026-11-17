@@ -95,6 +95,8 @@ It skips records that already have files and leaves the legacy fields in place. 
 
 ## Related
 
+- [[TAT-583 + TAT-592 + TAT-593 Staff Notification Fixes]]: the remove-file route reused the replace action, so removals said "uploaded" (TAT-592)
+
 - [[TAT-539 Multiple Nationalities]]: same deploy
 - [[Staff Profile & TOR Page Simplification]]: where the upload cards live
 - [[Staff Management Subsystem & TOR Model]]

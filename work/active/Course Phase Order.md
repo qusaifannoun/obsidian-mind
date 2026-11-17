@@ -89,4 +89,5 @@ All of it is live on `master`/production: `deploy.prod.yml` triggers on push to 
 - [[tat-ws]], [[tat-app-ws Backend]], [[TAT Platform]]
 - [[Gotchas - Backend Schema & Data]], [[Gotchas - Backend Services & Environment]]
 - [[Compose Exam - Period Chapters, Course Reset & Day Labels]] — same course/exam surface
+- [[Bulk Edit Exam Period Too Short]]: the same generator sized exam periods below the backend minimum (2026-11-17)
 - [[Live Exam Failure]] — same day, same repos

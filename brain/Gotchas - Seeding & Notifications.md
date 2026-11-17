@@ -52,6 +52,11 @@ Split out of [[Gotchas - Backend Services & Environment]] on 2026-09-15, when it
 >
 > **How to check a notification is actually live** (don't assume): query `notificationsettings` + `notificationtemplates` for the name/code, and grep the boot log for `not a valid enum value` / `No mapping found` / `Action not found`. All three failure modes are silent at runtime.
 
+## A route's `@Action` picks its permission AND its notification — reuse one and you reuse its message (2026-11-17)
+
+> [!warning] `@Action(SystemActions.X)` on a controller route is both the RBAC check and the key the notification interceptor switches on
+> Hamza's TAT-541 tagged the new remove-file route with `SM_REPLACE_TOR_DOCUMENT`, so removing a file sent "TOR Document Pending Review" with its "uploaded" template. A route that does something different needs its own action: enum code, `actions.json`, a role grant in bootstrap, a setting↔action mapping, the setting and template, plus the interceptor case. Also, some notifiers pick recipients in code (the assessment expiry cron), so the seeded `destination` is not the recipient list there. [[TAT-583 + TAT-592 + TAT-593 Staff Notification Fixes]].
+
 ## The notification seeder only re-syncs `parameters` — `destination` drift is permanent (2026-07-12)
 
 > [!warning] Editing `destination` in `notification-settings.json` for an already-seeded setting is a **silent no-op, forever**
