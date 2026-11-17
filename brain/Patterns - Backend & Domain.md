@@ -78,6 +78,10 @@ HTML reproduction tips that worked: one bordered `<table>` **per section** (not 
 
 When a form already exists as a filled `.docx` (the tat-ws enrollment and course forms), its PDF comes from **converting that same file**, not from a second layout. `convertDocxToPdf` in the shared PDF helper runs LibreOffice headless; `POST /forms/export-pdf` takes the browser-filled `.docx` and returns the PDF, so Word and PDF can't drift. Don't route it through `FileConversionProcessor`: mammoth turns Word into bare HTML and drops borders, header boxes and table layout. The API image needs `libreoffice-writer` plus metric-compatible fonts (`font-carlito` for Calibri, `ttf-liberation` for Arial/Times) or spacing shifts. LibreOffice converts any input without failing, so validate the upload type before calling it. [[TAT-588 Export Forms to PDF]].
 
+## Changing a stored field's shape — store it under a new key, default it at read time (2026-11-16)
+
+When a persisted field changes type (History Form `duties`: free text → four role flags), add a **new key** (`dutyRoles`) instead of reusing the old one, so old documents never have to cast a string into the new shape. Keep the new key `null` until the user saves, and fill a computed default in the response DTO (here from roles and TOR `instructorType`) so the user sees sensible ticks without a migration. The old key stays in Mongo unused. If the field is reviewable per field, the field id must equal the storage key, because the completeness check reads `basicInfo[fieldId]`. [[TAT-586 History Form Rev 02-00 Redesign]].
+
 ## Related
 
 - [[Patterns]] · [[Gotchas]] · [[Key Decisions]]

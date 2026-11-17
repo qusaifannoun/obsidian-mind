@@ -11,6 +11,9 @@ project: tat-app-ws
 
 # Export History Form — TAT Form 031 PDF
 
+> [!note] Superseded 2026-11-16
+> The layout below is rev 01/01 (03.23). The export now follows rev 02/00: [[TAT-586 History Form Rev 02-00 Redesign]].
+
 The [[History Form - Training & Validity Records|History Form]] had no export/print — only evidence-attachment downloads. Added a full-stack **server-generated PDF of TAT Form 031**, reusing the exact Form 32/285 machinery: `generatePdfFromHtml` (HTML → Puppeteer → A4 PDF) → S3 → signed URL → FE opens it.
 
 ## What shipped
