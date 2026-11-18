@@ -1,6 +1,6 @@
 ---
 date: 2026-11-18
-description: "Since Nov 2025 the exam shuffled answer texts under fixed letters and never saved the order, so grading compared letters, not the answer the trainee chose"
+description: "The exam shuffled answer texts under fixed letters and graded the letter; a follow-up sweep closed foreign answers, the client-only time limit and the answer key"
 tags:
   - work-note
   - project/tat
@@ -11,7 +11,7 @@ project: tat-app-ws
 
 # Exam Grading Compared Letters, Not Answers
 
-**Status (as of 2026-11-18):** fixed in [[tat-app-ws Backend]] `3cc5ecee`, merged to prepod `ae38675a` and master `9c2f459e`. **Not run in the exam portal or against a database; it needs an API redeploy.** No Jira ticket; Qusai reported it.
+**Status (as of 2026-11-18):** fixed in [[tat-app-ws Backend]] `3cc5ecee`. A follow-up sweep added `2f317c8b`, `1cd9cd6f` and `970f6120`. All on dev `970f6120`, prepod `f1ed5687` and master `529297ed`. **Not run in the exam portal or against a database; it needs an API redeploy.** No Jira ticket; Qusai reported it.
 
 ## Context
 
@@ -58,14 +58,36 @@ No exam-portal change: it shows and sends whatever `label` the API gives it.
 ## Still open
 
 - [ ] Redeploy the API, then on staging: start an exam, answer the correct text under its shuffled letter, refresh (the order must stay the same), finish, and check the score.
-- [ ] **Past results:** completed exams since about 2025-11-17 were likely mis-graded (inferred from code; about a 1-in-3 chance a correct answer was graded right). They can't be recovered, because the shuffled order was never saved. Needs a business decision (re-sit, review). Offered: a read-only Atlas query counting completed submissions since that date.
-- [ ] `finishExam` still returns every question's `correctAnswer` to the trainee: an answer-key leak when bank questions are reused.
+- [x] ~~Past results~~: no action. Old exam data is gone and the system is otherwise empty (Qusai, 2026-11-18). Before that, grading would have been about 1-in-3 correct by chance (inferred).
+- [x] ~~`finishExam` returns the answer key~~: fixed in `2f317c8b`, see below.
+- [ ] A trainee can still extend their time by staying disconnected while posting answers. This is accepted: the pause on disconnect is a business rule.
+- [ ] `my-submissions` still returns `correctAnswer` for published exams. Left as is; no frontend consumer found.
 - [ ] Tell Hamza: his code, and the submission schema gained `answerOrder`.
+
+## Follow-up sweep (2026-11-18)
+
+A sweep for the same kinds of bug (grading the wrong thing, random state not saved, trusting what the client sends, answer leaks, silent defaults) found five more. None overlaps Hamza's open tickets (TAT-598, 597, 599, 591).
+
+| # | Defect | Fix |
+|---|---|---|
+| 1 | `submitAnswer` never checked that the question belonged to the trainee's exam; it pushed a new response. The score is correct ÷ `responses.length`, so extra known answers raised it | `2f317c8b`: a non-exam question is a 400 |
+| 2 | The time check was `remainingSeconds === 0` on a Redis snapshot refreshed only by `getExamData` or a disconnect. The limit was effectively enforced only by the exam portal | `2f317c8b`: `sessionRemainingSeconds` subtracts the time since the last snapshot, with a 5 s grace; paused timers unchanged |
+| 3 | `finishExam` returned `submission.toObject()`, so every `correctAnswer` reached the trainee. The portal ignores the response | `2f317c8b`: returns the trainee view plus score and pass/fail |
+| 4 | The bulk upload's `parseCorrectLabel` turned anything other than exactly `answer_a/b/c` into A silently; level and category defaulted the same way | `1cd9cd6f`: row error; accepts A/B/C, `answer_x`, `option_x`. See [[Question Bank Bulk Upload - A Feature That Only Reported Success]] #9 |
+| 5 | Question selection used the biased `sort(() => 0.5 - Math.random())` | `970f6120`: one shared `shuffle` in `libs/helpers/src/lib/common/shuffle.ts`, also used for answer order |
+
+**Not changed:** pausing on disconnect, a business rule per Qusai (a dropped connection gives the trainee extra time). Online-course exams were checked and are not affected (validated A/B/C, no option shuffle, key hidden until review).
+
+**Evidence:** the exam specs on dev before the fix: `Tests: 5 failed, 8 passed` (the foreign-question answer was accepted and finish returned `correctAnswer`; the 3 timer tests failed because the helper did not exist yet). With the fixes: `Tests: 13 passed, 13 total`. Temporary parser test (deleted): `answer_a`→A, `Answer B`→B, `option_b`→B, `b)`→B; `D`, `""` and `answer` → null; level `4`/`hard` → null; category `B1-B2` → B1/B2, `A` → null. Shuffle spec: `Tests: 2 passed` (each position within 3% over 30k runs). API `tsc` exit 0.
+
+`2f317c8b` and `1cd9cd6f` reached `origin/dev` before the sync without being pushed from this session, most likely through the editor's Git sync (inferred).
 
 ## Related
 
 - [[Live Exam Failure]]: the same family, state computed once at an event and never re-derived
 - [[Exam Submissions Never Created - Enroll Before Compose]]
 - [[Online-Course Exam Timeout - Backend Bug]]: the separate online-course exam flow
+- [[Question Bank Bulk Upload - A Feature That Only Reported Success]]: defect #9 from the sweep
+- [[Gotchas - Backend Schema & Data#A check only the client enforces is not a check — exam answers, time and answer key (2026-11-18)]]
 - [[Gotchas - Backend Schema & Data#A shuffle that isn't saved is a different exam on every load — save the order, grade by identity (2026-11-18)]]
 - [[tat-app-ws Backend]]

@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Object-spread and merge entries moved verbatim to [[Gotchas - Backend Merging & Subdocuments]] on 2026-11-03, when this note reached 26KB. **Add merge and subdocument entries there.**
 
+## A check only the client enforces is not a check — exam answers, time and answer key (2026-11-18)
+
+> [!danger] The live exam trusted the exam portal for three things. The server accepted an answer for **any** bank question (and the score divides by the number of saved answers). It enforced the time limit only when a cached snapshot read exactly 0. And it sent the answer key in the finish response. Each looked fine from the portal, which never sends those requests. Anyone with developer tools could raise their own score.
+> Rule: every rule that protects a grade belongs on the server and is checked on every request. That means the question belongs to this attempt, the time left is computed now rather than read from a snapshot, and responses carry only what the trainee may see. A parser that maps unknown input to a default (`parseCorrectLabel` → A) is the same trap for data: reject it as a row error. [[Exam Grading Compared Letters, Not Answers#Follow-up sweep (2026-11-18)]].
+
 ## A shuffle that isn't saved is a different exam on every load — save the order, grade by identity (2026-11-18)
 
 > [!danger] The live exam shuffled answer **texts** under fixed letters A/B/C, on the first load only, and saved nothing. Grading compared the trainee's on-screen letter with the bank's letter of a different text, and a reload showed bank order again. So correct answers were graded at roughly 1-in-3 chance for a year (inferred), and the shuffled order can't be recovered after the fact.

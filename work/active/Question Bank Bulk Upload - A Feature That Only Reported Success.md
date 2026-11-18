@@ -27,6 +27,7 @@ Nine commits across [[tat-app-ws Backend]] and [[tat-ws]] over 2026-09-09/10. Th
 | 6 | `enrichQuestions` used `Promise.all`, so one question that failed to enrich blanked the **entire** list | `question-bank.service.ts` | `7d767e87` |
 | 7 | The list had no `isError` branch, no `staleTime` (its two siblings use 1 min) and no `placeholderData` | `page.tsx` + hook | `ba9446d` |
 | 8 | `Number("")` is `0`, and the criteria builder discarded only `undefined` — an empty Question ID box became `find({ questionId: 0 })`, matching nothing. **Two commits, one per repo** | DTO + `stripEmpty` | `aa59290d`, `14e8e2a` |
+| 9 | `parseCorrectLabel` recognised only the exact strings `answer_a`, `answer_b` and `answer_c`; anything else (`B`, `b`, `Answer B`) became **A** with no error. Level silently became BASIC and category B1/B2 the same way. Found 2026-11-18 in the [[Exam Grading Compared Letters, Not Answers#Follow-up sweep (2026-11-18)\|exam integrity sweep]] | `question-bank.service.ts` | `1cd9cd6f` |
 
 ## The two that are worth remembering
 
@@ -42,6 +43,7 @@ Nine commits across [[tat-app-ws Backend]] and [[tat-ws]] over 2026-09-09/10. Th
 
 ## Still open
 
+- [ ] **Questions bulk-uploaded before `1cd9cd6f` (2026-11-18) may have A as a wrong correct answer** (#9). Check the question-bank DB: `[{ $unwind: "$answers" }, { $match: { "answers.isCorrect": true } }, { $group: { _id: "$answers.label", questions: { $sum: 1 } } }]`. Nearly all A means a bad upload; delete and re-upload. Since `1cd9cd6f`, an unknown correct answer, level or category is a row error.
 - [ ] **Five backend commits are unverified** — `15734f07`, `030fb736`, `7d767e87`, `aa59290d`, and they need a deploy. Only the frontend half of #8 was confirmed live.
 - [ ] **`resolveChapterId` still trusts ObjectId syntax** (`question-bank.service.ts`). Until it verifies existence, an import can create the dangling rows that #6 now tolerates but does not prevent.
 - [ ] **The upload's own error text names no email.** "reviewer not found" doesn't say *which* address failed — that cost a round trip to diagnose.
