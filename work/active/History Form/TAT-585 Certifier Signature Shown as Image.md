@@ -12,7 +12,7 @@ ticket: TAT-585
 
 # TAT-585 — Certifier Signature Shown as Image
 
-**Status (as of 2026-11-18):** QA returned it on 2026-11-17 (Ready for Dev). The return is fixed in [[tat-prereq]] `45dfc4d` on dev, prepod and main, on top of Hamza's backend `d89e46c5`. Earlier fix: `6b5e72e`. **Jira not yet moved back to READY FOR QA; never opened in a browser.**
+**Status (as of 2026-11-18):** QA returned it on 2026-11-17 (Ready for Dev). The return is fixed in [[tat-prereq]] `45dfc4d` on dev, prepod and main, on top of Hamza's backend `d89e46c5`. Earlier fix: `6b5e72e`. Jira moved back to **READY FOR QA** on 2026-11-18. **Never opened in a browser.**
 
 ## Context
 
@@ -46,7 +46,6 @@ Ayat returned it, with the BA confirming: the sit-in final assessment Signature 
 - [ ] Not opened in a browser.
 - [ ] "QA Sync TAT-412" lost its signature before the cleanup fix, so it shows "—" until a new final assessment is recorded.
 - [x] ~~"Taken from the signer's saved signature" is not built~~: built 2026-11-18 (backend `d89e46c5` + tat-prereq `45dfc4d`). Why it needed the backend: `assertStaffEvidenceFileKey` accepts any `bucket/` key (since `db6922f7`, 2026-07-05), but profile signatures are stored as full S3 URLs ([[Gotchas - Frontend Data & API Contracts]]). These only pass once `d89e46c5` converts them with `s3Service.toObjectKey`.
-- [ ] Move TAT-585 back to READY FOR QA (awaiting Qusai's OK).
 - [ ] Not opened in a browser: check the prefill, draw, upload and "Sign" options as a TM.
 - [ ] The screen (sit-in uploaded file) and the PDF (approving TM's profile signature, see [[TAT-586 History Form Rev 02-00 Redesign]]) can show different signatures.
 
