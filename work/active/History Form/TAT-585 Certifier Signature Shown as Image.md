@@ -1,6 +1,6 @@
 ---
 date: 2026-11-17
-description: "History Form certifier signature opened S3 NoSuchKey: the 6-hourly cleanup deleted sit-in signatures, and the screen showed a link instead of an image"
+description: "History Form certifier signature opened S3 NoSuchKey because the 6-hourly cleanup deleted it; the sit-in final assessment now prefills the TM's saved signature"
 tags:
   - work-note
   - project/tat
@@ -12,7 +12,7 @@ ticket: TAT-585
 
 # TAT-585 — Certifier Signature Shown as Image
 
-**Status (as of 2026-11-17):** Jira **READY FOR QA** (moved there with Hamza's backend fix). [[tat-prereq]] `6b5e72e`, on dev, prepod and main. **Not opened in a browser.**
+**Status (as of 2026-11-18):** QA returned it on 2026-11-17 (Ready for Dev). The return is fixed in [[tat-prereq]] `45dfc4d` on dev, prepod and main, on top of Hamza's backend `d89e46c5`. Earlier fix: `6b5e72e`. **Jira not yet moved back to READY FOR QA; never opened in a browser.**
 
 ## Context
 
@@ -29,15 +29,25 @@ Two separate causes:
 
 [[tat-prereq]] `6b5e72e`: `CertifiedBySection` renders `<img src={fileViewUrl(sitIn.assessorSignatureKey)}>`. This is the same display used by `TorCertificateView` and the assessment signatures, which live in the same `tor-assessment` folder.
 
+## QA return (2026-11-17) and fix (2026-11-18)
+
+Ayat returned it, with the BA confirming: the sit-in final assessment Signature was a plain "Choose File" upload. It was not filled from the Training Manager's saved signature and could not be drawn.
+
+- **Backend (Hamza, [[tat-app-ws Backend]] `d89e46c5`, 2026-11-17, on dev, prepod and master):** `SitInResponseDTO` fills `assessorSignatureKey` from the viewer's saved profile signature while the final assessment is open, and adds `assessorSignatureUrl`. `CompleteSitInFinalAssessmentDTO.assessorSignatureKey` is optional. It accepts an uploaded key, a drawn `data:image/...` URL, or nothing, which keeps the saved signature.
+- **Frontend ([[tat-prereq]] `45dfc4d`):** `FinalAssessmentForm` uses `SignatureField` (category `TorAssessment`) and starts from `sitIn.assessorSignatureKey`. The TM can keep it, or clear it and then draw, upload, or click "Sign" for their saved signature. The schema now takes a string key. `useSitInActions.completeFinalAssessment` sends the key directly instead of uploading a `File`.
+
 ## Evidence
 
-- tat-prereq `tsc` clean. eslint: 0 errors, 1 `no-img-element` warning, the same as the other signature displays.
+- `6b5e72e`: tat-prereq `tsc` clean. eslint: 0 errors, 1 `no-img-element` warning, the same as the other signature displays.
+- `45dfc4d`: tat-prereq `tsc` exit 0; ESLint clean on `SitInSection.tsx` and `useForms.ts`.
 
 ## Still open
 
 - [ ] Not opened in a browser.
 - [ ] "QA Sync TAT-412" lost its signature before the cleanup fix, so it shows "—" until a new final assessment is recorded.
-- [ ] **"Taken from the signer's saved signature" is not built.** The sit-in final assessment still takes a plain file upload. The backend's `assertStaffEvidenceFileKey` only allows `tor-assessment` / `tor-documents` keys, so `SignatureField`'s "use saved signature" option (a profile key) would be rejected. It needs a backend change first, then the form switches to `SignatureField`. QA may return this part.
+- [x] ~~"Taken from the signer's saved signature" is not built~~: built 2026-11-18 (backend `d89e46c5` + tat-prereq `45dfc4d`). Why it needed the backend: `assertStaffEvidenceFileKey` accepts any `bucket/` key (since `db6922f7`, 2026-07-05), but profile signatures are stored as full S3 URLs ([[Gotchas - Frontend Data & API Contracts]]). These only pass once `d89e46c5` converts them with `s3Service.toObjectKey`.
+- [ ] Move TAT-585 back to READY FOR QA (awaiting Qusai's OK).
+- [ ] Not opened in a browser: check the prefill, draw, upload and "Sign" options as a TM.
 - [ ] The screen (sit-in uploaded file) and the PDF (approving TM's profile signature, see [[TAT-586 History Form Rev 02-00 Redesign]]) can show different signatures.
 
 ## Related
