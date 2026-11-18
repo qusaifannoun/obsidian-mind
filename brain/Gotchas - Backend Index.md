@@ -14,6 +14,7 @@ Split out of [[Gotchas]] on 2026-11-03, when the index reached 32KB. Moved verba
 
 _Mongoose document and schema mechanics that bite — enum defaults, index lifecycle, subdocument spreads, soft-delete, and sequence allocation._
 
+- [[Gotchas - Backend Schema & Data#A shuffle that isn't saved is a different exam on every load — save the order, grade by identity (2026-11-18)|A shuffle that isn't saved is a different exam on every load — save the order, grade by identity (2026-11-18)]]
 - [[Gotchas - Backend Schema & Data#A file field the S3 cleanup doesn't list is deleted within 6 hours (2026-11-16)|A file field the S3 cleanup doesn't list is deleted within 6 hours (2026-11-16)]]
 - [[Gotchas - Backend Schema & Data#`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)|`$lookup` does not preserve the local array's order — a populated list comes back in index order (2026-09-22)]]
 - [[Gotchas - Backend Schema & Data#A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)|A `required` String rejects `""` — and the seeded Super Admin has no name, so a joined display name is empty (2026-09-15)]]

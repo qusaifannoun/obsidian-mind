@@ -11,6 +11,11 @@ Split out of [[Gotchas]] on 2026-07-28, which had reached 96KB. Entries moved ve
 
 Object-spread and merge entries moved verbatim to [[Gotchas - Backend Merging & Subdocuments]] on 2026-11-03, when this note reached 26KB. **Add merge and subdocument entries there.**
 
+## A shuffle that isn't saved is a different exam on every load — save the order, grade by identity (2026-11-18)
+
+> [!danger] The live exam shuffled answer **texts** under fixed letters A/B/C, on the first load only, and saved nothing. Grading compared the trainee's on-screen letter with the bank's letter of a different text, and a reload showed bank order again. So correct answers were graded at roughly 1-in-3 chance for a year (inferred), and the shuffled order can't be recovered after the fact.
+> Rule: any randomised presentation (answer order, question order) must **save the permutation** with the attempt, rebuild the screen from it on every load, and grade by the **identity** of what was chosen (bank label or id), never by its position or display letter. Keep trainee responses in display terms and stored data in bank terms. [[Exam Grading Compared Letters, Not Answers]].
+
 ## A file field the S3 cleanup doesn't list is deleted within 6 hours (2026-11-16)
 
 > [!danger] `S3CleanupService` deletes every S3 object that no field in its `FILE_FIELD_CONFIG` refers to, every 6 hours, on every environment
