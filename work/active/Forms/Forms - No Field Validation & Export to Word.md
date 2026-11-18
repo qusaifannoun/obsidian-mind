@@ -56,7 +56,7 @@ Fix (`97fb5e90`, my call over S3 — no credentials, no per-environment upload):
 
 - [ ] **Never opened in Microsoft Word** — validated by Quick Look and XML inspection only.
 - [ ] **485–488 mappers never ran on a real record** — no account in reach could view a checklist, training order, assessment or attendance report. Export one of each on staging.
-- [ ] **S3 CORS on staging/prod buckets unverified** — the dev bucket allows it (needs `cache: 'no-store'`, see [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]]).
+- [ ] **S3 CORS: the production bucket has none (as of 2026-11-18), so exports drop every signature (TAT-594).** A preflight to `tat147-prod.s3.eu-central-1.amazonaws.com` from `backoffice.tat147.com` and `staff.tat147.com` returned `403 AccessForbidden — CORSResponse: CORS is not enabled for this bucket`. The dev bucket returns `Access-Control-Allow-Origin: *`. The staging bucket (`tat--staging`, me-south-1) could not be reached from Qusai's Mac, so it is still unverified. `loadImage` in `docxTemplate.ts` swallows the failed fetch and leaves the cell empty. Open choice: DevOps adds a GET CORS rule for the dashboard origins, or the backend streams the images. Fetches also need `cache: 'no-store'`; see [[Gotchas - Frontend#A browser-cached image fetched without CORS fails a later `fetch()` (tat-ws, 2026-10-15)]].
 - [ ] **QA will test the old ACs** — required-field ACs on all six tickets now describe removed behaviour; tell QA / reword.
 - [ ] Stamps appear only on the Check List export; the other paper forms have no stamp spot.
 - [ ] The proposal page (`/proposal-test`) was moved onto the shared renderer but not clicked through.
@@ -67,6 +67,7 @@ Fix (`97fb5e90`, my call over S3 — no credentials, no per-environment upload):
 ## Related
 
 - [[TAT-588 Export Forms to PDF]] — Export to PDF converts this same filled Word file with LibreOffice (2026-11-16)
+- [[QA Fixes - Exam Classroom, Course Subject, Application Footer, Attendance %]] — Application footer made a real footer, % of Att column added to the attendance template (2026-11-18)
 - [[Decision - Word Templates for Generated Documents]] · [[Word Template Document Generation]] · [[Proposal Generator - Word Template Spike]]
 - [[TAT-482 + TAT-483 Enrollment Forms]] · [[TAT-485 Training Order Check List]] · [[TAT-481 Super Admin Forms Browser]]
 - [[Gotchas - Frontend]] — the docx and grid traps hit here

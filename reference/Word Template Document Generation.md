@@ -46,6 +46,7 @@ const blob = doc.getZip().generate({ type: 'blob', mimeType: 'application/vnd.op
 - **Loops:** `{#items}…{/items}`. In a table, put `{#items}` in the first cell and `{/items}` in the last cell of **one** row → that row repeats per item.
 - **Conditionals:** `{#hasDiscount}…{/hasDiscount}` shows the block only when truthy.
 - **Headers and footers work** — placeholders there are filled like the body.
+- **A footer line must be a real Word footer.** A "Page 1/1 · form ref" line typed as a body paragraph after the table gets pushed onto page 2 once the form fills the page. The fix was to move it into `footer1.xml` with a `footerReference` ([[QA Fixes - Exam Classroom, Course Subject, Application Footer, Attendance %|TAT-596]], 2026-11-18).
 - **Computed values are computed before render** (totals, formatted money and dates) — the template only prints.
 - **A row in a one-cell table** repeats only with `{-w:tr items}…{/items}`; and loop tags must sit in their own paragraphs — [[Gotchas - Frontend#docxtemplater: loop tags that share a paragraph merge paragraphs; a one-cell row needs `{-w:tr name}` (tat-ws, 2026-10-15)]].
 - **Type each placeholder in one go.** Editing inside an existing `{tag}` can make Word split it across runs; docxtemplater copes with most splits and throws a clear error otherwise.
