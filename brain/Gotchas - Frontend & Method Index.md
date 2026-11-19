@@ -43,6 +43,7 @@ _Component and framework traps across tat-prereq, tat-portal, tat-ws and tat-web
 
 _Frontend data-layer traps across tat-prereq, tat-portal and tat-ws — React Query errors and cache keys, endpoint contracts, uploads and certificate hooks_
 
+- [[Gotchas - Frontend Data & API Contracts#A prefetch made while logged out caches the middleware's login redirect — a client-side login replays it (tat-portal, 2026-11-19)|A prefetch made while logged out caches the middleware's login redirect — a client-side login replays it (tat-portal, 2026-11-19)]]
 - [[Gotchas - Frontend Data & API Contracts#A browser prefill that only fills empty fields freezes a wrong stored value (tat-ws, 2026-11-16)|A browser prefill that only fills empty fields freezes a wrong stored value (tat-ws, 2026-11-16)]]
 - [[Gotchas - Frontend Data & API Contracts#A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)|A step that copies a query into form state only after an upload shows nothing on reopen (tat-ws, 2026-11-12)]]
 - [[Gotchas - Frontend Data & API Contracts#`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)|`nationalities` replaces the whole list — send each existing ID image back or it is wiped (2026-11-02)]]

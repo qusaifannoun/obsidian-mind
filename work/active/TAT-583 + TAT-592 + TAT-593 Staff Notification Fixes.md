@@ -12,7 +12,7 @@ ticket: TAT-583
 
 # TAT-583 + TAT-592 + TAT-593 — Staff Notification Fixes
 
-**Status (as of 2026-11-17):** fixed and pushed to dev, prepod and master/main. **Jira not yet transitioned. Nothing deployed or run in a browser.** All three depend on the API restarting, because the boot seeder writes the new action, role grants and notification settings.
+**Status (as of 2026-11-19):** Jira: TAT-593 Passed QA, TAT-583 IN QA, TAT-592 READY FOR QA again after QA returned it (see below). The first TAT-592 and TAT-583 fixes shipped templates that never seeded; Hamza's `de25032e` fixes that, on [[tat-app-ws Backend]] `dev` only. **It needs merging to prepod/master, a deploy and an API restart before QA retests.**
 
 ## TAT-583 — Assessment Form near-expiry reminder skipped QM and TM
 
@@ -34,7 +34,9 @@ ticket: TAT-583
 
 **Root cause:** Hamza's [[TAT-541 Multiple File Uploads]] tagged `DELETE tor-documents/:docType/files/:fileId` with `SM_REPLACE_TOR_DOCUMENT`. The action on a route also picks the notification, so a removal fired "TOR Document Pending Review", whose only template (`TDPR`) says "uploaded".
 
-**Fix:** [[tat-app-ws Backend]] `36e1972b`. A new action `SM_REMOVE_TOR_DOCUMENT_FILE` (`SMTDF`) is granted to the same roles as upload. A new "TOR Document File Removed" setting uses the new `TDFR` template: *"Instructor {{instructorName}} removed a file from {{docTypeLabel}} and it is waiting for your review."* A removal sends the document back for review, so the wording holds.
+**Fix:** [[tat-app-ws Backend]] `36e1972b`, completed by Hamza's `de25032e`. A new action `SM_REMOVE_TOR_DOCUMENT_FILE` (`SMTDF`) is granted to the same roles as upload. A new "TOR Document File Removed" setting uses the new `TDFR` template: *"Instructor {{instructorName}} removed a file from {{docTypeLabel}} and it is waiting for your review."* A removal sends the document back for review, so the wording holds.
+
+**QA returned it (Needs Fixes, 2026-11-18): no notification at all.** `36e1972b` added `TDFR` to the template seed but not to the `SystemActions` enum, which `NotificationTemplate.code` is validated against. Seeding rejected the template, the setting was never created, and the removal found no setting and skipped silently. The near-expiry template `ASEXP` (TAT-583) failed the same way. Hamza's `de25032e` "fix seeding new template" adds `TOR_DOCUMENT_FILE_REMOVED = "TDFR"` and `ASSESSMENT_FORM_NEAR_EXPIRY = "ASEXP"` to `SystemActions`. The remove flow sets the document back to draft, so the notification check passes once seeded. No further code from Qusai; moved to READY FOR QA on 2026-11-19.
 
 ## Evidence
 
@@ -45,7 +47,8 @@ ticket: TAT-583
 
 - [ ] Not deployed or exercised; the API must restart for the action, grants and settings.
 - [ ] No spec covers TAT-592 or TAT-593. `notifications.service.spec.ts` is an empty placeholder.
-- [ ] Jira: move TAT-583, TAT-592 and TAT-593 to Ready for QA.
+- [x] ~~Jira~~: TAT-593 Passed QA, TAT-583 IN QA, TAT-592 READY FOR QA (as of 2026-11-19).
+- [ ] Merge `de25032e` to prepod/master, deploy, restart the API, then QA retests TAT-592 and TAT-583.
 
 ## Related
 

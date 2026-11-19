@@ -12,11 +12,11 @@ ticket: TAT-600
 
 # QA Fixes: Exam Classroom, Course Subject, Application Footer, Attendance %
 
-**Status (as of 2026-11-18):** pushed. [[tat-ws]] `8038abb2` is on dev, prepod and main, fast-forwarded. [[tat-app-ws Backend]] `51504845` is on dev and merged into prepod and master. **Nothing opened in a browser or on staging. Jira not yet moved.**
+**Status (as of 2026-11-18):** pushed. [[tat-ws]] `8038abb2` is on dev, prepod and main, fast-forwarded. [[tat-app-ws Backend]] `51504845` is on dev and merged into prepod and master. **Not opened in a browser by Qusai.** Jira (as of 2026-11-19): TAT-601, TAT-595 and TAT-596 Passed QA; TAT-600 READY FOR QA.
 
 ## Context
 
-Four tickets from Ayat and Dania's QA round on 2026-11-17 and 18. TAT-595 and TAT-601 sit under TAT-491 PreRequisites V3; TAT-596 and TAT-600 under TAT-314 Forms. TAT-594 (signatures missing from exports) came in the same round. It is not fixed here; see [[Forms - No Field Validation & Export to Word]].
+Four tickets from Ayat and Dania's QA round on 2026-11-17 and 18. TAT-595 and TAT-601 sit under TAT-491 PreRequisites V3; TAT-596 and TAT-600 under TAT-314 Forms. TAT-594 (signatures missing from exports) came in the same round. It was fixed by DevOps adding S3 CORS on production and Passed QA; see [[Forms - No Field Validation & Export to Word]].
 
 ## Root causes and fixes
 
@@ -39,7 +39,7 @@ Four tickets from Ayat and Dania's QA round on 2026-11-17 and 18. TAT-595 and TA
 - [ ] Not opened in a browser or exercised on staging, for any of the four.
 - [ ] Existing attendance reports show a blank % until the hourly refresh rebuilds them; approved reports stay blank because they no longer refresh.
 - [ ] The % denominator (all scheduled training hours, including future periods) is inferred from the client sample (TBC with the BA).
-- [ ] Move TAT-601, TAT-595, TAT-596 and TAT-600 to READY FOR QA.
+- [x] ~~Move to READY FOR QA~~: done; 601, 595 and 596 Passed QA (as of 2026-11-19).
 
 ## Related
 

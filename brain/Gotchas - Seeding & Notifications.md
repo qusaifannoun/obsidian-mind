@@ -51,6 +51,8 @@ Split out of [[Gotchas - Backend Services & Environment]] on 2026-09-15, when it
 > No template → `seedNotificationSettings` can't create the setting → `sendNotification` no-ops on the missing setting. **Dead at three layers, and the only trace is a `console.error` at boot** that nobody reads. Fixed by adding `SIT_IN_MOVED = "SIMV"` and `ASSESSMENT_ASSESSOR_ASSIGNED = "ASNAR"` to `SystemActions` (`enums.ts`); both then seeded on the next boot.
 >
 > **How to check a notification is actually live** (don't assume): query `notificationsettings` + `notificationtemplates` for the name/code, and grep the boot log for `not a valid enum value` / `No mapping found` / `Action not found`. All three failure modes are silent at runtime.
+>
+> **It happened again (2026-11-18):** `TDFR` (TAT-592) and `ASEXP` (TAT-583) were added to the template seed without the enum member; QA saw no notification at all. Fixed by Hamza in `de25032e`. [[TAT-583 + TAT-592 + TAT-593 Staff Notification Fixes]].
 
 ## A route's `@Action` picks its permission AND its notification — reuse one and you reuse its message (2026-11-17)
 
